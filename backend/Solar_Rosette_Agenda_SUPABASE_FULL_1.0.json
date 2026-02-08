@@ -276,7 +276,16 @@
             "parameters": {
                 "respondWith": "text",
                 "responseBody": "={{ $json.html }}",
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "text/html"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond HTML",
             "type": "n8n-nodes-base.respondToWebhook",
