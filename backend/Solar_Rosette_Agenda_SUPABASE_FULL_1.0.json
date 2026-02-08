@@ -62,7 +62,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -114,7 +115,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -167,7 +169,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -220,7 +223,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -273,7 +277,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -379,7 +384,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -432,7 +438,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -485,7 +492,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -537,7 +545,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -618,7 +627,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
@@ -670,7 +680,8 @@
         },
         {
             "parameters": {
-                "respondWith": "allItems",
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
