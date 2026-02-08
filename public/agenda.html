@@ -608,17 +608,26 @@
 
         async function loadAppointments() {
             try {
-                const res = await fetch(`${API_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}`);
+                const url = `${API_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}`;
+                console.log('Fetching appointments:', url);
+                const res = await fetch(url);
                 const data = await res.json();
+                
                 if (data.success && data.appointments) {
                     // STRICT ISOLATION: Client-side filter to prevent any mix-up
                     appointments = data.appointments.filter(a => String(a.patientCedula) === String(currentUser.cedula));
+                    console.log('Loaded appointments:', appointments.length);
                     render();
                 } else {
+                    console.warn('Backend returned success:false or no appointments', data);
                     appointments = [];
                     render();
                 }
-            } catch (e) { appointments = []; render(); }
+            } catch (e) { 
+                console.error('Error in loadAppointments:', e);
+                appointments = []; 
+                render(); 
+            }
         }
 
         async function createAppointment(payload) {
@@ -892,22 +901,27 @@
         // NEW: Load available hours from backend
         async function loadAvailableHours(selectedDate) {
             const timeSelect = document.getElementById('inputTime');
-            timeSelect.innerHTML = '<option value="">Cargando...</option>';
+            timeSelect.innerHTML = '<option value="">Cargando bloques de 20 min...</option>';
             timeSelect.disabled = true;
 
             try {
-                // Call backend to get available hours
-                const res = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${selectedDate}`);
+                const url = `${CONFIG.AVAILABLE_HOURS_URL}?date=${selectedDate}`;
+                console.log('Fetching availability:', url);
+                
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                
                 const data = await res.json();
+                console.log('Availability response:', data);
 
                 if (data.success && data.availableHours) {
                     if (data.availableHours.length === 0) {
-                        timeSelect.innerHTML = '<option value="">No hay horas disponibles este día</option>';
+                        timeSelect.innerHTML = '<option value="">No hay disponibilidad este día</option>';
                         return;
                     }
 
                     // Populate dropdown with available hours
-                    timeSelect.innerHTML = '<option value="">Selecciona una hora</option>';
+                    timeSelect.innerHTML = '<option value="">Selecciona tu hora</option>';
                     data.availableHours.forEach(hour => {
                         const option = document.createElement('option');
                         option.value = hour;
@@ -916,11 +930,13 @@
                     });
                     timeSelect.disabled = false;
                 } else {
-                    timeSelect.innerHTML = '<option value="">Error cargando horas</option>';
+                    const msg = data.message || 'Error desconocido';
+                    timeSelect.innerHTML = `<option value="">${msg}</option>`;
+                    console.error('Backend reporting failure:', data);
                 }
             } catch (e) {
-                console.error('Error loading hours:', e);
-                timeSelect.innerHTML = '<option value="">Error de conexión</option>';
+                console.error('Error loadAvailableHours:', e);
+                timeSelect.innerHTML = `<option value="">Error: ${e.message}</option>`;
             }
         }
 
