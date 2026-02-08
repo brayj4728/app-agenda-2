@@ -1,5 +1,5 @@
--- Solar Rosette - Supabase Database Setup
--- Run this in your Supabase SQL Editor: https://xcvtrgaasfqocjkeulfq.supabase.co
+-- Solar Rosette Agenda - Supabase Database Setup (FULL VERSION)
+-- Execute these commands in your Supabase SQL Editor
 
 -- 1. Create Users Table
 CREATE TABLE IF NOT EXISTS users (
@@ -7,22 +7,23 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   cedula TEXT UNIQUE NOT NULL,
-  role TEXT NOT NULL,
+  role TEXT DEFAULT 'patient',
   type TEXT DEFAULT 'patient',
   phone TEXT,
   notes JSONB DEFAULT '[]'::jsonb,
   registered_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 2. Create Appointments Table  
+-- 2. Create Appointments Table
 CREATE TABLE IF NOT EXISTS appointments (
   id BIGINT PRIMARY KEY,
-  patient_cedula TEXT NOT NULL,
-  patient_name TEXT NOT NULL,
-  date_str TEXT NOT NULL,
-  time TEXT NOT NULL,
-  type TEXT DEFAULT 'Fisioterapia',
-  status TEXT DEFAULT 'PENDIENTE',
+  patient_name TEXT,
+  patient_cedula TEXT,
+  date_str TEXT, -- 'YYYY-MM-DD'
+  time TEXT,     -- 'HH:MM'
+  type TEXT DEFAULT 'Cita',
+  status TEXT DEFAULT 'PENDIENTE', -- 'PENDIENTE', 'CONFIRMADA', 'CANCELADA'
+  color TEXT DEFAULT 'bg-orange',
   whatsapp_sent BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
