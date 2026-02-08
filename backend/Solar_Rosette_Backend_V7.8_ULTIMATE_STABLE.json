@@ -1,0 +1,276 @@
+{
+    "name": "Solar Rosette Backend V7.8 ULTIMATE STABLE",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "ping",
+                "options": {}
+            },
+            "name": "Webhook Ping",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "webhookId": "ping-v78"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Ping",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                0
+            ],
+            "parameters": {
+                "options": {},
+                "respondWith": "json",
+                "responseBody": "{\"success\":true,\"message\":\"PONG - V7.8 ULTIMATE READY\"}"
+            }
+        },
+        {
+            "parameters": {
+                "path": "appointments/available-hours-v7",
+                "options": {}
+            },
+            "name": "Webhook Availability",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                250
+            ],
+            "webhookId": "avail-v78"
+        },
+        {
+            "parameters": {
+                "jsCode": "const query = items[0].json.query || {};\nconst d = query.date || new Date().toISOString().split('T')[0];\nreturn [{ json: { date: d, url: `https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/appointments?date_str=eq.${d}&status=neq.CANCELADA` } }];"
+            },
+            "name": "Prepare Search",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                250,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{$json.url}}",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        }
+                    ]
+                },
+                "options": {
+                    "alwaysOutputData": true
+                }
+            },
+            "name": "Fetch from Supabase",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                500,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "try {\n  const appts = items[0].json;\n  const targetDate = $node[\"Prepare Search\"].json.date;\n  const allHours = [];\n  for (let h = 9; h < 18; h++) {\n    for (let m = 0; m < 60; m += 20) {\n      allHours.push(h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0'));\n    }\n  }\n  allHours.push('18:00');\n  let occupied = [];\n  if (Array.isArray(appts)) occupied = appts.map(a => a.time);\n  const available = allHours.filter(h => !occupied.includes(h));\n  return [{ json: { success: true, date: targetDate, availableHours: available } }];\n} catch (e) {\n  return [{ json: { success: false, message: e.message } }];\n}"
+            },
+            "name": "Process Avail",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                750,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "options": {
+                    "responseCode": "={{ $json.success ? 200 : 500 }}"
+                }
+            },
+            "name": "Respond Avail",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1000,
+                250
+            ],
+            "parameters": {
+                "options": {},
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify($json) }}"
+            }
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "login",
+                "options": {}
+            },
+            "name": "Webhook Login",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                -250
+            ],
+            "webhookId": "login-v78"
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/users",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        }
+                    ]
+                },
+                "sendQueryParameters": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "cedula",
+                            "value": "=eq.{{ String($json.body.cedula).trim() }}"
+                        },
+                        {
+                            "name": "role",
+                            "value": "=eq.{{ $json.body.role }}"
+                        }
+                    ]
+                },
+                "options": {
+                    "alwaysOutputData": true
+                }
+            },
+            "name": "Supabase Query User",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                250,
+                -250
+            ]
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Login",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                500,
+                -250
+            ],
+            "parameters": {
+                "options": {},
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({\n  success: items[0].json.length > 0,\n  user: items[0].json[0] || null,\n  message: items[0].json.length > 0 ? '' : 'Usuario no encontrado'\n}) }}"
+            }
+        }
+    ],
+    "connections": {
+        "Webhook Ping": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Ping",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Availability": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Search",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Search": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch from Supabase",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch from Supabase": {
+            "main": [
+                [
+                    {
+                        "node": "Process Avail",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Process Avail": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Avail",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Login": {
+            "main": [
+                [
+                    {
+                        "node": "Supabase Query User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Supabase Query User": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
