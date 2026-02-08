@@ -1,5 +1,5 @@
 # Script para purgar datos y configurar nuevo profesional
-$BASE_URL = "https://n8n-n8n.xxboi7.easypanel.host/webhook"
+$BASE_URL = "https://n8n-n8n-cliente2.xxboi7.easypanel.host/webhook"
 
 Write-Host "--- EMPEZANDO RESET DE DATOS ---" -ForegroundColor Cyan
 

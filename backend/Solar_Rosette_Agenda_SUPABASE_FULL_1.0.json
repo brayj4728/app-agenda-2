@@ -261,7 +261,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\n\nlet html = `<html><head><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px}th{background:#eee}</style></head><body><h1>Usuarios Registrados</h1><table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Cedula</th><th>Rol (Tipo)</th></tr>`;\n\nusers.forEach(u => {\n  html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.cedula}</td><td><b>${u.role}</b></td></tr>`;\n});\n\nhtml += `</table></body></html>`;\n\nreturn [{ json: { html } }];"
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\n\nlet html = `<html><head><title>Usuarios Agenda</title><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px}th{background:#eee}</style></head><body><h1>Usuarios Registrados (Agenda 2)</h1>`;\n\nif (users.length === 0) {\n  html += `<p>No hay usuarios registrados todavía.</p>`;\n} else {\n  html += `<table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Cedula</th><th>Rol (Tipo)</th></tr>`;\n  users.forEach(u => {\n    html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.cedula}</td><td><b>${u.role}</b></td></tr>`;\n  });\n  html += `</table>`;\n}\n\nhtml += `</body></html>`;\n\nreturn [{ json: { html: html || \"Error: No HTML generated\" } }];"
             },
             "name": "Generate User Table HTML",
             "type": "n8n-nodes-base.function",
