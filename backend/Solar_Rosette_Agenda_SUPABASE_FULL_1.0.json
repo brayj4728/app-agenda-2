@@ -1,0 +1,893 @@
+{
+    "name": "Solar Rosette Agenda (SUPABASE - FULL 1.0)",
+    "nodes": [
+        {
+            "parameters": {
+                "jsCode": "const staticData = $getWorkflowStaticData('global');\n\n// Cédula \nconst cedulaABorrar = \"1000595135\"; \n\nif (staticData.users) {\n  const antes = staticData.users.length;\n  \n  // Borrar por Cédula (más preciso)\n  staticData.users = staticData.users.filter(u => String(u.cedula) !== cedulaABorrar);\n  \n  const despues = staticData.users.length;\n  \n  return [{ \n    json: { \n      resultado: antes - despues > 0 ? \"✅ USUARIO ELIMINADO CORRECTAMENTE\" : \"⚠️ No se encontró esa cédula\",\n      usuarios_restantes: despues\n    } \n  }];\n}\n\nreturn [{ json: { mensaje: \"No hay base de datos de usuarios.\" } }];"
+            },
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                16448,
+                23168
+            ],
+            "id": "2c38998c-06a6-4da7-81b9-ab87afa6d47c",
+            "name": "eliminuar usuario por cedula"
+        },
+        {
+            "parameters": {
+                "path": "borrar-test1|",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                16240,
+                23152
+            ],
+            "id": "e2c8f2b2-d1d4-4c3d-9e15-2f99ac0475f8",
+            "name": "BORRAR USARIO",
+            "webhookId": "9ccc5bc5-0056-42b8-8cda-05fe8c0b62aa"
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Create",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                23104
+            ],
+            "webhookId": "create-appt-webhook",
+            "id": "4ca70872-c649-407f-9fae-1ac72da28f68"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.appointments) { staticData.appointments = []; }\nconst body = items[0].json.body;\n\n// CONFLICT DETECTION\nconst conflict = staticData.appointments.find(a => \n  a.dateStr == body.dateStr && \n  a.time == body.time &&\n  a.status != 'CANCELADA'\n);\nif (conflict) {\n  return [{ json: { success: false, message: 'Lo sentimos, esta hora ya está ocupada por otro paciente.' } }];\n}\n\nconst newAppt = {\n  id: Date.now(),\n  patientName: body.patientName,\n  patientCedula: body.patientCedula,\n  dateStr: body.dateStr,\n  time: body.time,\n  type: body.type || 'Cita',\n  status: 'PENDIENTE',\n  color: 'bg-orange'\n};\nstaticData.appointments.push(newAppt);\nreturn [{ json: { success: true, appointment: newAppt } }];"
+            },
+            "name": "Create Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                23104
+            ],
+            "id": "8262ad93-aaa7-48a2-82ea-32c844eace7d"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Create",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                23104
+            ],
+            "id": "c5e074d4-7079-4932-a165-827159211c44"
+        },
+        {
+            "parameters": {
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Get",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                23312
+            ],
+            "webhookId": "get-appts-webhook",
+            "id": "9704f6d0-c69a-404a-bc3a-863ad98ca548"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst allAppts = staticData.appointments || [];\nconst query = items[0].json.query;\nconst userCedula = query.cedula;\nconst userRole = query.role;\n\nlet myAppts = [];\n// DATA ISOLATION LOGIC\nif (userRole === 'professional' || userRole === 'admin') {\n    // Admin/Pro see EVERYTHING\n    myAppts = allAppts;\n} else {\n    // Patients see ONLY their own based on CEDULA match\n    // Ensure loose comparison for string/number match\n    if (!userCedula) {\n        myAppts = []; // No cedula? No data.\n    } else {\n        myAppts = allAppts.filter(a => a.patientCedula == userCedula);\n    }\n}\nreturn [{ json: { success: true, appointments: myAppts } }];"
+            },
+            "name": "Get Logic (Filtered)",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                23312
+            ],
+            "id": "32fcfa6d-7307-46e8-8150-a95facfa5d06"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Get",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                23312
+            ],
+            "id": "32b3bc4a-84c5-4df4-8f1c-c2e23a201b16"
+        },
+        {
+            "parameters": {
+                "httpMethod": "DELETE",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Delete",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                23504
+            ],
+            "webhookId": "delete-webhook",
+            "id": "8b721de0-6917-4e3c-a5f2-18c0c98d4ce0"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\n\n// Ensure appointments array matches\nif (!staticData.appointments) { staticData.appointments = []; }\n\n// Handle Body or Query parsing\nconst body = items[0].json.body || items[0].json.query || {};\nconst idToDelete = body.id;\n\nconst initialLength = staticData.appointments.length;\n\n// Force String comparison to handle ID type mismatches\nstaticData.appointments = staticData.appointments.filter(a => String(a.id) !== String(idToDelete));\n\nconst wasDeleted = initialLength > staticData.appointments.length;\n\n// Return success:true regardless of deletion count to avoid UI errors, \n// but send 'deleted' status for debug.\nreturn [{ json: { success: true, deleted: wasDeleted } }];"
+            },
+            "name": "Delete Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                23504
+            ],
+            "id": "57ebb359-924d-4cbb-8625-342f6ae15986"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Delete",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                23504
+            ],
+            "id": "29c48352-6b35-435f-9cb0-2e832dadd193"
+        },
+        {
+            "parameters": {
+                "httpMethod": "PUT",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Update",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                23712
+            ],
+            "webhookId": "update-webhook",
+            "id": "61f7736e-d22c-4788-9996-4ef31b003736"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\n\nif (!staticData.appointments) { staticData.appointments = []; }\n\nconst body = items[0].json.body || {};\nconst idToUpdate = body.id;\nconst newStatus = body.status;\nconst newColor = body.color;\n\n// Find and Update\nconst matching = staticData.appointments.find(a => String(a.id) === String(idToUpdate));\n\nif (matching) {\n    if(newStatus) matching.status = newStatus;\n    if(newColor) matching.color = newColor;\n    return [{ json: { success: true, appointment: matching } }];\n}\n\nreturn [{ json: { success: false, message: 'Cita no encontrada' } }];"
+            },
+            "name": "Update Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                23712
+            ],
+            "id": "803a2734-e9b6-45a3-bd1a-269f74a6a108"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Update",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                23712
+            ],
+            "id": "c034b96f-97bb-4c0a-9427-c13baea8cfcb"
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "register",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Register",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                24112
+            ],
+            "webhookId": "register-webhook",
+            "id": "d9f3fba0-2853-434b-af9d-044891792f16"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.users) { staticData.users = []; }\n\nconst body = items[0].json.body;\n\n// CHECK FOR DUPLICATES (Cedula or Email)\nconst existingUser = staticData.users.find(u => \n  String(u.cedula) === String(body.cedula) || \n  u.email === body.email\n);\n\nif (existingUser) {\n  return [{ \n    json: { \n      success: false, \n      message: 'La cédula o el correo electrónico ya se encuentran registrados.' \n    } \n  }];\n}\n\n// Create User Object\nconst newUser = {\n  id: Date.now(),\n  name: body.name,\n  email: body.email,\n  cedula: body.cedula,\n  phone: body.phone || '',\n  role: body.role || 'patient',\n  type: body.type || '',\n  registeredAt: new Date().toISOString()\n};\n\nstaticData.users.push(newUser);\n\nreturn [{ json: { success: true, user: newUser } }];"
+            },
+            "name": "Register Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                24112
+            ],
+            "id": "34eafeb8-97a3-4be3-8030-9b72e3e812c1"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Register",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                24112
+            ],
+            "id": "c510ed08-903a-4fec-9762-b27f27056438"
+        },
+        {
+            "parameters": {
+                "path": "agenda-view",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook View DB",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                23904
+            ],
+            "webhookId": "view-db-webhook",
+            "id": "22628819-062c-41d6-b921-864a848d8f93"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\n\nlet html = `<html><head><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px}th{background:#eee}</style></head><body><h1>Usuarios Registrados</h1><table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Cedula</th><th>Rol (Tipo)</th></tr>`;\n\nusers.forEach(u => {\n  html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.cedula}</td><td><b>${u.role}</b></td></tr>`;\n});\n\nhtml += `</table></body></html>`;\n\nreturn [{ json: { html } }];"
+            },
+            "name": "Generate User Table HTML",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                23904
+            ],
+            "id": "6c16c222-6b59-4684-bdb7-020120460e47"
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ $json.html }}",
+                "options": {}
+            },
+            "name": "Respond HTML",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                23904
+            ],
+            "id": "e2e6a6bd-c5d4-42c2-961f-a3626f91d4f5"
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "login",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Login",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                24304
+            ],
+            "webhookId": "login-webhook",
+            "id": "0df375bf-35cc-4128-b571-edf311daf42e"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\n\nconst body = items[0].json.body;\nconst name = body.name;\nconst cedula = body.cedula;\nconst role = body.role;\n\n// FIND USER\n// Loose comparison or string normalization\nconst user = users.find(u => \n    (u.cedula == cedula || u.cedula === cedula) && \n    (role ? u.role === role : true)\n);\n\nif (user) {\n    return [{ json: { success: true, user: user } }];\n}\n\nreturn [{ json: { success: false, message: 'Usuario no encontrado' } }];"
+            },
+            "name": "Login Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                24304
+            ],
+            "id": "37ef2165-9998-4ce6-ad42-73841bb72ab2"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Login",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                24304
+            ],
+            "id": "79227cb3-677f-4bf1-ab75-a286c3f71721"
+        },
+        {
+            "parameters": {
+                "httpMethod": "DELETE",
+                "path": "users",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Delete Users",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                24512
+            ],
+            "webhookId": "delete-users-webhook",
+            "id": "3b762641-dcb7-495f-9521-d4062364d20e"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.users) return [{ json: { success: true, deleted: 0 } }];\n\nconst body = items[0].json.body || items[0].json.query || {};\nconst cedulaToDelete = body.id || body.cedula;\n\nconst initialCount = staticData.users.length;\n\nif (cedulaToDelete) {\n    // DELETE INDIVIDUAL USER\n    staticData.users = staticData.users.filter(u => String(u.cedula) !== String(cedulaToDelete));\n    const deletedCount = initialCount - staticData.users.length;\n    return [{ json: { success: true, deleted: deletedCount, message: 'Usuario eliminado correctamente' } }];\n} else {\n    // PROTECT BRAYAN AND REMOVE OTHERS (Original logic)\n    const keepCedula = '1000595131';\n    staticData.users = staticData.users.filter(u => String(u.cedula) === keepCedula);\n    const deletedCount = initialCount - staticData.users.length;\n    return [{ json: { success: true, deleted: deletedCount, message: 'Limpieza masiva completada' } }];\n}"
+            },
+            "name": "Delete Users Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                24512
+            ],
+            "id": "58ed9a3b-3d7f-4833-84cb-799ccccafc86"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Delete Users",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                24512
+            ],
+            "id": "a6447c11-46c9-41a5-917d-c7f4a3273d53"
+        },
+        {
+            "parameters": {
+                "httpMethod": "PUT",
+                "path": "users",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Update User",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                24704
+            ],
+            "webhookId": "update-user-webhook",
+            "id": "98aae394-ba72-44da-a42b-a7e4499d4f43"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\n\nconst body = items[0].json.body || {};\nconst cedula = body.cedula;\nconst notes = body.notes;\n\nif (!cedula) return [{ json: { success: false, message: 'Cedula requerida' } }];\n\nconst user = users.find(u => String(u.cedula) === String(cedula));\n\nif (user) {\n    if (notes !== undefined) user.notes = notes;\n    return [{ json: { success: true, user: user } }];\n}\n\nreturn [{ json: { success: false, message: 'Usuario no encontrado' } }];"
+            },
+            "name": "Update User Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                24704
+            ],
+            "id": "208c4511-c672-4d6d-9527-584ea14e8d14"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Update User",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                24704
+            ],
+            "id": "64a3663c-76d4-4bbb-8382-0deae52772ae"
+        },
+        {
+            "parameters": {
+                "path": "users",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Get User",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                24912
+            ],
+            "webhookId": "get-user-webhook",
+            "id": "e5400d2b-69b7-4f77-a91f-c369748e67e3"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst cedula = items[0].json.query.cedula;\nconst role = items[0].json.query.role;\n\nif (!cedula) return [{ json: { success: false, message: 'No cedula provided' } }];\n\n// ADMIN LIST ALL\nif (cedula === 'ALL' && role === 'admin') {\n    return [{ json: { success: true, users: users } }];\n}\n\nconst user = users.find(u => String(u.cedula) === String(cedula));\n\nif (user) {\n    return [{ json: { success: true, user: user, users: [user] } }];\n} else {\n    return [{ json: { success: false, message: 'Usuario no encontrado', users: [] } }];\n}"
+            },
+            "name": "Get User Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                24912
+            ],
+            "id": "cb63d4ba-0272-4c26-b887-4e634ed9ddc0"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Get User",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                24912
+            ],
+            "id": "43a218d2-309e-4d1e-85fc-ef8b85f24dfc"
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "ai-insights",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook AI",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                25104
+            ],
+            "webhookId": "ai-insights-webhook",
+            "id": "5babf972-65e2-4797-b214-473fecbef128"
+        },
+        {
+            "parameters": {
+                "functionCode": "const appts = items[0].json.appointments || [];\nconst now = new Date().toLocaleString();\nconst prompt = `Act as an expert scheduling assistant. Current time: ${now}. Analyze these appointments: ${JSON.stringify(appts)}. Tasks: 1. Summarize schedule status. 2. Identify conflicts/gaps. 3. Suggest improvements. 4. Speak in Spanish. 5. Keep it concise.`;\nreturn [{ json: { prompt } }];"
+            },
+            "name": "Prepare Prompts",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17280,
+                25104
+            ],
+            "id": "67f1f618-d69e-4019-b2cf-fdd1238da020"
+        },
+        {
+            "parameters": {
+                "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCsJQJuug8ugm7vEmoiOb8_tG1o9B_QEjw",
+                "jsonParameters": true,
+                "options": {}
+            },
+            "name": "Gemini API",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                17472,
+                25104
+            ],
+            "id": "d5590ec1-1fe0-4aa8-999b-c6a08eabec3a"
+        },
+        {
+            "parameters": {
+                "functionCode": "const text = items[0].json.candidates?.[0]?.content?.parts?.[0]?.text || 'No suggestion.';\nreturn [{ json: { suggestion: text } }];"
+            },
+            "name": "Format Response",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17680,
+                25104
+            ],
+            "id": "561501d6-25a4-464c-a8a1-59d0e2eeb316"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond AI",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17872,
+                25104
+            ],
+            "id": "a05ccf18-6d12-4961-a717-2a7decff17ab"
+        },
+        {
+            "parameters": {
+                "path": "appointments/available-hours",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Available Hours",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                17072,
+                25312
+            ],
+            "webhookId": "available-hours-webhook",
+            "id": "5eaf5bb0-6049-4b7c-ba6f-83b1fcc7ec8b"
+        },
+        {
+            "parameters": {
+                "functionCode": "const date = $input.first().json.query.date;\nif (!date) {\n  return [{ json: { success: false, message: 'Falta fecha' } }];\n}\n\nconst staticData = $getWorkflowStaticData('global');\nconst appointments = staticData.appointments || [];\n\nconst allHours = [];\nfor (let h = 9; h <= 17; h++) {\n  allHours.push(h.toString().padStart(2, '0') + ':00');\n}\n\nconst occupied = [];\nfor (let i = 0; i < appointments.length; i++) {\n  if (appointments[i].dateStr === date && appointments[i].status !== 'CANCELADA') {\n    occupied.push(appointments[i].time);\n  }\n}\n\nconst available = [];\nfor (let i = 0; i < allHours.length; i++) {\n  if (occupied.indexOf(allHours[i]) === -1) {\n    available.push(allHours[i]);\n  }\n}\n\nreturn [{\n  json: {\n    success: true,\n    date: date,\n    availableHours: available,\n    occupiedHours: occupied,\n    totalSlots: allHours.length,\n    availableSlots: available.length\n  }\n}];"
+            },
+            "name": "Available Hours Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                17328,
+                25312
+            ],
+            "id": "2c0ef080-62c0-4908-972d-a8a48cc512de"
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond Available Hours",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                17584,
+                25312
+            ],
+            "id": "ad954a1c-c1cc-45c7-b571-7cf7309109e8"
+        }
+    ],
+    "pinData": {},
+    "connections": {
+        "eliminuar usuario por cedula": {
+            "main": [
+                []
+            ]
+        },
+        "BORRAR USARIO": {
+            "main": [
+                [
+                    {
+                        "node": "eliminuar usuario por cedula",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Create": {
+            "main": [
+                [
+                    {
+                        "node": "Create Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Create",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Get": {
+            "main": [
+                [
+                    {
+                        "node": "Get Logic (Filtered)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Logic (Filtered)": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Get",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Delete": {
+            "main": [
+                [
+                    {
+                        "node": "Delete Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Delete Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Delete",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Update": {
+            "main": [
+                [
+                    {
+                        "node": "Update Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Update",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Register": {
+            "main": [
+                [
+                    {
+                        "node": "Register Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Register Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Register",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook View DB": {
+            "main": [
+                [
+                    {
+                        "node": "Generate User Table HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate User Table HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Respond HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Login": {
+            "main": [
+                [
+                    {
+                        "node": "Login Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Login Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Delete Users": {
+            "main": [
+                [
+                    {
+                        "node": "Delete Users Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Delete Users Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Delete Users",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Update User": {
+            "main": [
+                [
+                    {
+                        "node": "Update User Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update User Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Update User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Get User": {
+            "main": [
+                [
+                    {
+                        "node": "Get User Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get User Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Get User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook AI": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Prompts",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Prompts": {
+            "main": [
+                [
+                    {
+                        "node": "Gemini API",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Gemini API": {
+            "main": [
+                [
+                    {
+                        "node": "Format Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Response": {
+            "main": [
+                [
+                    {
+                        "node": "Respond AI",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Available Hours": {
+            "main": [
+                [
+                    {
+                        "node": "Available Hours Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Available Hours Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Available Hours",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate",
+        "availableInMCP": false
+    },
+    "versionId": "e375eb11-69b2-41c8-8320-4264f2f70e11",
+    "meta": {
+        "templateCredsSetupCompleted": true,
+        "instanceId": "ff6bd174b0f020425d7923013f8f27387bf39ef33c016982d67575517e700bd2"
+    },
+    "id": "ZxCzbBuO4Mr3wwhx",
+    "tags": []
+}
