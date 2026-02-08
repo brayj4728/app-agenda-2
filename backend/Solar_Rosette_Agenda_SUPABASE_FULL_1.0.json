@@ -17,6 +17,7 @@
         {
             "parameters": {
                 "path": "borrar-test1|",
+                "responseMode": "responseNode",
                 "options": {}
             },
             "type": "n8n-nodes-base.webhook",
@@ -61,7 +62,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Create",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -103,7 +113,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Get",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -146,7 +165,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Delete",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -189,7 +217,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Update",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -232,7 +269,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Register",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -328,7 +374,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Login",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -371,7 +426,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Delete Users",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -414,7 +478,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Update User",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -456,7 +529,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Get User",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -527,7 +609,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond AI",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -569,7 +660,16 @@
         },
         {
             "parameters": {
-                "options": {}
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
             },
             "name": "Respond Available Hours",
             "type": "n8n-nodes-base.respondToWebhook",
