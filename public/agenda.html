@@ -612,7 +612,7 @@
                 console.log('Fetching appointments:', url);
                 const res = await fetch(url);
                 const data = await res.json();
-                
+
                 if (data.success && data.appointments) {
                     // STRICT ISOLATION: Client-side filter to prevent any mix-up
                     appointments = data.appointments.filter(a => String(a.patientCedula) === String(currentUser.cedula));
@@ -623,10 +623,10 @@
                     appointments = [];
                     render();
                 }
-            } catch (e) { 
+            } catch (e) {
                 console.error('Error in loadAppointments:', e);
-                appointments = []; 
-                render(); 
+                appointments = [];
+                render();
             }
         }
 
@@ -905,12 +905,12 @@
             timeSelect.disabled = true;
 
             try {
-                const url = `${CONFIG.AVAILABLE_HOURS_URL}?date=${selectedDate}`;
+                const url = `${CONFIG.AVAILABLE_HOURS_URL}?date=${selectedDate}&t=${Date.now()}`;
                 console.log('Fetching availability:', url);
-                
+
                 const res = await fetch(url);
                 if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-                
+
                 const data = await res.json();
                 console.log('Availability response:', data);
 
