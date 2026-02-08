@@ -1,0 +1,774 @@
+{
+    "name": "Solar Rosette Backend V4.0 (File Persistence)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "register",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Register",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "webhookId": "register-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst usersFile = path.join(dataDir, 'users.json');\n\nfunction getUsers() {\n  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });\n  if (!fs.existsSync(usersFile)) return [];\n  return JSON.parse(fs.readFileSync(usersFile, 'utf8'));\n}\n\nfunction saveUsers(users) {\n  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });\n  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));\n}\n\nconst users = getUsers();\nconst body = items[0].json.body;\n\nif (!body) return [{ json: { success: false, message: 'No body' } }];\n\nconst exists = users.find(u => u.email === body.email || String(u.cedula) === String(body.cedula));\nif (exists) return [{ json: { success: false, message: 'Usuario ya registrado (Email o Cédula)' } }];\n\nconst newUser = {\n  id: Date.now(),\n  name: body.name,\n  email: body.email,\n  cedula: String(body.cedula),\n  role: body.role,\n  type: body.type || 'patient',\n  phone: body.phone || '',\n  notes: [],\n  registeredAt: new Date().toISOString()\n};\n\nusers.push(newUser);\nsaveUsers(users);\n\nreturn [{ json: { success: true, user: newUser } }];"
+            },
+            "name": "Register Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Register",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "login",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Login",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                200
+            ],
+            "webhookId": "login-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst usersFile = path.join(dataDir, 'users.json');\n\nfunction getUsers() {\n  if (!fs.existsSync(usersFile)) return [];\n  return JSON.parse(fs.readFileSync(usersFile, 'utf8'));\n}\n\nconst users = getUsers();\nconst body = items[0].json.body;\n\nconst user = users.find(u => String(u.cedula) === String(body.cedula) && u.role === body.role);\n\nif (user) {\n  return [{ json: { success: true, user: user } }];\n} else {\n  return [{ json: { success: false, message: 'Credenciales incorrectas o usuario no encontrado' } }];\n}"
+            },
+            "name": "Login Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Login",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "GET",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Get Appts",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                400
+            ],
+            "webhookId": "get-appts-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst apptsFile = path.join(dataDir, 'appointments.json');\n\nfunction getAppts() {\n  if (!fs.existsSync(apptsFile)) return [];\n  return JSON.parse(fs.readFileSync(apptsFile, 'utf8'));\n}\n\nconst appts = getAppts();\nreturn [{ json: { success: true, appointments: appts } }];"
+            },
+            "name": "Get Appts Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Get Appts",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Create Appt",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                600
+            ],
+            "webhookId": "create-appt-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst apptsFile = path.join(dataDir, 'appointments.json');\n\nfunction getAppts() {\n  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });\n  if (!fs.existsSync(apptsFile)) return [];\n  return JSON.parse(fs.readFileSync(apptsFile, 'utf8'));\n}\n\nfunction saveAppts(appts) {\n  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });\n  fs.writeFileSync(apptsFile, JSON.stringify(appts, null, 2));\n}\n\nconst appts = getAppts();\nconst body = items[0].json.body;\n\nconst conflict = appts.find(a => a.dateStr === body.dateStr && a.time === body.time && a.status !== 'CANCELADA');\nif (conflict) return [{ json: { success: false, message: 'conflict: slot taken' } }];\n\nconst newAppt = {\n  id: Date.now(),\n  patientCedula: body.patientCedula,\n  patientName: body.patientName,\n  dateStr: body.dateStr,\n  time: body.time,\n  type: body.type || 'Fisioterapia',\n  status: body.status || 'PENDIENTE',\n  whatsappSent: false\n};\n\nappts.push(newAppt);\nsaveAppts(appts);\n\nreturn [{ json: { success: true, appointment: newAppt } }];"
+            },
+            "name": "Create Appt Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Create Appt",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "PUT",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Update Appt",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                800
+            ],
+            "webhookId": "update-appt-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst apptsFile = path.join(dataDir, 'appointments.json');\n\nfunction getAppts() {\n  if (!fs.existsSync(apptsFile)) return [];\n  return JSON.parse(fs.readFileSync(apptsFile, 'utf8'));\n}\n\nfunction saveAppts(appts) {\n  fs.writeFileSync(apptsFile, JSON.stringify(appts, null, 2));\n}\n\nconst appts = getAppts();\nconst body = items[0].json.body;\n\nconst appt = appts.find(a => String(a.id) === String(body.id));\nif (appt) {\n  if (body.status) appt.status = body.status;\n  if (body.whatsappSent !== undefined) appt.whatsappSent = body.whatsappSent;\n  saveAppts(appts);\n  return [{ json: { success: true } }];\n}\nreturn [{ json: { success: false, message: 'Not found' } }];"
+            },
+            "name": "Update Appt Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Update Appt",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "DELETE",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Delete Appt",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1000
+            ],
+            "webhookId": "delete-appt-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst apptsFile = path.join(dataDir, 'appointments.json');\n\nfunction getAppts() {\n  if (!fs.existsSync(apptsFile)) return [];\n  return JSON.parse(fs.readFileSync(apptsFile, 'utf8'));\n}\n\nfunction saveAppts(appts) {\n  fs.writeFileSync(apptsFile, JSON.stringify(appts, null, 2));\n}\n\nconst appts = getAppts();\nconst query = items[0].json.query;\nconst body = items[0].json.body;\nconst id = (query && query.id) ? query.id : (body && body.id ? body.id : null);\n\nif (!id) return [{ json: { success: false, message: 'No ID' } }];\n\nconst initial = appts.length;\nconst filtered = appts.filter(a => String(a.id) !== String(id));\n\nif (filtered.length < initial) {\n  saveAppts(filtered);\n  return [{ json: { success: true } }];\n}\nreturn [{ json: { success: false, message: 'Not found' } }];"
+            },
+            "name": "Delete Appt Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                1000
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Delete Appt",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1000
+            ]
+        },
+        {
+            "parameters": {
+                "path": "users",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Users",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1200
+            ],
+            "webhookId": "users-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst usersFile = path.join(dataDir, 'users.json');\n\nfunction getUsers() {\n  if (!fs.existsSync(usersFile)) return [];\n  return JSON.parse(fs.readFileSync(usersFile, 'utf8'));\n}\n\nfunction saveUsers(users) {\n  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));\n}\n\nconst users = getUsers();\nconst method = items[0].json.method;\nconst query = items[0].json.query;\nconst body = items[0].json.body;\n\nif (method === 'GET') {\n  if (query.cedula) {\n    const u = users.find(x => String(x.cedula) === String(query.cedula));\n    if (u) return [{ json: { success: true, user: u, users: [u] } }];\n    return [{ json: { success: false } }];\n  }\n  return [{ json: { success: true, users: users } }];\n}\n\nif (method === 'PUT') {\n  const u = users.find(x => String(x.cedula) === String(body.cedula));\n  if (u) {\n    u.notes = body.notes;\n    saveUsers(users);\n    return [{ json: { success: true } }];\n  }\n  return [{ json: { success: false } }];\n}\nreturn [{ json: { success: false } }];"
+            },
+            "name": "Users Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                1200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Users",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1200
+            ]
+        },
+        {
+            "parameters": {
+                "path": "appointments/available-hours",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Hours",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1400
+            ],
+            "webhookId": "hours-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst apptsFile = path.join(dataDir, 'appointments.json');\n\nfunction getAppts() {\n  if (!fs.existsSync(apptsFile)) return [];\n  return JSON.parse(fs.readFileSync(apptsFile, 'utf8'));\n}\n\nconst appts = getAppts();\nconst date = items[0].json.query.date;\nif (!date) return [{ json: { success: false } }];\n\nconst slots = [];\nfor (let h=9; h<18; h++) for (let m=0; m<60; m+=20) slots.push(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`);\n\nconst booked = appts.filter(a => a.dateStr === date && a.status !== 'CANCELADA').map(a => a.time);\nconst available = slots.filter(s => !booked.includes(s));\nreturn [{ json: { success: true, availableHours: available } }];"
+            },
+            "name": "Hours Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                1400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Hours",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1400
+            ]
+        },
+        {
+            "parameters": {
+                "path": "agenda-view",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook View DB",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1600
+            ],
+            "webhookId": "view-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const fs = require('fs');\nconst path = require('path');\n\nconst dataDir = path.join(process.env.N8N_USER_FOLDER || '/home/node/.n8n', 'solar_rosette_data');\nconst usersFile = path.join(dataDir, 'users.json');\n\nfunction getUsers() {\n  if (!fs.existsSync(usersFile)) return [];\n  return JSON.parse(fs.readFileSync(usersFile, 'utf8'));\n}\n\nconst users = getUsers();\nlet html = `<html><head><title>Usuarios Agenda 2</title><meta charset='utf-8'><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px}</style></head><body><h1>Usuarios</h1>`;\nif (users.length===0) html+='<p>Sin usuarios</p>';\nelse {\n  html+='<table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th></tr>';\n  users.forEach(u => html+=`<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td></tr>`);\n  html+='</table>';\n}\nhtml+='</body></html>';\nreturn [{ json: { html } }];"
+            },
+            "name": "View HTML Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                1600
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ $json.html }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "text/html"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond View HTML",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1600
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "ai-insights",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook AI",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1800
+            ],
+            "webhookId": "ai-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "return [{ json: { suggestion: 'IA Sugerencia Mock' } }];"
+            },
+            "name": "AI Logic (Mock)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                1800
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond AI",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1800
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Register": {
+            "main": [
+                [
+                    {
+                        "node": "Register Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Register Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Register",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Login": {
+            "main": [
+                [
+                    {
+                        "node": "Login Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Login Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Get Appts": {
+            "main": [
+                [
+                    {
+                        "node": "Get Appts Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Appts Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Get Appts",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Create Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Create Appt Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Appt Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Create Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Update Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Update Appt Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Appt Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Update Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Delete Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Delete Appt Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Delete Appt Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Delete Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Users": {
+            "main": [
+                [
+                    {
+                        "node": "Users Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Users Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Users",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Hours": {
+            "main": [
+                [
+                    {
+                        "node": "Hours Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Hours Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Hours",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook View DB": {
+            "main": [
+                [
+                    {
+                        "node": "View HTML Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "View HTML Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond View HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook AI": {
+            "main": [
+                [
+                    {
+                        "node": "AI Logic (Mock)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Logic (Mock)": {
+            "main": [
+                [
+                    {
+                        "node": "Respond AI",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
