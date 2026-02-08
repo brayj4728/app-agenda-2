@@ -1,0 +1,731 @@
+{
+    "name": "Solar Rosette Backend V3 (Modular Brain)",
+    "nodes": [
+        {
+            "parameters": {
+                "path": "register",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Register",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "webhookId": "register-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.users) staticData.users = [];\n\nconst body = items[0].json.body;\nif (!body) return [{ json: { success: false, message: 'No body' } }];\n\n// Check Duplicates\nconst exists = staticData.users.find(u => u.email === body.email || String(u.cedula) === String(body.cedula));\nif (exists) return [{ json: { success: false, message: 'Usuario ya registrado (Email o Cédula)' } }];\n\n// Create User\nconst newUser = {\n  id: Date.now(),\n  name: body.name,\n  email: body.email,\n  cedula: String(body.cedula),\n  role: body.role,\n  type: body.type || 'patient',\n  phone: body.phone || '',\n  notes: [],\n  registeredAt: new Date().toISOString()\n};\n\nstaticData.users.push(newUser);\nreturn [{ json: { success: true, user: newUser } }];"
+            },
+            "name": "Register Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Register",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "path": "login",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Login",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                200
+            ],
+            "webhookId": "login-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst body = items[0].json.body;\n\nconst user = users.find(u => String(u.cedula) === String(body.cedula) && u.role === body.role);\n\nif (user) {\n  return [{ json: { success: true, user: user } }];\n} else {\n  return [{ json: { success: false, message: 'Credenciales incorrectas o usuario no encontrado' } }];\n}"
+            },
+            "name": "Login Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Login",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "GET",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Get Appts",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                400
+            ],
+            "webhookId": "get-appts-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\n// Allow filtering if needed, but returning all is simplest for now as frontend filters too.\n// Frontend sends query params: cedula, role. We can just return all and let frontend filter, OR filter here.\n// Frontend code: appointments = data.appointments.filter(...)\n// So returning all is safe and flexible.\nreturn [{ json: { success: true, appointments: appts } }];"
+            },
+            "name": "Get Appts Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Get Appts",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Create Appt",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                600
+            ],
+            "webhookId": "create-appt-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.appointments) staticData.appointments = [];\nconst body = items[0].json.body;\n\n// Backend Validation: Check conflict\nconst conflict = staticData.appointments.find(a => \n  a.dateStr === body.dateStr && \n  a.time === body.time && \n  a.status !== 'CANCELADA'\n);\n\nif (conflict) {\n  return [{ json: { success: false, message: 'conflict: slot taken' } }];\n}\n\nconst newAppt = {\n  id: Date.now(),\n  patientCedula: body.patientCedula,\n  patientName: body.patientName,\n  dateStr: body.dateStr,\n  time: body.time,\n  type: body.type || 'Fisioterapia',\n  status: body.status || 'PENDIENTE',\n  whatsappSent: false\n};\n\nstaticData.appointments.push(newAppt);\nreturn [{ json: { success: true, appointment: newAppt } }];"
+            },
+            "name": "Create Appt Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Create Appt",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                600
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "PUT",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Update Appt",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                800
+            ],
+            "webhookId": "update-appt-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nconst body = items[0].json.body;\n\nconst appt = appts.find(a => String(a.id) === String(body.id));\nif (appt) {\n  if (body.status) appt.status = body.status;\n  if (body.whatsappSent !== undefined) appt.whatsappSent = body.whatsappSent;\n  return [{ json: { success: true } }];\n}\nreturn [{ json: { success: false, message: 'Not found' } }];"
+            },
+            "name": "Update Appt Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Update Appt",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                800
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "DELETE",
+                "path": "appointments",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Delete Appt",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1000
+            ],
+            "webhookId": "delete-appt-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.appointments) staticData.appointments = [];\n\n// Handle both Query Param (Professional DB) and Body (Agenda HTML)\nconst query = items[0].json.query;\nconst body = items[0].json.body;\nconst idToDelete = (query && query.id) ? query.id : (body && body.id ? body.id : null);\n\nif (!idToDelete) return [{ json: { success: false, message: 'No ID provided' } }];\n\nconst initialLength = staticData.appointments.length;\nstaticData.appointments = staticData.appointments.filter(a => String(a.id) !== String(idToDelete));\n\nif (staticData.appointments.length < initialLength) {\n  return [{ json: { success: true } }];\n} else {\n  return [{ json: { success: false, message: 'Not found' } }];\n}"
+            },
+            "name": "Delete Appt Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                1000
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Delete Appt",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1000
+            ]
+        },
+        {
+            "parameters": {
+                "path": "users",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Users",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1200
+            ],
+            "webhookId": "users-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst method = items[0].json.method;\nconst query = items[0].json.query;\nconst body = items[0].json.body;\n\nif (method === 'GET') {\n  const cedula = query.cedula;\n  if (cedula) {\n    // Return specific user (for phone/notes)\n    const u = users.find(x => String(x.cedula) === String(cedula));\n    if (u) return [{ json: { success: true, user: u, users: [u] } }]; // Return both format for compatibility\n    return [{ json: { success: false, message: 'User not found' } }];\n  }\n  return [{ json: { success: true, users: users } }];\n}\n\nif (method === 'PUT') {\n  // Update Notes\n  const cedula = body.cedula;\n  const notes = body.notes;\n  const u = users.find(x => String(x.cedula) === String(cedula));\n  if (u) {\n    u.notes = notes;\n    return [{ json: { success: true } }];\n  }\n  return [{ json: { success: false, message: 'User not found for update' } }];\n}\n\nreturn [{ json: { success: false, message: 'Method not supported' } }];"
+            },
+            "name": "Users Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                1200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Users",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1200
+            ]
+        },
+        {
+            "parameters": {
+                "path": "appointments/available-hours",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Hours",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1400
+            ],
+            "webhookId": "hours-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nconst query = items[0].json.query;\nconst date = query.date;\n\nif (!date) return [{ json: { success: false, message: 'Date required' } }];\n\n// Generate slots (9am - 6pm, 20 mins)\nconst slots = [];\nfor (let h = 9; h < 18; h++) {\n  for (let m = 0; m < 60; m += 20) {\n    slots.push(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`);\n  }\n}\n\n// Filter booked\nconst booked = appts.filter(a => a.dateStr === date && a.status !== 'CANCELADA').map(a => a.time);\nconst available = slots.filter(s => !booked.includes(s));\n\nreturn [{ json: { success: true, availableHours: available } }];"
+            },
+            "name": "Hours Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                1400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Hours",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1400
+            ]
+        },
+        {
+            "parameters": {
+                "path": "agenda-view",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook View DB",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1600
+            ],
+            "webhookId": "view-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nlet users = staticData.users;\nif (!users || !Array.isArray(users)) users = [];\n\nlet html = `<html><head><title>Usuarios Agenda 2</title><meta charset=\"UTF-8\"><style>body{font-family:'Segoe UI',sans-serif;padding:20px;background:#f9f9f9}.container{max-width:1200px;margin:0 auto;background:white;padding:20px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}h1{border-bottom:2px solid #007bff;padding-bottom:10px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background:#f2f2f2}.badge{padding:4px 8px;border-radius:4px;font-size:0.9em}.badge-professional{background:#d1ecf1;color:#0c5460}.badge-patient{background:#d4edda;color:#155724}.empty{text-align:center;padding:40px;color:#666}</style></head><body><div class=\"container\"><h1>Usuarios Registrados (Agenda 2)</h1>`;\n\nif (users.length === 0) {\n  html += `<div class=\"empty\"><h3>No hay usuarios</h3></div>`;\n} else {\n  html += `<table><thead><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Cedula</th><th>Rol</th></tr></thead><tbody>`;\n  users.forEach(u => {\n    const roleClass = u.role === 'professional' ? 'badge-professional' : 'badge-patient';\n    html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.cedula}</td><td><span class=\"badge ${roleClass}\">${u.role}</span></td></tr>`;\n  });\n  html += `</tbody></table>`;\n}\n\nhtml += `</div></body></html>`;\nreturn [{ json: { html: html } }];"
+            },
+            "name": "View HTML Logic",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                1600
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ $json.html }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "text/html"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond View HTML",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1600
+            ]
+        },
+        {
+            "parameters": {
+                "path": "ai-insights",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook AI",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                1800
+            ],
+            "webhookId": "ai-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "return [{ json: { suggestion: \"La IA sugiere optimizar los horarios de la tarde... (Simulación)\" } }];"
+            },
+            "name": "AI Logic (Mock)",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                200,
+                1800
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond AI",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                400,
+                1800
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Register": {
+            "main": [
+                [
+                    {
+                        "node": "Register Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Register Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Register",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Login": {
+            "main": [
+                [
+                    {
+                        "node": "Login Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Login Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Get Appts": {
+            "main": [
+                [
+                    {
+                        "node": "Get Appts Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get Appts Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Get Appts",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Create Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Create Appt Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Create Appt Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Create Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Update Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Update Appt Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Update Appt Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Update Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Delete Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Delete Appt Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Delete Appt Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Delete Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Users": {
+            "main": [
+                [
+                    {
+                        "node": "Users Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Users Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Users",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Hours": {
+            "main": [
+                [
+                    {
+                        "node": "Hours Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Hours Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Hours",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook View DB": {
+            "main": [
+                [
+                    {
+                        "node": "View HTML Logic",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "View HTML Logic": {
+            "main": [
+                [
+                    {
+                        "node": "Respond View HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook AI": {
+            "main": [
+                [
+                    {
+                        "node": "AI Logic (Mock)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Logic (Mock)": {
+            "main": [
+                [
+                    {
+                        "node": "Respond AI",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
