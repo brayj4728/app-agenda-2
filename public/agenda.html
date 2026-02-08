@@ -973,62 +973,57 @@
             const d = document.getElementById('inputDate').value;
             const timeSelect = document.getElementById('inputTime');
             const t = timeSelect ? timeSelect.value : '';
+            const btn = document.querySelector('#stepTime .modal-btn');
 
             if (!d || !t) {
                 alert('Por favor selecciona fecha y hora');
                 return;
             }
 
-            // Validate date is not in the past
-            const selectedDate = new Date(d);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            // UI Feedback
+            const originalText = btn.textContent;
+            btn.textContent = 'Agendando...';
+            btn.disabled = true;
 
-            if (selectedDate < today) {
-                alert('No puedes agendar citas en fechas pasadas');
-                return;
-            }
-
-            // BACKEND VALIDATION: Double-check availability before creating
             try {
-                const checkRes = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${d}`);
+                // BACKEND VALIDATION: Double-check availability before creating
+                const checkRes = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${d}&t=${Date.now()}`);
                 const checkData = await checkRes.json();
 
                 if (checkData.success && checkData.availableHours) {
                     if (!checkData.availableHours.includes(t)) {
-                        alert('⚠️ Esta hora acaba de ser reservada por otro paciente. Por favor selecciona otra hora.');
-                        // Reload available hours
+                        alert('⚠️ Esta hora acaba de ser reservada. Por favor selecciona otra.');
                         await loadAvailableHours(d);
+                        btn.textContent = originalText;
+                        btn.disabled = false;
                         return;
                     }
                 }
-            } catch (e) {
-                console.error('Error validating availability:', e);
-                // Continue anyway if backend check fails
-            }
 
-            const payload = {
-                patientCedula: currentUser.cedula,
-                patientName: currentUser.name,
-                dateStr: d,
-                time: t,
-                type: 'Fisioterapia',
-                status: 'PENDIENTE'
-            };
+                const payload = {
+                    patientCedula: currentUser.cedula,
+                    patientName: currentUser.name,
+                    dateStr: d,
+                    time: t,
+                    type: 'Fisioterapia',
+                    status: 'PENDIENTE'
+                };
 
-            const res = await createAppointment(payload);
+                const res = await createAppointment(payload);
 
-            if (res.success) {
-                closeModal();
-                loadAppointments();
-            } else {
-                // Check if error is due to conflict
-                if (res.message && res.message.includes('conflict')) {
-                    alert('⚠️ Esta hora ya no está disponible. Por favor selecciona otra.');
-                    await loadAvailableHours(d);
+                if (res.success) {
+                    closeModal();
+                    await loadAppointments();
                 } else {
-                    alert('Error al agendar: ' + (res.message || JSON.stringify(res)));
+                    alert('Error al agendar: ' + (res.message || 'Error desconocido'));
+                    btn.textContent = originalText;
+                    btn.disabled = false;
                 }
+            } catch (e) {
+                console.error('Error in confirmAdd:', e);
+                alert('Error de conexión al agendar');
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
         }
         function logout() { localStorage.removeItem('solarUser'); window.location.href = 'index.html'; }
