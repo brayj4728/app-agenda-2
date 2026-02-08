@@ -608,30 +608,36 @@
 
         async function loadAppointments() {
             try {
-                const url = `${API_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}`;
+                const url = `${CONFIG.APPOINTMENTS_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}`;
                 console.log('Fetching appointments:', url);
                 const res = await fetch(url);
-                const data = await res.json();
 
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: Servidor no disponible`);
+                }
+
+                const data = await res.json();
                 if (data.success && data.appointments) {
-                    // STRICT ISOLATION: Client-side filter to prevent any mix-up
                     appointments = data.appointments.filter(a => String(a.patientCedula) === String(currentUser.cedula));
                     console.log('Loaded appointments:', appointments.length);
                     render();
                 } else {
-                    console.warn('Backend returned success:false or no appointments', data);
                     appointments = [];
                     render();
                 }
             } catch (e) {
                 console.error('Error in loadAppointments:', e);
+                // Only show alert if it's a real network error, not just 404
+                if (e.message.includes('fetch') || e.message.includes('Failed')) {
+                    alert('⚠️ Error de conexión: No se pudo contactar con el servidor. Verifica que el flujo de n8n esté ACTIVO.');
+                }
                 appointments = [];
                 render();
             }
         }
 
         async function createAppointment(payload) {
-            try { return await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); } catch (e) { return { success: false }; }
+            try { return await (await fetch(CONFIG.APPOINTMENTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); } catch (e) { return { success: false }; }
         }
         async function updateStatus(id, newStatus, newColor) {
             // Optimistic UI Update
@@ -640,7 +646,7 @@
 
             // Backend Update
             try {
-                const res = await fetch(API_URL, {
+                const res = await fetch(CONFIG.APPOINTMENTS_URL, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id, status: newStatus, color: newColor })
@@ -657,7 +663,7 @@
         }
 
         async function deleteAppointment(id) {
-            try { return await (await fetch(API_URL, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })).json(); } catch (e) { return { success: false }; }
+            try { return await (await fetch(CONFIG.APPOINTMENTS_URL, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })).json(); } catch (e) { return { success: false }; }
         }
 
         // Modified render function to use updateStatus
