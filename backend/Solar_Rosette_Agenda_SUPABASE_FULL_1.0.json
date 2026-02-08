@@ -296,7 +296,7 @@
         },
         {
             "parameters": {
-                "path": "agenda-view-new",
+                "path": "agenda-view",
                 "responseMode": "responseNode",
                 "options": {}
             },
@@ -326,7 +326,7 @@
         {
             "parameters": {
                 "respondWith": "text",
-                "responseBody": "={{ $json.html || '<h1>Error: El servidor no pudo generar la tabla. Verifica el nodo anterior.</h1>' }}",
+                "responseBody": "={{ $json.html }}",
                 "options": {
                     "responseHeaders": {
                         "entries": [
