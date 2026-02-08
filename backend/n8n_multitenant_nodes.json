@@ -1,0 +1,45 @@
+{
+    "name": "Nodos Multi-Tenant",
+    "nodes": [
+        {
+            "parameters": {
+                "jsCode": "const staticData = getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst newUser = items[0].json.body;\n\n// Evitar duplicados por cedula SOLO dentro de este mismo profesional\nconst exists = users.find(u => u.cedula === newUser.cedula && u.clientId === newUser.clientId);\nif (exists) {\n    return [{ json: { success: false, message: 'Este paciente ya está en tu lista.' } }];\n}\n\n// Guardamos al paciente vinculado al profesional (clientId)\nusers.push({\n    ...newUser,\n    id: Date.now()\n});\n\nstaticData.users = users;\nreturn [{ json: { success: true, user: newUser } }];"
+            },
+            "id": "uuid-register-logic",
+            "name": "Register Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                460,
+                460
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const staticData = getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst { cedula, clientId } = items[0].json.query || items[0].json.body;\n\n// Buscamos usuario que coincida con cedula Y con este profesional específico\nconst user = users.find(u => u.cedula === cedula && u.clientId === clientId);\n\nif (!user) {\n    return [{ json: { success: false, message: 'Usuario no encontrado en la base de este profesional.' } }];\n}\n\nreturn [{ json: { success: true, user } }];"
+            },
+            "id": "uuid-login-logic",
+            "name": "Login Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                700,
+                460
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const staticData = getWorkflowStaticData('global');\nconst appointments = staticData.appointments || [];\nconst { clientId, role, cedula } = items[0].json.query;\n\nlet filtered;\nif (role === 'admin' || role === 'professional') {\n    // El profesional VE TODAS las citas de SU clientId\n    filtered = appointments.filter(a => a.clientId === clientId);\n} else {\n    // El paciente VE SOLO sus citas agendadas CON ESTE profesional\n    filtered = appointments.filter(a => a.patientCedula === cedula && a.clientId === clientId);\n}\n\nreturn [{ json: { success: true, appointments: filtered } }];"
+            },
+            "id": "uuid-get-appointments",
+            "name": "Get Appointments Logic",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                940,
+                460
+            ]
+        }
+    ],
+    "connections": {}
+}

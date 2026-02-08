@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            max-width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        @media (min-width: 500px) {
+            .container {
+                max-height: 850px;
+                border: 1px solid #ddd;
+                border-radius: 20px;
+                margin-top: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* BACK NAV */
+        .back-nav {
+            position: absolute;
+            top: 40px;
+            left: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* SECTIONS */
+        .view-section {
+            width: 100%;
+            max-width: 320px;
+            /* Added to match register.html */
+            display: flex;
+            flex-direction: column;
+            /* margin-top removed for vertical centering */
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .view-title {
+            font-size: 2.2rem;
+            font-family: 'Courier New', monospace;
+            font-weight: 400;
+            color: black;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .view-subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* BUTTONS */
+        .role-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+
+            /* Gray Default */
+            background-color: #D9D9D9;
+            color: #888;
+            border: 2px solid #D9D9D9;
+        }
+
+        /* Hover Black */
+        .role-btn:hover {
+            background-color: black;
+            color: white;
+            border-color: black;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            font-size: 1rem;
+            color: black;
+            outline: none;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: black;
+            color: white;
+            border-radius: 30px;
+            border: none;
+            font-size: 1rem;
+            margin-top: 30px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1 style="position:absolute; z-index:9999; color:black; top:10px; left:10px; font-size:12px; opacity:0.5;">
+            Cargando Login...</h1>
+
+        <!-- BACK BUTTON -->
+        <button class="back-nav" onclick="goBack()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="12" fill="#D9D9D9" />
+                <path d="M14 8L10 12L14 16" stroke="black" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </button>
+
+        <!-- VIEW 1: SELECTION -->
+        <div id="viewSelection" class="view-section">
+            <h1 class="view-title">Elige tu usuario</h1>
+            <p class="view-subtitle">Selecciona</p>
+
+            <button class="role-btn" onclick="selectRole('professional')">Profesional</button>
+            <button class="role-btn" onclick="selectRole('patient')">Paciente</button>
+        </div>
+
+        <!-- VIEW 2: PATIENT LOGIN -->
+        <div id="viewPatient" class="view-section" style="display:none;">
+            <h1 class="view-title">Ingreso Paciente</h1>
+
+            <form onsubmit="handleLogin(event, 'patient')">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-input" placeholder="Lois Becket" id="patName">
+                </div>
+                <div class="form-group">
+                    <label>Cedula</label>
+                    <input type="text" class="form-input" placeholder="1098765432" id="patCedula">
+                </div>
+                <button type="submit" class="submit-btn" id="patSubmit">Ingreso</button>
+            </form>
+
+            <div class="exit-footer-row" onclick="goBack()"
+                style="margin-top:40px; display:flex; flex-direction:column; align-items:center; cursor:pointer; opacity:0.6;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                <span style="font-size:12px; font-weight:600; color:#666; margin-top:5px;">Salir</span>
+            </div>
+        </div>
+
+        <!-- VIEW 3: PROFESSIONAL LOGIN -->
+        <div id="viewProfessional" class="view-section" style="display:none;">
+            <h1 class="view-title">Ingreso<br>profesional</h1>
+
+            <form onsubmit="handleLogin(event, 'professional')">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-input" placeholder="Lois Becket" id="profName">
+                </div>
+                <div class="form-group">
+                    <label>Cedula</label>
+                    <input type="text" class="form-input" placeholder="1098765432" id="profCedula">
+                </div>
+                <button type="submit" class="submit-btn" id="profSubmit">Ingreso</button>
+            </form>
+
+            <div class="exit-footer-row" onclick="goBack()"
+                style="margin-top:40px; display:flex; flex-direction:column; align-items:center; cursor:pointer; opacity:0.6;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                <span style="font-size:12px; font-weight:600; color:#666; margin-top:5px;">Salir</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        let currentView = 'selection';
+
+        function selectRole(role) {
+            document.getElementById('viewSelection').style.display = 'none';
+            if (role === 'patient') {
+                document.getElementById('viewPatient').style.display = 'flex';
+                currentView = 'patient';
+            } else {
+                document.getElementById('viewProfessional').style.display = 'flex';
+                currentView = 'professional';
+            }
+        }
+
+        function goBack() {
+            if (currentView === 'selection') {
+                window.location.href = 'index.html';
+            } else {
+                document.getElementById('viewPatient').style.display = 'none';
+                document.getElementById('viewProfessional').style.display = 'none';
+                document.getElementById('viewSelection').style.display = 'flex';
+                currentView = 'selection';
+            }
+        }
+
+        async function handleLogin(e, role) {
+            e.preventDefault();
+
+            let payload = {};
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            submitBtn.textContent = 'Verificando...';
+            submitBtn.disabled = true;
+
+            if (role === 'patient') {
+                const n = document.getElementById('patName').value;
+                const c = document.getElementById('patCedula').value;
+                if (!n || !c) {
+                    submitBtn.textContent = originalText; submitBtn.disabled = false;
+                    return alert('Completa los campos');
+                }
+                payload = { name: n, cedula: c, role: 'patient' };
+            } else {
+                const n = document.getElementById('profName').value;
+                const c = document.getElementById('profCedula').value;
+                if (!n || !c) {
+                    submitBtn.textContent = originalText; submitBtn.disabled = false;
+                    return alert('Completa los campos');
+                }
+
+                // STRICT PROFESSIONAL CHECK (User Request)
+                if (c !== '1000491639') {
+                    submitBtn.textContent = originalText; submitBtn.disabled = false;
+                    return alert('Acceso denegado: Solo el perfil autorizado (Carmona Cesar) puede ingresar como Profesional.');
+                }
+
+                payload = { name: n, cedula: c, role: 'professional' };
+            }
+
+            try {
+                // FETCH TO N8N
+                const response = await fetch(CONFIG.LOGIN_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                // HANDLE BOTH STANDARD JSON SUCCESS AND N8N DEFAULT RESPONSE
+                if (response.ok && (data.success || data.message === 'Workflow was started')) {
+
+                    // If n8n didn't return user object (default response), use form data
+                    const userToSave = data.user || {
+                        name: payload.name,
+                        role: payload.role,
+                        cedula: payload.cedula
+                    };
+
+                    localStorage.setItem('solarUser', JSON.stringify({
+                        name: userToSave.name,
+                        cedula: userToSave.cedula,
+                        role: userToSave.role
+                    }));
+
+                    // ROLE BASED REDIRECT
+                    if (userToSave.role === 'professional' || userToSave.role === 'admin') {
+                        // Direct path to file to avoid Rewrite 404s
+                        window.location.href = '/dashboards/professional_dashboard.html';
+                    } else {
+                        window.location.href = '/agenda.html';
+                    }
+                } else {
+                    alert('Error: ' + (data.message || 'Credenciales incorrectas'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error de conexión. Asegúrate de que el flujo de n8n esté activo.');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

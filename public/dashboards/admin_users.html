@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Admin</title>
+    <style>
+        :root {
+            --primary: #000000;
+            --danger: #ff4444;
+            --success: #00c851;
+            --bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 30px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: space-between;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            flex-grow: 1;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-refresh {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-delete-manual {
+            background: var(--danger);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f1f1f1;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background: #fafafa;
+        }
+
+        .btn-table-del {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 4px 8px;
+            font-size: 0.8rem;
+        }
+
+        .btn-table-del:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        #status {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>👤 Gestión de Usuarios</h1>
+
+        <div class="controls">
+            <input type="text" id="manualCedula" placeholder="Cédula para borrar manualmente...">
+            <button class="btn-delete-manual" onclick="deleteManual()">Eliminar por Cédula</button>
+            <button class="btn-refresh" onclick="loadUsers()">🔄 Actualizar lista</button>
+        </div>
+
+        <div id="status"></div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cédula</th>
+                    <th>Rol</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- Data here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script src="../config.js"></script>
+    <script>
+        const USER_API = CONFIG.USERS_URL;
+
+        async function loadUsers() {
+            const status = document.getElementById('status');
+            const tbody = document.getElementById('userTableBody');
+            status.innerText = 'Cargando usuarios...';
+            tbody.innerHTML = '';
+
+            try {
+                // We use the agenda-view to get HTML and then parse or just use a dedicated GET /users
+                // Actually, my backend GET /users needs a cedula to find one, but if I send role=admin maybe it returns all?
+                // Checking n8n code... It seems GET /users only finds ONE.
+                // But I can use the HTML view to at least see them.
+                // Let's assume the user wants to see the table.
+
+                // To be robust, I'll use the agenda-view to get the raw HTML from n8n and display it or parse it.
+                // Better: I'll update the n8n GET /users to return ALL if role=admin is passed.
+
+                const res = await fetch(`${USER_API}?cedula=ALL&role=admin`);
+                const data = await res.json();
+
+                if (data.success && data.users) {
+                    data.users.forEach(u => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                        <td>${u.name}</td>
+                        <td>${u.cedula}</td>
+                        <td>${u.role}</td>
+                        <td><button class="btn-table-del" onclick="deleteUser('${u.cedula}')">Eliminar</button></td>
+                    `;
+                        tbody.appendChild(tr);
+                    });
+                    status.innerText = `Mostrando ${data.users.length} usuarios.`;
+                } else {
+                    status.innerText = 'No se pudieron cargar los usuarios.';
+                }
+            } catch (e) {
+                status.innerText = 'Error de conexión: ' + e.message;
+            }
+        }
+
+        async function deleteUser(cedula) {
+            if (!confirm(`¿Estás seguro de eliminar al usuario con cédula ${cedula}?`)) return;
+
+            const status = document.getElementById('status');
+            status.innerText = 'Eliminando...';
+
+            try {
+                const res = await fetch(`${USER_API}?cedula=${cedula}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    status.style.color = 'green';
+                    status.innerText = '✅ Usuario eliminado correctamente.';
+                    loadUsers();
+                } else {
+                    status.style.color = 'red';
+                    status.innerText = '❌ Error: ' + (data.message || 'No se pudo eliminar.');
+                }
+            } catch (e) {
+                status.innerText = 'Error: ' + e.message;
+            }
+        }
+
+        function deleteManual() {
+            const cedula = document.getElementById('manualCedula').value.trim();
+            if (!cedula) {
+                alert('Por favor ingresa una cédula.');
+                return;
+            }
+            deleteUser(cedula);
+        }
+
+        // Initial load
+        loadUsers();
+    </script>
+
+</body>
+
+</html>

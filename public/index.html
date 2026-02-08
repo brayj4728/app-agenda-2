@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Solar Rosette - Agenda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            background: #f5f5f5;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            max-width: 400px;
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CENTRAL GLOW */
+        .central-glow {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #FF9B44 0%, rgba(255, 155, 68, 0) 70%);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            filter: blur(20px);
+        }
+
+        /* CONTENT LAYER */
+        .content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 30px 60px;
+        }
+
+        /* HEADER (TOP RIGHT) */
+        .header-top {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-pill-small {
+            background: #DCDCDC;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .label-agenda-small {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        /* CENTER TEXT */
+        .center-text-block {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+        }
+
+        .main-title-center {
+            font-size: 56px;
+            font-weight: 900;
+            color: #4A3A2A;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        /* FOOTER */
+        .footer-nav {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .btn-inicio-pill {
+            background: #DCDCDC;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .btn-arrow-circle {
+            width: 52px;
+            height: 52px;
+            background: #DCDCDC;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-arrow-circle svg {
+            width: 22px;
+            height: 22px;
+            stroke: #000;
+            stroke-width: 3;
+            fill: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Layer 1: Glow -->
+        <div class="central-glow"></div>
+
+        <!-- Layer 2: Content -->
+        <div class="content">
+            <!-- Top -->
+            <div class="header-top">
+                <div class="header-right">
+                    <button class="btn-pill-small" id="btnRegister">Registro</button>
+                    <div class="label-agenda-small">Agenda</div>
+                </div>
+            </div>
+
+            <!-- Middle -->
+            <div class="center-text-block">
+                <h1 class="main-title-center">AGENDA</h1>
+            </div>
+
+            <!-- Bottom -->
+            <div class="footer-nav">
+                <button class="btn-inicio-pill" id="btnLogin">inicio</button>
+                <div class="btn-arrow-circle" id="btnArrow">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const goLog = () => window.location.href = 'login.html';
+        const goReg = () => window.location.href = 'register.html';
+
+        document.getElementById('btnLogin').onclick = goLog;
+        document.getElementById('btnArrow').onclick = goLog;
+        document.getElementById('btnRegister').onclick = goReg;
+    </script>
+</body>
+
+</html>

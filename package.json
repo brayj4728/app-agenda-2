@@ -1,0 +1,28 @@
+{
+  "name": "solar-rosette",
+  "version": "1.0.0",
+  "description": "Sistema de gestión de citas médicas con IA integrada",
+  "main": "public/index.html",
+  "scripts": {
+    "start": "npx http-server public -p 8000 -o",
+    "test": "echo \"Tests disponibles en /tests/*.ps1\""
+  },
+  "keywords": [
+    "medical",
+    "appointments",
+    "healthcare",
+    "ai",
+    "gemini",
+    "n8n",
+    "physiotherapy"
+  ],
+  "author": "Solar Rosette Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tu-usuario/solar-rosette.git"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

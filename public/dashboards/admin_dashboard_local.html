@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Rosetta Solar</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f4f4f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-pendiente {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        .status-confirmada {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .status-cancelada {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .btn-refresh {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .btn-refresh:hover {
+            background: #1976D2;
+        }
+
+        #loading {
+            display: none;
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>📅 Agenda de Citas (Admin)</h1>
+            <button class="btn-refresh" onclick="loadCitas()">🔄 Actualizar Tabla</button>
+        </div>
+        <div id="loading">Cargando datos del servidor...</div>
+        <div id="error-msg" style="color:red; display:none;"></div>
+
+        <table id="citasTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Paciente</th>
+                    <th>Cédula</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Fila de ejemplo vacía -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // URL de producción (Confirmada que funciona)
+        const API_URL = "https://n8n-n8n.xxboi7.easypanel.host/webhook/appointments?role=admin";
+
+        async function loadCitas() {
+            const tbody = document.querySelector("#citasTable tbody");
+            const loading = document.getElementById("loading");
+            const errorMsg = document.getElementById("error-msg");
+
+            tbody.innerHTML = "";
+            loading.style.display = "block";
+            errorMsg.style.display = "none";
+
+            try {
+                console.log("Fetching from:", API_URL);
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                loading.style.display = "none";
+
+                if (!data.success) {
+                    throw new Error(data.message || "Error desconocido al obtener citas.");
+                }
+
+                const citas = data.appointments || [];
+
+                if (citas.length === 0) {
+                    tbody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No hay citas registradas aún.</td></tr>";
+                    return;
+                }
+
+                // Ordenar por fecha (más reciente primero)
+                citas.sort((a, b) => b.id - a.id);
+
+                citas.forEach(cita => {
+                    const tr = document.createElement("tr");
+                    const estadoClass = `status-${(cita.status || 'pendiente').toLowerCase()}`;
+
+                    tr.innerHTML = `
+                    <td>${cita.id}</td>
+                    <td><strong>${cita.patientName}</strong></td>
+                    <td>${cita.patientCedula}</td>
+                    <td>${cita.dateStr}</td>
+                    <td>${cita.time}</td>
+                    <td><span class="status-badge ${estadoClass}">${cita.status || 'PENDIENTE'}</span></td>
+                `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (error) {
+                console.error(error);
+                loading.style.display = "none";
+                errorMsg.style.display = "block";
+                errorMsg.textContent = "Error de conexión: " + error.message;
+            }
+        }
+
+        // Cargar al inicio
+        document.addEventListener("DOMContentLoaded", loadCitas);
+    </script>
+
+</body>
+
+</html>

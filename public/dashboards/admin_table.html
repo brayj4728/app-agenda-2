@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Visor de Base de Datos - Solar Rosette</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #000;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .green {
+            background: #e0ffe0;
+            color: #008800;
+        }
+
+        .red {
+            background: #ffe0e0;
+            color: #880000;
+        }
+
+        .orange {
+            background: #fff0d0;
+            color: #cc8800;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📋 Tabla de Citas (Base de Datos n8n)</h1>
+    <button onclick="loadData()">🔄 Actualizar Tabla</button>
+    <button onclick="window.location.href='admin_users.html'"
+        style="background:#007bff; color:white; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:bold;">👤
+        Gestionar Usuarios</button>
+    <div id="loading">Cargando datos...</div>
+
+    <table id="dbTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Paciente</th>
+                <th>Cédula</th>
+                <th>Fecha/Hora</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+
+    <script src="../config.js"></script>
+    <script>
+        const API = CONFIG.APPOINTMENTS_URL;
+        // Admin Credentials to see ALL
+        const cedula = '1000595131';
+        const role = 'admin';
+
+        async function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('dbTable').style.display = 'none';
+            try {
+                const res = await fetch(`${API}?cedula=${cedula}&role=${role}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    renderTable(data.appointments);
+                } else {
+                    alert('Error cargando datos');
+                }
+            } catch (e) {
+                alert('Error de conexión');
+            }
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dbTable').style.display = 'table';
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            list.forEach(item => {
+                let st = (item.status || 'Pendiente').toUpperCase();
+                let cls = 'orange';
+                if (st.includes('APROB')) cls = 'green';
+                if (st.includes('CANCEL')) cls = 'red';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.patientName}</td>
+                    <td>${item.patientCedula}</td>
+                    <td>${item.dateStr} - ${item.time}</td>
+                    <td><span class="status-badge ${cls}">${st}</span></td>
+                    <td>
+                        <button onclick="deleteItem(${item.id})">❌</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('¿Borrar definitivamente?')) return;
+            await fetch(API, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            loadData();
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>

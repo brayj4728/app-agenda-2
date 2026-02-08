@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Registro N8N</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        input {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #log {
+            background: #f0f0f0;
+            padding: 10px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="box">
+        <h2>🛠 Debugger de Registro</h2>
+        <p>Usa este formulario para probar si la conexión con N8N funciona.</p>
+
+        <label>Nombre:</label>
+        <input type="text" id="dName" value="Profesional Test">
+
+        <label>Email:</label>
+        <input type="email" id="dEmail" value="test@pro.com">
+
+        <label>Cédula (ID):</label>
+        <input type="text" id="dCedula" value="88888">
+
+        <button onclick="testRegister()">Probar Registro</button>
+    </div>
+
+    <div id="log">Esperando acción...</div>
+
+    <!-- Cargar Config -->
+    <script src="config.js"></script>
+
+    <script>
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            logDiv.innerText += '\n' + msg;
+            console.log(msg);
+        }
+
+        async function testRegister() {
+            document.getElementById('log').innerText = 'Iniciando prueba...';
+
+            if (typeof CONFIG === 'undefined') {
+                log('❌ ERROR: config.js no se cargó.');
+                return;
+            }
+
+            const name = document.getElementById('dName').value;
+            const email = document.getElementById('dEmail').value;
+            const cedula = document.getElementById('dCedula').value; // Keep as string
+
+            const payload = {
+                name, email, cedula,
+                role: 'professional',
+                type: 'Profesional',
+                clientId: cedula,
+                clientName: name
+            };
+
+            log('Enviando datos a: ' + CONFIG.REGISTER_URL);
+            log('Payload: ' + JSON.stringify(payload, null, 2));
+
+            try {
+                const res = await fetch(CONFIG.REGISTER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                log('Status HTTP: ' + res.status);
+
+                const text = await res.text();
+                log('Respuesta Texto: ' + text);
+
+                try {
+                    const json = JSON.parse(text);
+                    if (json.success || json.message === 'Workflow was started') {
+                        log('✅ ¡ÉXITO! N8N respondió correctamente.');
+                        alert('¡Funciona! El problema no es N8N.');
+                    } else {
+                        log('❌ N8N respondió pero con error: ' + json.message);
+                    }
+                } catch (e) {
+                    log('⚠️ La respuesta no es JSON válido.');
+                }
+
+            } catch (e) {
+                log('❌ ERROR DE CONEXIÓN: ' + e.message);
+                log('Posibles causas: N8N caído, Bloqueo de CORS, o URL incorrecta.');
+            }
+        }
+    </script>
+</body>
+
+</html>
