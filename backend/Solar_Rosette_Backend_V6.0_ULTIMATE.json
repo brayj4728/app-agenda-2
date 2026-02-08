@@ -1,0 +1,400 @@
+{
+    "name": "Solar Rosette Backend V6.0 (ULTIMATE FIX)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "register",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Register",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "webhookId": "register-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const body = items[0].json.body;\nif (!body) return [{ json: { success: false, message: 'No body' } }];\n\nconst newUser = {\n  id: Date.now(),\n  name: body.name,\n  email: body.email,\n  cedula: String(body.cedula).trim(),\n  role: body.role,\n  type: body.type || 'patient',\n  phone: body.phone || '',\n  notes: [],\n  registered_at: new Date().toISOString()\n};\n\nreturn [{ json: newUser }];"
+            },
+            "name": "Prepare User Data",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                200,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/users",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        },
+                        {
+                            "name": "Prefer",
+                            "value": "return=representation"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify($json) }}",
+                "options": {}
+            },
+            "name": "Insert to Supabase",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                400,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const res = items[0].json;\n// Polyfill for array or single object\nlet user = null;\nif (Array.isArray(res) && res.length > 0) user = res[0];\nelse if (res && res.id) user = res;\n\nif (user) {\n  return [{ json: { success: true, user: user } }];\n}\n\nif (res.code === '23505') {\n  return [{ json: { success: false, message: 'Usuario ya registrado (Email o Cédula duplicada)' } }];\n}\n\nreturn [{ json: { success: false, message: 'Error en el registro', detail: res } }];"
+            },
+            "name": "Format Register",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                600,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Register",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                800,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "login",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Login",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                200
+            ],
+            "webhookId": "login-webhook"
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/users",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        }
+                    ]
+                },
+                "sendQueryParameters": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "cedula",
+                            "value": "=eq.{{ String($json.body.cedula).trim() }}"
+                        },
+                        {
+                            "name": "role",
+                            "value": "=eq.{{ $json.body.role }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Query Supabase",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                300,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const res = items[0].json;\n// Polyfill for array or single object\nlet user = null;\nif (Array.isArray(res) && res.length > 0) user = res[0];\nelse if (res && res.id) user = res;\n\nif (user) {\n  return [{ json: { success: true, user: user } }];\n}\n\nreturn [{ json: { success: false, message: 'Usuario no encontrado. Verifica tu cédula y rol.', debug: res } }];"
+            },
+            "name": "Format Login",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ JSON.stringify($json) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Login",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                700,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "path": "agenda-view",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook View",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                400
+            ],
+            "webhookId": "view-webhook"
+        },
+        {
+            "parameters": {
+                "url": "https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/users",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Get All Users",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                300,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const users = items[0].json;\nlet html = `<html><head><title>System View</title><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px}tr:nth-child(even){background-color:#f2f2f2}h1{color:#2c3e50}</style></head><body><h1>Usuarios Registrados (Supabase)</h1>`;\nif (!Array.isArray(users) || users.length === 0) {\n  if (users && users.id) {\n    const u = users;\n    html += '<table><tr><th>ID</th><th>Nombre</th><th>Cédula</th><th>Email</th><th>Rol</th></tr>';\n    html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.cedula}</td><td>${u.email}</td><td>${u.role}</td></tr>`;\n    html += '</table>';\n  } else {\n    html += '<p>No hay usuarios en la base de datos.</p>';\n  }\n} else {\n  html += '<table><tr><th>ID</th><th>Nombre</th><th>Cédula</th><th>Email</th><th>Rol</th></tr>';\n  users.forEach(u => html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.cedula}</td><td>${u.email}</td><td>${u.role}</td></tr>`);\n  html += '</table>';\n}\nhtml += '<br><hr><p>Si el login falla, asegúrate de escribir la cédula EXACTAMENTE como aparece arriba.</p></body></html>';\nreturn [{ json: { html } }];"
+            },
+            "name": "Generate View HTML",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "={{ $json.html }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "text/html"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond View HTML",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                700,
+                400
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Register": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare User Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare User Data": {
+            "main": [
+                [
+                    {
+                        "node": "Insert to Supabase",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Insert to Supabase": {
+            "main": [
+                [
+                    {
+                        "node": "Format Register",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Register": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Register",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Login": {
+            "main": [
+                [
+                    {
+                        "node": "Query Supabase",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Query Supabase": {
+            "main": [
+                [
+                    {
+                        "node": "Format Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Login": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook View": {
+            "main": [
+                [
+                    {
+                        "node": "Get All Users",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Get All Users": {
+            "main": [
+                [
+                    {
+                        "node": "Generate View HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate View HTML": {
+            "main": [
+                [
+                    {
+                        "node": "Respond View HTML",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
