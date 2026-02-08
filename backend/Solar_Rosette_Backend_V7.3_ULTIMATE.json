@@ -414,7 +414,7 @@
             "type": "n8n-nodes-base.httpRequest",
             "typeVersion": 4.1,
             "position": [
-                300,
+                417,
                 600
             ]
         },
@@ -426,7 +426,7 @@
             "type": "n8n-nodes-base.code",
             "typeVersion": 2,
             "position": [
-                550,
+                629,
                 600
             ]
         },
@@ -457,7 +457,7 @@
             "type": "n8n-nodes-base.respondToWebhook",
             "typeVersion": 1,
             "position": [
-                750,
+                850,
                 600
             ]
         },
@@ -503,4 +503,190 @@
                 800
             ]
         }
-    ],\n  \"connections\": {\n    \"Webhook Register\": { \"main\": [[{ \"node\": \"Prepare Register Data\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Prepare Register Data\": { \"main\": [[{ \"node\": \"Supabase Insert User\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Supabase Insert User\": { \"main\": [[{ \"node\": \"Format Register Response\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Format Register Response\": { \"main\": [[{ \"node\": \"Respond Register\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Webhook Login\": { \"main\": [[{ \"node\": \"Supabase Query User\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Supabase Query User\": { \"main\": [[{ \"node\": \"Format Login Response\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Format Login Response\": { \"main\": [[{ \"node\": \"Respond Login\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Webhook Create Appt\": { \"main\": [[{ \"node\": \"Check Conflict Supabase\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Check Conflict Supabase\": { \"main\": [[{ \"node\": \"Process Create Appt\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Process Create Appt\": { \"main\": [[{ \"node\": \"Has Conflict?\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Has Conflict?\": {\n      \"main\": [\n        [ { \"node\": \"Respond Create Appt\", \"type\": \"main\", \"index\": 0 } ],\n        [ { \"node\": \"Supabase Insert Appt\", \"type\": \"main\", \"index\": 0 } ]\n      ]\n    },\n    \"Supabase Insert Appt\": { \"main\": [[{ \"node\": \"Respond Create Appt\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Webhook Availability\": { \"main\": [[{ \"node\": \"Supabase Get Occupied\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Supabase Get Occupied\": { \"main\": [[{ \"node\": \"Calc Availability\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Calc Availability\": { \"main\": [[{ \"node\": \"Respond Availability\", \"type\": \"main\", \"index\": 0 }]] },\n    \"Webhook Ping\": { \"main\": [[{ \"node\": \"Respond Ping\", \"type\": \"main\", \"index\": 0 }]] }\n  }\n}\n
+    ],
+    "connections": {
+        "Webhook Register": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Register Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Register Data": {
+            "main": [
+                [
+                    {
+                        "node": "Supabase Insert User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Supabase Insert User": {
+            "main": [
+                [
+                    {
+                        "node": "Format Register Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Register Response": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Register",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Login": {
+            "main": [
+                [
+                    {
+                        "node": "Supabase Query User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Supabase Query User": {
+            "main": [
+                [
+                    {
+                        "node": "Format Login Response",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Login Response": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Create Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Check Conflict Supabase",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Conflict Supabase": {
+            "main": [
+                [
+                    {
+                        "node": "Process Create Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Process Create Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Has Conflict?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Has Conflict?": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Create Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Supabase Insert Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Supabase Insert Appt": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Create Appt",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Availability": {
+            "main": [
+                [
+                    {
+                        "node": "Supabase Get Occupied",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Supabase Get Occupied": {
+            "main": [
+                [
+                    {
+                        "node": "Calc Availability",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Calc Availability": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Availability",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Ping": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Ping",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
