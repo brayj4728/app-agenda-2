@@ -19,7 +19,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.users) staticData.users = [];\n\nconst body = items[0].json.body;\nif (!body) return [{ json: { success: false, message: 'No body' } }];\n\nconst exists = staticData.users.find(u => u.email === body.email || String(u.cedula) === String(body.cedula));\nif (exists) return [{ json: { success: false, message: 'Usuario ya registrado (Email o Cédula)' } }];\n\nconst newUser = {\n  id: Date.now(),\n  name: body.name,\n  email: body.email,\n  cedula: String(body.cedula),\n  role: body.role,\n  type: body.type || 'patient',\n  phone: body.phone || '',\n  notes: [],\n  registeredAt: new Date().toISOString()\n};\n\nstaticData.users.push(newUser);\nreturn [{ json: { success: true, user: newUser } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nif (!staticData.users) staticData.users = [];\n\nconst body = items[0].json.body;\nif (!body) return [{ json: { success: false, message: 'No body' } }];\n\nconst exists = staticData.users.find(u => u.email === body.email || String(u.cedula) === String(body.cedula));\nif (exists) return [{ json: { success: false, message: 'Usuario ya registrado (Email o Cédula)' } }];\n\nconst newUser = {\n  id: Date.now(),\n  name: body.name,\n  email: body.email,\n  cedula: String(body.cedula),\n  role: body.role,\n  type: body.type || 'patient',\n  phone: body.phone || '',\n  notes: [],\n  registeredAt: new Date().toISOString()\n};\n\nstaticData.users.push(newUser);\nreturn [{ json: { success: true, user: newUser } }];"
             },
             "name": "Register Logic",
             "type": "n8n-nodes-base.function",
@@ -74,7 +74,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst body = items[0].json.body;\n\nconst user = users.find(u => String(u.cedula) === String(body.cedula) && u.role === body.role);\n\nif (user) {\n  return [{ json: { success: true, user: user } }];\n} else {\n  return [{ json: { success: false, message: 'Credenciales incorrectas o usuario no encontrado' } }];\n}"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst body = items[0].json.body;\n\nconst user = users.find(u => String(u.cedula) === String(body.cedula) && u.role === body.role);\n\nif (user) {\n  return [{ json: { success: true, user: user } }];\n} else {\n  return [{ json: { success: false, message: 'Credenciales incorrectas o usuario no encontrado' } }];\n}"
             },
             "name": "Login Logic",
             "type": "n8n-nodes-base.function",
@@ -129,7 +129,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nreturn [{ json: { success: true, appointments: appts } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nreturn [{ json: { success: true, appointments: appts } }];"
             },
             "name": "Get Appts Logic",
             "type": "n8n-nodes-base.function",
@@ -184,7 +184,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.appointments) staticData.appointments = [];\nconst body = items[0].json.body;\n\nconst conflict = staticData.appointments.find(a => a.dateStr === body.dateStr && a.time === body.time && a.status !== 'CANCELADA');\nif (conflict) return [{ json: { success: false, message: 'conflict: slot taken' } }];\n\nconst newAppt = { \n  id: Date.now(), \n  patientCedula: body.patientCedula, \n  patientName: body.patientName, \n  dateStr: body.dateStr, \n  time: body.time, \n  type: body.type || 'Fisioterapia', \n  status: body.status || 'PENDIENTE', \n  whatsappSent: false \n};\n\nstaticData.appointments.push(newAppt);\nreturn [{ json: { success: true, appointment: newAppt } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nif (!staticData.appointments) staticData.appointments = [];\nconst body = items[0].json.body;\n\nconst conflict = staticData.appointments.find(a => a.dateStr === body.dateStr && a.time === body.time && a.status !== 'CANCELADA');\nif (conflict) return [{ json: { success: false, message: 'conflict: slot taken' } }];\n\nconst newAppt = { \n  id: Date.now(), \n  patientCedula: body.patientCedula, \n  patientName: body.patientName, \n  dateStr: body.dateStr, \n  time: body.time, \n  type: body.type || 'Fisioterapia', \n  status: body.status || 'PENDIENTE', \n  whatsappSent: false \n};\n\nstaticData.appointments.push(newAppt);\nreturn [{ json: { success: true, appointment: newAppt } }];"
             },
             "name": "Create Appt Logic",
             "type": "n8n-nodes-base.function",
@@ -239,7 +239,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nconst body = items[0].json.body;\n\nconst appt = appts.find(a => String(a.id) === String(body.id));\nif (appt) {\n  if (body.status) appt.status = body.status;\n  if (body.whatsappSent !== undefined) appt.whatsappSent = body.whatsappSent;\n  return [{ json: { success: true } }];\n}\nreturn [{ json: { success: false, message: 'Not found' } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nconst body = items[0].json.body;\n\nconst appt = appts.find(a => String(a.id) === String(body.id));\nif (appt) {\n  if (body.status) appt.status = body.status;\n  if (body.whatsappSent !== undefined) appt.whatsappSent = body.whatsappSent;\n  return [{ json: { success: true } }];\n}\nreturn [{ json: { success: false, message: 'Not found' } }];"
             },
             "name": "Update Appt Logic",
             "type": "n8n-nodes-base.function",
@@ -294,7 +294,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.appointments) staticData.appointments = [];\n\nconst query = items[0].json.query;\nconst body = items[0].json.body;\nconst id = (query && query.id) ? query.id : (body && body.id ? body.id : null);\n\nif (!id) return [{ json: { success: false, message: 'No ID' } }];\n\nconst initial = staticData.appointments.length;\nstaticData.appointments = staticData.appointments.filter(a => String(a.id) !== String(id));\n\nif (staticData.appointments.length < initial) return [{ json: { success: true } }];\nreturn [{ json: { success: false, message: 'Not found' } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nif (!staticData.appointments) staticData.appointments = [];\n\nconst query = items[0].json.query;\nconst body = items[0].json.body;\nconst id = (query && query.id) ? query.id : (body && body.id ? body.id : null);\n\nif (!id) return [{ json: { success: false, message: 'No ID' } }];\n\nconst initial = staticData.appointments.length;\nstaticData.appointments = staticData.appointments.filter(a => String(a.id) !== String(id));\n\nif (staticData.appointments.length < initial) return [{ json: { success: true } }];\nreturn [{ json: { success: false, message: 'Not found' } }];"
             },
             "name": "Delete Appt Logic",
             "type": "n8n-nodes-base.function",
@@ -348,7 +348,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst method = items[0].json.method;\nconst query = items[0].json.query;\nconst body = items[0].json.body;\n\nif (method === 'GET') {\n  if (query.cedula) {\n    const u = users.find(x => String(x.cedula) === String(query.cedula));\n    if (u) return [{ json: { success: true, user: u, users: [u] } }];\n    return [{ json: { success: false } }];\n  }\n  return [{ json: { success: true, users: users } }];\n}\n\nif (method === 'PUT') {\n  const u = users.find(x => String(x.cedula) === String(body.cedula));\n  if (u) {\n    u.notes = body.notes;\n    return [{ json: { success: true } }];\n  }\n  return [{ json: { success: false } }];\n}\nreturn [{ json: { success: false } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nconst users = staticData.users || [];\nconst method = items[0].json.method;\nconst query = items[0].json.query;\nconst body = items[0].json.body;\n\nif (method === 'GET') {\n  if (query.cedula) {\n    const u = users.find(x => String(x.cedula) === String(query.cedula));\n    if (u) return [{ json: { success: true, user: u, users: [u] } }];\n    return [{ json: { success: false } }];\n  }\n  return [{ json: { success: true, users: users } }];\n}\n\nif (method === 'PUT') {\n  const u = users.find(x => String(x.cedula) === String(body.cedula));\n  if (u) {\n    u.notes = body.notes;\n    return [{ json: { success: true } }];\n  }\n  return [{ json: { success: false } }];\n}\nreturn [{ json: { success: false } }];"
             },
             "name": "Users Logic",
             "type": "n8n-nodes-base.function",
@@ -402,7 +402,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nconst date = items[0].json.query.date;\nif (!date) return [{ json: { success: false } }];\n\nconst slots = [];\nfor (let h=9; h<18; h++) for (let m=0; m<60; m+=20) slots.push(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`);\n\nconst booked = appts.filter(a => a.dateStr === date && a.status !== 'CANCELADA').map(a => a.time);\nconst available = slots.filter(s => !booked.includes(s));\nreturn [{ json: { success: true, availableHours: available } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nconst appts = staticData.appointments || [];\nconst date = items[0].json.query.date;\nif (!date) return [{ json: { success: false } }];\n\nconst slots = [];\nfor (let h=9; h<18; h++) for (let m=0; m<60; m+=20) slots.push(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`);\n\nconst booked = appts.filter(a => a.dateStr === date && a.status !== 'CANCELADA').map(a => a.time);\nconst available = slots.filter(s => !booked.includes(s));\nreturn [{ json: { success: true, availableHours: available } }];"
             },
             "name": "Hours Logic",
             "type": "n8n-nodes-base.function",
@@ -456,7 +456,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\nlet html = `<html><head><title>Usuarios Agenda 2</title><meta charset='utf-8'><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px}</style></head><body><h1>Usuarios</h1>`;\nif (users.length===0) html+='<p>Sin usuarios</p>';\nelse {\n  html+='<table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th></tr>';\n  users.forEach(u => html+=`<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td></tr>`);\n  html+='</table>';\n}\nhtml+='</body></html>';\nreturn [{ json: { html } }];"
+                "functionCode": "const staticData = getWorkflowStaticData('global');\nconst users = staticData.users || [];\nlet html = `<html><head><title>Usuarios Agenda 2</title><meta charset='utf-8'><style>body{font-family:sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:8px}</style></head><body><h1>Usuarios</h1>`;\nif (users.length===0) html+='<p>Sin usuarios</p>';\nelse {\n  html+='<table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Rol</th></tr>';\n  users.forEach(u => html+=`<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td></tr>`);\n  html+='</table>';\n}\nhtml+='</body></html>';\nreturn [{ json: { html } }];"
             },
             "name": "View HTML Logic",
             "type": "n8n-nodes-base.function",
