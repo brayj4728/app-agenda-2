@@ -1,0 +1,387 @@
+{
+    "name": "Solar Rosette Backend V7.6 ULTIMATE (RESILIENT)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "login",
+                "responseMode": "lastNode",
+                "options": {
+                    "noResponseCustomHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Webhook Login",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                0
+            ],
+            "webhookId": "login-webhook"
+        },
+        {
+            "parameters": {
+                "method": "GET",
+                "url": "https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/users",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        }
+                    ]
+                },
+                "sendQueryParameters": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "cedula",
+                            "value": "=eq.{{ String($json.body.cedula).trim() }}"
+                        },
+                        {
+                            "name": "role",
+                            "value": "=eq.{{ $json.body.role }}"
+                        }
+                    ]
+                },
+                "options": {
+                    "alwaysOutputData": true
+                }
+            },
+            "name": "Supabase Query User",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                250,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "try {\n  const res = items[0].json;\n  let user = Array.isArray(res) ? res[0] : (res && res.id ? res : null);\n  if (user) return [{ json: { success: true, user: user } }];\n  return [{ json: { success: false, message: 'Usuario no encontrado.' } }];\n} catch (e) {\n  return [{ json: { success: false, message: e.message } }];\n}"
+            },
+            "name": "Respond Login",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                500,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "path": "appointments/available-hours",
+                "responseMode": "lastNode",
+                "options": {
+                    "noResponseCustomHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Methods",
+                                "value": "GET,OPTIONS"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Webhook Availability",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                250
+            ],
+            "webhookId": "availability-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const query = items[0].json.query || {};\nconst date = query.date || new Date().toISOString().split('T')[0];\nreturn [{\n  json: {\n    targetDate: date,\n    supabaseUrl: `https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/appointments?date_str=eq.${date}&status=neq.CANCELADA`\n  }\n}];"
+            },
+            "name": "Prepare Avail Engine",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                250,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.supabaseUrl }}",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        }
+                    ]
+                },
+                "options": {
+                    "alwaysOutputData": true
+                }
+            },
+            "name": "Supabase Fetch Slots",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                500,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "try {\n  const appts = items[0].json;\n  // Recover date from previous node if available, else use query\n  const date = $node[\"Prepare Avail Engine\"].json.targetDate;\n\n  const allHours = [];\n  for (let hour = 9; hour < 18; hour++) {\n    for (let minute = 0; minute < 60; minute += 20) {\n      allHours.push(hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0'));\n    }\n  }\n  allHours.push('18:00');\n\n  let occupied = [];\n  if (Array.isArray(appts)) occupied = appts.map(a => a.time).filter(t => t);\n  else if (appts && appts.time) occupied = [appts.time];\n\n  const available = allHours.filter(h => !occupied.includes(h));\n\n  return [{ json: { success: true, date, availableHours: available, count: available.length } }];\n} catch (e) {\n  return [{ json: { success: false, message: e.message } }];\n}"
+            },
+            "name": "Respond Availability",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                750,
+                250
+            ]
+        },
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "register",
+                "responseMode": "lastNode",
+                "options": {
+                    "noResponseCustomHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Webhook Register",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                -200
+            ],
+            "webhookId": "register-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "const body = items[0].json.body || {};\nreturn [{ json: { id: Date.now(), name: body.name, email: body.email, cedula: String(body.cedula).trim(), role: body.role || 'patient', registered_at: new Date().toISOString() } }];"
+            },
+            "name": "Format User",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                250,
+                -200
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://xcvtrgaasfqocjkeulfq.supabase.co/rest/v1/users",
+                "authentication": "none",
+                "sendHeaders": true,
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "apikey",
+                            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Authorization",
+                            "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjdnRyZ2Fhc2Zxb2Nqa2V1bGZxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDU2ODUxMywiZXhwIjoyMDg2MTQ0NTEzfQ.0L7OllT7IYkrY_eI1UNFfmX0UIekr_PBCqsuaWuo0yo"
+                        },
+                        {
+                            "name": "Content-Type",
+                            "value": "application/json"
+                        }
+                    ]
+                },
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ JSON.stringify($json) }}",
+                "options": {}
+            },
+            "name": "Insert User",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                500,
+                -200
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const res = items[0].json;\nif (res.id || (Array.isArray(res) && res.length > 0)) return [{ json: { success: true, user: res } }];\nreturn [{ json: { success: false, message: 'Error en registro' } }];"
+            },
+            "name": "Respond Register",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                750,
+                -200
+            ]
+        },
+        {
+            "parameters": {
+                "path": "ping",
+                "responseMode": "lastNode",
+                "options": {
+                    "noResponseCustomHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Webhook Ping",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                0,
+                500
+            ],
+            "webhookId": "ping-webhook"
+        },
+        {
+            "parameters": {
+                "jsCode": "return [{ json: { success: true, message: \"PONG - V7.6 ULTIMATE READY\" } }];"
+            },
+            "name": "Respond Ping",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                250,
+                500
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Login": {
+            "main": [
+                [
+                    {
+                        "node": "Supabase Query User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Supabase Query User": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Login",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Availability": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Avail Engine",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Avail Engine": {
+            "main": [
+                [
+                    {
+                        "node": "Supabase Fetch Slots",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Supabase Fetch Slots": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Availability",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Register": {
+            "main": [
+                [
+                    {
+                        "node": "Format User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format User": {
+            "main": [
+                [
+                    {
+                        "node": "Insert User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Insert User": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Register",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Webhook Ping": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Ping",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}
