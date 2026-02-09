@@ -9,7 +9,7 @@ function Test-Step {
     Write-Host "[:] TESTING: $Name..." -NoNewline
     try {
         $res = & $ScriptBlock
-        if ($res.success -eq $true -or $res -match "V9.0") {
+        if ($res.success -eq $true -or $res -match "V9.3") {
             Write-Host " [OK]" -ForegroundColor Green
             return $res
         }
@@ -26,26 +26,31 @@ function Test-Step {
     }
 }
 
-Write-Host "--- STARTING V9.0 ULTIMATE SYSTEM TEST ---`n" -ForegroundColor Cyan
+Write-Host "--- STARTING V9.3 ISOLATION SYSTEM TEST ---`n" -ForegroundColor Cyan
 
 # 1. PING
 Test-Step "Connectivity (Ping)" {
-    Invoke-RestMethod -Uri "$BaseUrl/ping" -Method Get
+    Invoke-RestMethod -Uri "$BaseUrl/v9/ping" -Method Get
 } | Out-Null
 
 # 2. AVAILABILITY (20-min slots)
 $avail = Test-Step "Availability (20-min Slots)" {
-    Invoke-RestMethod -Uri "$BaseUrl/appointments/available-hours-v7?date=$Date" -Method Get
+    Invoke-RestMethod -Uri "$BaseUrl/v9/availability?date=$Date" -Method Get
 }
 if ($avail) {
     Write-Host "   > Slots Found: $($avail.availableHours.Count)" -ForegroundColor Gray
     Write-Host "   > Sample: $($avail.availableHours[0]), $($avail.availableHours[1])" -ForegroundColor Gray
 }
 
+# 2.5 CORS PREFLIGHT (OPTIONS)
+Test-Step "CORS Preflight (OPTIONS)" {
+    Invoke-RestMethod -Uri "$BaseUrl/v9/login" -Method Options
+} | Out-Null
+
 # 3. LOGIN PATIENT
 $user = Test-Step "Auth (Login Patient)" {
     $body = @{ cedula = $Cedula; role = "patient" }
-    Invoke-RestMethod -Uri "$BaseUrl/login" -Method Post -Body ($body | ConvertTo-Json) -ContentType "application/json"
+    Invoke-RestMethod -Uri "$BaseUrl/v9/login" -Method Post -Body ($body | ConvertTo-Json) -ContentType "application/json"
 }
 
 # 4. CREATE APPOINTMENT
@@ -60,7 +65,7 @@ if ($avail.availableHours.Count -gt 0) {
             time          = $slot;
             type          = "Prueba Sistema V9"
         }
-        Invoke-RestMethod -Uri "$BaseUrl/appointments" -Method Post -Body ($body | ConvertTo-Json) -ContentType "application/json"
+        Invoke-RestMethod -Uri "$BaseUrl/v9/appointments" -Method Post -Body ($body | ConvertTo-Json) -ContentType "application/json"
     }
 }
 else {
@@ -72,13 +77,13 @@ if ($appt.success) {
     $id = $appt.appointment.id
     Test-Step "Process (Professional Approve ID: $id)" {
         $body = @{ id = $id; status = "APROBADA"; color = "bg-green" }
-        Invoke-RestMethod -Uri "$BaseUrl/appointments" -Method Put -Body ($body | ConvertTo-Json) -ContentType "application/json"
+        Invoke-RestMethod -Uri "$BaseUrl/v9/appointments" -Method Put -Body ($body | ConvertTo-Json) -ContentType "application/json"
     } | Out-Null
 
     # 6. DELETE APPOINTMENT
     Test-Step "Process (Delete Appt ID: $id)" {
         $body = @{ id = $id }
-        Invoke-RestMethod -Uri "$BaseUrl/appointments" -Method Delete -Body ($body | ConvertTo-Json) -ContentType "application/json"
+        Invoke-RestMethod -Uri "$BaseUrl/v9/appointments" -Method Delete -Body ($body | ConvertTo-Json) -ContentType "application/json"
     } | Out-Null
 }
 

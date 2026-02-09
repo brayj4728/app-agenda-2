@@ -12,13 +12,14 @@ const CONFIG = {
     WHATSAPP_COUNTRY_CODE: '57',
 
     // API Endpoints
-    get APPOINTMENTS_URL() { return `${this.N8N_BASE_URL}/appointments`; },
-    get USERS_URL() { return `${this.N8N_BASE_URL}/users`; },
-    get REGISTER_URL() { return `${this.N8N_BASE_URL}/register`; },
-    get LOGIN_URL() { return `${this.N8N_BASE_URL}/login`; },
-    get AI_INSIGHTS_URL() { return `${this.N8N_BASE_URL}/ai-insights`; },
-    get AGENDA_VIEW_URL() { return `${this.N8N_BASE_URL}/agenda-view`; },
-    get AVAILABLE_HOURS_URL() { return `${this.N8N_BASE_URL}/appointments/available-hours-v7`; }
+    // API Endpoints
+    get APPOINTMENTS_URL() { return `${this.N8N_BASE_URL}/v9/appointments`; },
+    get USERS_URL() { return `${this.N8N_BASE_URL}/v9/users`; },
+    get REGISTER_URL() { return `${this.N8N_BASE_URL}/v9/register`; },
+    get LOGIN_URL() { return `${this.N8N_BASE_URL}/v9/login`; },
+    get AI_INSIGHTS_URL() { return `${this.N8N_BASE_URL}/v9/ai-insights`; },
+    get AGENDA_VIEW_URL() { return `${this.N8N_BASE_URL}/v9/agenda-view`; },
+    get AVAILABLE_HOURS_URL() { return `${this.N8N_BASE_URL}/v9/availability`; }
 };
 
 // Export to be used in HTML scripts
