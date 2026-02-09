@@ -608,7 +608,7 @@
 
         async function loadAppointments() {
             try {
-                const url = `${CONFIG.APPOINTMENTS_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}`;
+                const url = `${CONFIG.APPOINTMENTS_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}&t=${Date.now()}`;
                 console.log('Fetching appointments:', url);
                 const res = await fetch(url);
 
