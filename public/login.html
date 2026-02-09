@@ -299,12 +299,7 @@
                     return alert('Completa los campos');
                 }
 
-                // STRICT PROFESSIONAL CHECK (User Request)
-                if (c !== '1000491639') {
-                    submitBtn.textContent = originalText; submitBtn.disabled = false;
-                    return alert('Acceso denegado: Solo el perfil autorizado (Carmona Cesar) puede ingresar como Profesional.');
-                }
-
+                // Cualquier profesional válido en Supabase puede ingresar
                 payload = { name: n, cedula: c, role: 'professional' };
             }
 

@@ -539,7 +539,7 @@
                 </svg>
             </div>
             <div class="stat-number">0</div>
-            <div class="stat-label">citas que has realizado</div>
+            <div class="stat-label">citas pendientes por revisar</div>
         </div>
 
         <!-- TABS -->
@@ -815,7 +815,8 @@
                 else pending++;
             });
 
-            document.querySelector('.stat-number').textContent = approved;
+            // Mostrar al profesional cuántas citas tiene pendientes por revisar
+            document.querySelector('.stat-number').textContent = pending;
             const cards = document.querySelectorAll('.stat-card');
             if (cards[0]) cards[0].querySelector('.card-val').textContent = cancelled;
             if (cards[1]) cards[1].querySelector('.card-val').textContent = approved;
@@ -1068,11 +1069,11 @@
             let isSwiping = false;
 
             card.addEventListener('touchstart', (e) => {
-                // Only allow swipe on Approved or Cancelled AND WhatsApp sent
+                // Solo permitir swipe en citas APROBADAS / CANCELADAS / REALIZADAS
                 const status = (appointment.status || '').toUpperCase();
                 const isFinalStatus = status.includes('APROB') || status.includes('CANCEL') || status.includes('REALIZ');
 
-                if (!isFinalStatus || !appointment.whatsappSent) return;
+                if (!isFinalStatus) return;
 
                 startX = e.touches[0].clientX;
                 isSwiping = true;
@@ -1119,7 +1120,7 @@
             card.addEventListener('mousedown', (e) => {
                 const status = (appointment.status || '').toUpperCase();
                 const isFinalStatus = status.includes('APROB') || status.includes('CANCEL') || status.includes('REALIZ');
-                if (!isFinalStatus || !appointment.whatsappSent) return;
+                if (!isFinalStatus) return;
 
                 startX = e.clientX;
                 isSwiping = true;
@@ -1162,18 +1163,23 @@
 
         async function deleteAppointment(id) {
             try {
-                const res = await fetch(`${API_URL}?id=${id}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (data.success) {
+                if (typeof SupabaseHelper === 'undefined') {
+                    alert('SupabaseHelper no está disponible para eliminar la cita.');
+                    return;
+                }
+
+                const res = await SupabaseHelper.deleteAppointment(id);
+
+                if (res && res.success) {
                     allAppointments = allAppointments.filter(a => String(a.id) !== String(id));
                     renderPatients();
                     renderDashboard();
                 } else {
-                    alert('Error al eliminar cita');
+                    alert('Error al eliminar cita en Supabase');
                     renderPatients();
                 }
             } catch (e) {
-                console.error(e);
+                console.error('Error de conexión al eliminar en Supabase:', e);
                 alert('Error de conexión al eliminar');
                 renderPatients();
             }

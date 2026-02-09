@@ -1040,11 +1040,13 @@
             const res = await createAppointment(payload);
 
             if (res.success) {
-                // Notificar al profesional por WhatsApp cuando se crea una cita nueva
+                const createdAppt = res.appointment || payload;
+
+                // Notificar al profesional por Telegram vía n8n
                 try {
-                    await notifyProfessionalNewAppointment(res.appointment || payload);
+                    await notifyProfessionalTelegram(createdAppt);
                 } catch (e) {
-                    console.error('Error enviando notificación al profesional:', e);
+                    console.error('Error enviando notificación Telegram al profesional:', e);
                 }
 
                 closeModal();
@@ -1061,33 +1063,28 @@
         }
 
         // Enviar notificación de nueva cita al profesional (solo Supabase, sin N8N)
-        async function notifyProfessionalNewAppointment(appointment) {
-            // Requiere SupabaseHelper y un usuario profesional con teléfono en la tabla users
-            if (typeof SupabaseHelper === 'undefined') return;
+        // Notificación al profesional por Telegram usando n8n
+        async function notifyProfessionalTelegram(appointment) {
+            if (!CONFIG.N8N_BASE_URL) return;
 
-            const usersData = await SupabaseHelper.getAllUsers();
-            if (!usersData || !usersData.success || !Array.isArray(usersData.users)) return;
+            const url = `${CONFIG.N8N_BASE_URL}/notify-telegram`;
+            const body = {
+                patientName: appointment.patientName || currentUser.name,
+                patientCedula: appointment.patientCedula || currentUser.cedula,
+                dateStr: appointment.dateStr,
+                time: appointment.time,
+                status: appointment.status || 'PENDIENTE'
+            };
 
-            // Buscar al profesional principal (por rol y/o cédula fija)
-            const professional =
-                usersData.users.find(u => u.role === 'professional' && String(u.cedula) === '1000491639') ||
-                usersData.users.find(u => u.role === 'professional');
-
-            if (!professional || !professional.phone || !professional.phone.trim()) return;
-
-            const phone = professional.phone.trim();
-            const msg = [
-                '📅 *Nueva cita agendada*',
-                '',
-                `Paciente: ${appointment.patientName || currentUser.name}`,
-                `Cédula: ${appointment.patientCedula || currentUser.cedula}`,
-                `Fecha: ${appointment.dateStr}`,
-                `Hora: ${appointment.time}`,
-                `Estado: ${appointment.status || 'PENDIENTE'}`,
-            ].join('\n');
-
-            const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(msg)}`;
-            window.open(whatsappUrl, '_blank');
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+            } catch (e) {
+                console.error('Error llamando al webhook de Telegram en n8n:', e);
+            }
         }
         function logout() { localStorage.removeItem('solarUser'); window.location.href = 'index.html'; }
 
