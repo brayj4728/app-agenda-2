@@ -1,0 +1,271 @@
+{
+    "name": "Solar Rosette Supabase (HTTP Request - WORKING)",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "register",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Webhook Register",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1.1,
+            "position": [
+                240,
+                300
+            ],
+            "webhookId": "register-webhook"
+        },
+        {
+            "parameters": {
+                "functionCode": "const body = items[0].json.body;\n\nreturn [{\n  json: {\n    name: body.name,\n    email: body.email,\n    cedula: String(body.cedula),\n    phone: body.phone || '',\n    role: body.role || 'patient',\n    type: body.type || '',\n    registered_at: new Date().toISOString()\n  }\n}];"
+            },
+            "name": "Prepare Data",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "=https://vfbujngupbnvmlomzfgg.supabase.co/rest/v1/users?or=(cedula.eq.{{ $json.cedula }},email.eq.{{ encodeURIComponent($json.email) }})&select=id",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "options": {}
+            },
+            "name": "Check Existing",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                680,
+                300
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "supabase-auth",
+                    "name": "Supabase Auth"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "number": [
+                        {
+                            "value1": "={{ $json.length }}",
+                            "operation": "larger",
+                            "value2": 0
+                        }
+                    ]
+                }
+            },
+            "name": "User Exists?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 2,
+            "position": [
+                900,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "return [{\n  json: {\n    success: false,\n    message: 'La cedula o el correo electronico ya se encuentran registrados.'\n  }\n}];"
+            },
+            "name": "Return Error",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1120,
+                200
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://vfbujngupbnvmlomzfgg.supabase.co/rest/v1/users",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "name": "name",
+                            "value": "={{ $node['Prepare Data'].json.name }}"
+                        },
+                        {
+                            "name": "email",
+                            "value": "={{ $node['Prepare Data'].json.email }}"
+                        },
+                        {
+                            "name": "cedula",
+                            "value": "={{ $node['Prepare Data'].json.cedula }}"
+                        },
+                        {
+                            "name": "phone",
+                            "value": "={{ $node['Prepare Data'].json.phone }}"
+                        },
+                        {
+                            "name": "role",
+                            "value": "={{ $node['Prepare Data'].json.role }}"
+                        },
+                        {
+                            "name": "type",
+                            "value": "={{ $node['Prepare Data'].json.type }}"
+                        },
+                        {
+                            "name": "registered_at",
+                            "value": "={{ $node['Prepare Data'].json.registered_at }}"
+                        }
+                    ]
+                },
+                "options": {
+                    "response": {
+                        "response": {
+                            "responseFormat": "json"
+                        }
+                    }
+                },
+                "headerParameters": {
+                    "parameters": [
+                        {
+                            "name": "Prefer",
+                            "value": "return=representation"
+                        }
+                    ]
+                }
+            },
+            "name": "Insert User",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                1120,
+                400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "supabase-auth",
+                    "name": "Supabase Auth"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "functionCode": "return [{\n  json: {\n    success: true,\n    user: items[0].json[0]\n  }\n}];"
+            },
+            "name": "Format Success",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                1340,
+                400
+            ]
+        },
+        {
+            "parameters": {
+                "options": {}
+            },
+            "name": "Respond",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                1560,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook Register": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Data": {
+            "main": [
+                [
+                    {
+                        "node": "Check Existing",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Existing": {
+            "main": [
+                [
+                    {
+                        "node": "User Exists?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "User Exists?": {
+            "main": [
+                [
+                    {
+                        "node": "Return Error",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Insert User",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Return Error": {
+            "main": [
+                [
+                    {
+                        "node": "Respond",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Insert User": {
+            "main": [
+                [
+                    {
+                        "node": "Format Success",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format Success": {
+            "main": [
+                [
+                    {
+                        "node": "Respond",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": false,
+    "settings": {},
+    "versionId": "working-supabase-v1",
+    "meta": {},
+    "id": "WorkingSupabaseFlow",
+    "tags": []
+}

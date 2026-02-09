@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Solar Rosette</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -575,6 +577,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
     <script>
         const API_URL = CONFIG.APPOINTMENTS_URL;
         let currentUser = { name: 'Guest', role: 'patient', cedula: '000' };
@@ -608,62 +611,72 @@
 
         async function loadAppointments() {
             try {
-                const url = `${CONFIG.APPOINTMENTS_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}&t=${Date.now()}`;
-                console.log('Fetching appointments:', url);
-                const res = await fetch(url);
-
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: Servidor no disponible`);
+                let data;
+                if (CONFIG.USE_SUPABASE_DIRECT) {
+                    data = await SupabaseHelper.getAppointments(currentUser.cedula, currentUser.role);
+                } else {
+                    const res = await fetch(`${API_URL}?cedula=${currentUser.cedula}&role=${currentUser.role}`);
+                    data = await res.json();
                 }
 
-                const data = await res.json();
                 if (data.success && data.appointments) {
+                    // STRICT ISOLATION: Client-side filter to prevent any mix-up
                     appointments = data.appointments.filter(a => String(a.patientCedula) === String(currentUser.cedula));
-                    console.log('Loaded appointments:', appointments.length);
                     render();
                 } else {
                     appointments = [];
                     render();
                 }
-            } catch (e) {
-                console.error('Error in loadAppointments:', e);
-                // Only show alert if it's a real network error, not just 404
-                if (e.message.includes('fetch') || e.message.includes('Failed')) {
-                    alert('⚠️ Error de conexión: No se pudo contactar con el servidor. Verifica que el flujo de n8n esté ACTIVO.');
-                }
-                appointments = [];
-                render();
-            }
+            } catch (e) { appointments = []; render(); }
         }
 
         async function createAppointment(payload) {
-            try { return await (await fetch(CONFIG.APPOINTMENTS_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json(); } catch (e) { return { success: false }; }
+            try {
+                if (CONFIG.USE_SUPABASE_DIRECT) {
+                    return await SupabaseHelper.createAppointment(payload);
+                } else {
+                    return await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json();
+                }
+            } catch (e) { return { success: false }; }
         }
         async function updateStatus(id, newStatus, newColor) {
             // Optimistic UI Update
             const appt = appointments.find(a => a.id == id);
             if (appt) { appt.status = newStatus; appt.color = newColor; render(); }
 
-            // Backend Update
+            // Persist to backend
             try {
-                const res = await fetch(CONFIG.APPOINTMENTS_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, status: newStatus, color: newColor })
-                });
-                const data = await res.json();
+                let data;
+                if (CONFIG.USE_SUPABASE_DIRECT) {
+                    data = await SupabaseHelper.updateAppointment(id, { status: newStatus, color: newColor });
+                } else {
+                    const res = await fetch(API_URL, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id, status: newStatus, color: newColor })
+                    });
+                    data = await res.json();
+                }
+
                 if (!data.success) {
-                    alert("Error guardando estado: " + data.message);
-                    loadAppointments(); // Revert
+                    alert('Error al actualizar la cita');
+                    loadAppointments(); // Reload to revert
                 }
             } catch (e) {
                 console.error(e);
+                alert('Error de conexión');
                 loadAppointments(); // Revert
             }
         }
 
         async function deleteAppointment(id) {
-            try { return await (await fetch(CONFIG.APPOINTMENTS_URL, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })).json(); } catch (e) { return { success: false }; }
+            try {
+                if (CONFIG.USE_SUPABASE_DIRECT) {
+                    return await SupabaseHelper.deleteAppointment(id);
+                } else {
+                    return await (await fetch(API_URL, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })).json();
+                }
+            } catch (e) { return { success: false }; }
         }
 
         // Modified render function to use updateStatus
@@ -907,27 +920,26 @@
         // NEW: Load available hours from backend
         async function loadAvailableHours(selectedDate) {
             const timeSelect = document.getElementById('inputTime');
-            timeSelect.innerHTML = '<option value="">Cargando bloques de 20 min...</option>';
+            timeSelect.innerHTML = '<option value="">Cargando...</option>';
             timeSelect.disabled = true;
 
             try {
-                const url = `${CONFIG.AVAILABLE_HOURS_URL}?date=${selectedDate}&t=${Date.now()}`;
-                console.log('Fetching availability:', url);
-
-                const res = await fetch(url);
-                if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-
-                const data = await res.json();
-                console.log('Availability response:', data);
+                let data;
+                if (CONFIG.USE_SUPABASE_DIRECT) {
+                    data = await SupabaseHelper.getAvailableHours(selectedDate);
+                } else {
+                    const res = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${selectedDate}`);
+                    data = await res.json();
+                }
 
                 if (data.success && data.availableHours) {
                     if (data.availableHours.length === 0) {
-                        timeSelect.innerHTML = '<option value="">No hay disponibilidad este día</option>';
+                        timeSelect.innerHTML = '<option value="">No hay horas disponibles este día</option>';
                         return;
                     }
 
                     // Populate dropdown with available hours
-                    timeSelect.innerHTML = '<option value="">Selecciona tu hora</option>';
+                    timeSelect.innerHTML = '<option value="">Selecciona una hora</option>';
                     data.availableHours.forEach(hour => {
                         const option = document.createElement('option');
                         option.value = hour;
@@ -936,13 +948,11 @@
                     });
                     timeSelect.disabled = false;
                 } else {
-                    const msg = data.message || 'Error desconocido';
-                    timeSelect.innerHTML = `<option value="">${msg}</option>`;
-                    console.error('Backend reporting failure:', data);
+                    timeSelect.innerHTML = '<option value="">Error cargando horas</option>';
                 }
             } catch (e) {
-                console.error('Error loadAvailableHours:', e);
-                timeSelect.innerHTML = `<option value="">Error: ${e.message}</option>`;
+                console.error('Error loading hours:', e);
+                timeSelect.innerHTML = '<option value="">Error de conexión</option>';
             }
         }
 
@@ -979,58 +989,105 @@
             const d = document.getElementById('inputDate').value;
             const timeSelect = document.getElementById('inputTime');
             const t = timeSelect ? timeSelect.value : '';
-            const btn = document.querySelector('#stepTime .modal-btn');
 
             if (!d || !t) {
                 alert('Por favor selecciona fecha y hora');
                 return;
             }
 
-            // UI Feedback
-            const originalText = btn.textContent;
-            btn.textContent = 'Agendando...';
-            btn.disabled = true;
+            // Validate date is not in the past
+            const selectedDate = new Date(d);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
+            if (selectedDate < today) {
+                alert('No puedes agendar citas en fechas pasadas');
+                return;
+            }
+
+            // BACKEND VALIDATION: Double-check availability before creating
             try {
-                // BACKEND VALIDATION: Double-check availability before creating
-                const checkRes = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${d}&t=${Date.now()}`);
-                const checkData = await checkRes.json();
+                let checkData;
+                if (CONFIG.USE_SUPABASE_DIRECT) {
+                    checkData = await SupabaseHelper.getAvailableHours(d);
+                } else {
+                    const checkRes = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${d}`);
+                    checkData = await checkRes.json();
+                }
 
                 if (checkData.success && checkData.availableHours) {
                     if (!checkData.availableHours.includes(t)) {
-                        alert('⚠️ Esta hora acaba de ser reservada. Por favor selecciona otra.');
+                        alert('⚠️ Esta hora acaba de ser reservada por otro paciente. Por favor selecciona otra hora.');
+                        // Reload available hours
                         await loadAvailableHours(d);
-                        btn.textContent = originalText;
-                        btn.disabled = false;
                         return;
                     }
                 }
-
-                const payload = {
-                    patientCedula: currentUser.cedula,
-                    patientName: currentUser.name,
-                    dateStr: d,
-                    time: t,
-                    type: 'Fisioterapia',
-                    status: 'PENDIENTE'
-                };
-
-                const res = await createAppointment(payload);
-
-                if (res.success) {
-                    closeModal();
-                    await loadAppointments();
-                } else {
-                    alert('Error al agendar: ' + (res.message || 'Error desconocido'));
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }
             } catch (e) {
-                console.error('Error in confirmAdd:', e);
-                alert('Error de conexión al agendar');
-                btn.textContent = originalText;
-                btn.disabled = false;
+                console.error('Error validating availability:', e);
+                // Continue anyway if backend check fails
             }
+
+            const payload = {
+                patientCedula: currentUser.cedula,
+                patientName: currentUser.name,
+                dateStr: d,
+                time: t,
+                type: 'Fisioterapia',
+                status: 'PENDIENTE'
+            };
+
+            const res = await createAppointment(payload);
+
+            if (res.success) {
+                // Notificar al profesional por WhatsApp cuando se crea una cita nueva
+                try {
+                    await notifyProfessionalNewAppointment(res.appointment || payload);
+                } catch (e) {
+                    console.error('Error enviando notificación al profesional:', e);
+                }
+
+                closeModal();
+                loadAppointments();
+            } else {
+                // Check if error is due to conflict
+                if (res.message && res.message.includes('conflict')) {
+                    alert('⚠️ Esta hora ya no está disponible. Por favor selecciona otra.');
+                    await loadAvailableHours(d);
+                } else {
+                    alert('Error al agendar: ' + (res.message || JSON.stringify(res)));
+                }
+            }
+        }
+
+        // Enviar notificación de nueva cita al profesional (solo Supabase, sin N8N)
+        async function notifyProfessionalNewAppointment(appointment) {
+            // Requiere SupabaseHelper y un usuario profesional con teléfono en la tabla users
+            if (typeof SupabaseHelper === 'undefined') return;
+
+            const usersData = await SupabaseHelper.getAllUsers();
+            if (!usersData || !usersData.success || !Array.isArray(usersData.users)) return;
+
+            // Buscar al profesional principal (por rol y/o cédula fija)
+            const professional =
+                usersData.users.find(u => u.role === 'professional' && String(u.cedula) === '1000491639') ||
+                usersData.users.find(u => u.role === 'professional');
+
+            if (!professional || !professional.phone || !professional.phone.trim()) return;
+
+            const phone = professional.phone.trim();
+            const msg = [
+                '📅 *Nueva cita agendada*',
+                '',
+                `Paciente: ${appointment.patientName || currentUser.name}`,
+                `Cédula: ${appointment.patientCedula || currentUser.cedula}`,
+                `Fecha: ${appointment.dateStr}`,
+                `Hora: ${appointment.time}`,
+                `Estado: ${appointment.status || 'PENDIENTE'}`,
+            ].join('\n');
+
+            const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(msg)}`;
+            window.open(whatsappUrl, '_blank');
         }
         function logout() { localStorage.removeItem('solarUser'); window.location.href = 'index.html'; }
 

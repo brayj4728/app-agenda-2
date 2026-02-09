@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -192,6 +194,11 @@
                 <div class="form-group">
                     <label>Cedula</label>
                     <input type="text" class="form-input" placeholder="1098765432" id="profCedula">
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono (WhatsApp)</label>
+                    <input type="tel" class="form-input" placeholder="3001234567" id="profPhone" maxlength="10">
                 </div>
 
                 <div class="form-group">
@@ -386,6 +393,7 @@
     </style>
 
     <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
     <script>
         // NAVIGATION LOGIC
         let currentView = 'selection'; // selection, professional, patient, success
@@ -431,12 +439,20 @@
                 const name = document.getElementById('profName').value;
                 const email = document.getElementById('profEmail').value;
                 const cedula = document.getElementById('profCedula').value;
+                const phone = document.getElementById('profPhone').value;
                 const type = document.getElementById('profType').value;
-                if (!name || !email || !cedula) {
+                if (!name || !email || !cedula || !phone) {
                     submitBtn.textContent = originalText; submitBtn.disabled = false;
                     return alert('Completa todos los campos');
                 }
-                payload = { name, email, cedula, role: 'professional', type };
+
+                // Validate phone format (10 digits)
+                if (!/^\d{10}$/.test(phone)) {
+                    submitBtn.textContent = originalText; submitBtn.disabled = false;
+                    return alert('El teléfono debe tener 10 dígitos (ejemplo: 3001234567)');
+                }
+
+                payload = { name, email, cedula, phone, role: 'professional', type };
             } else if (currentView === 'patient') {
                 const name = document.getElementById('patName').value;
                 const email = document.getElementById('patEmail').value;
@@ -458,16 +474,29 @@
             }
 
             try {
-                const response = await fetch(CONFIG.REGISTER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                // Use Supabase direct connection if enabled
+                let data;
+                if (CONFIG.USE_SUPABASE_DIRECT) {
+                    data = await SupabaseHelper.registerUser(payload);
+                } else {
+                    // Fallback to N8N
+                    const response = await fetch(CONFIG.REGISTER_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ body: payload })
+                    });
 
-                const data = await response.json();
+                    const text = await response.text();
+                    try {
+                        data = text ? JSON.parse(text) : {};
+                    } catch {
+                        console.error("Invalid JSON:", text);
+                        data = {};
+                    }
+                }
 
                 // HANDLE BOTH STANDARD JSON SUCCESS AND N8N DEFAULT RESPONSE
-                if (response.ok && (data.success || data.message === 'Workflow was started')) {
+                if (data.success || data.message === 'Workflow was started') {
                     // Show Success View
                     document.getElementById('viewProfessional').style.display = 'none';
                     document.getElementById('viewPatient').style.display = 'none';

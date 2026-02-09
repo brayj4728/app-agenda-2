@@ -17,7 +17,6 @@
         {
             "parameters": {
                 "path": "borrar-test1|",
-                "responseMode": "responseNode",
                 "options": {}
             },
             "type": "n8n-nodes-base.webhook",
@@ -62,18 +61,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Create",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -115,18 +103,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Get",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -169,18 +146,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Delete",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -223,18 +189,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Update",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -277,18 +232,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Register",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -312,12 +256,12 @@
                 17072,
                 23904
             ],
-            "webhookId": "view-db-webhook-new",
+            "webhookId": "view-db-webhook",
             "id": "22628819-062c-41d6-b921-864a848d8f93"
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nlet users = staticData.users;\n\n// Defensive check: Ensure users is an array\nif (!users || !Array.isArray(users)) {\n    users = [];\n}\n\nlet html = `\n<html>\n<head>\n  <title>Usuarios Agenda 2</title>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <style>\n    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f9f9f9; }\n    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; }\n    h1 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }\n    table { border-collapse: collapse; width: 100%; margin-top: 20px; }\n    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }\n    th { background-color: #f2f2f2; color: #333; font-weight: bold; }\n    tr:nth-child(even) { background-color: #f9f9f9; }\n    tr:hover { background-color: #f1f1f1; }\n    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.9em; }\n    .badge-professional { background-color: #d1ecf1; color: #0c5460; }\n    .badge-patient { background-color: #d4edda; color: #155724; }\n    .empty-state { text-align: center; padding: 40px; color: #666; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <h1>Usuarios Registrados (Agenda 2)</h1>\n`;\n\nif (users.length === 0) {\n  html += `<div class=\"empty-state\"><h3>No hay usuarios registrados</h3><p>Registra un usuario desde la aplicación para verlo aquí.</p></div>`;\n} else {\n  html += `\n    <table>\n      <thead>\n        <tr>\n          <th>ID</th>\n          <th>Nombre</th>\n          <th>Email</th>\n          <th>Cédula</th>\n          <th>Rol</th>\n        </tr>\n      </thead>\n      <tbody>`;\n      \n  users.forEach(u => {\n    const roleClass = u.role === 'professional' ? 'badge-professional' : 'badge-patient';\n    html += `\n        <tr>\n          <td>${u.id || '-'}</td>\n          <td>${u.name || '-'}</td>\n          <td>${u.email || '-'}</td>\n          <td>${u.cedula || '-'}</td>\n          <td><span class=\"badge ${roleClass}\">${u.role || '-'}</span></td>\n        </tr>`;\n  });\n  \n  html += `\n      </tbody>\n    </table>`;\n}\n\nhtml += `\n    <div style=\"margin-top: 20px; color: #888; font-size: 12px; text-align: right;\">\n      Total usuarios: ${users.length} | Sincronizado: ${new Date().toLocaleString()}\n    </div>\n  </div>\n</body>\n</html>`;\n\nreturn [{ json: { html: html } }];"
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nconst users = staticData.users || [];\n\nlet html = `<html><head><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px}th{background:#eee}</style></head><body><h1>Usuarios Registrados</h1><table><tr><th>ID</th><th>Nombre</th><th>Email</th><th>Cedula</th><th>Rol (Tipo)</th></tr>`;\n\nusers.forEach(u => {\n  html += `<tr><td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.cedula}</td><td><b>${u.role}</b></td></tr>`;\n});\n\nhtml += `</table></body></html>`;\n\nreturn [{ json: { html } }];"
             },
             "name": "Generate User Table HTML",
             "type": "n8n-nodes-base.function",
@@ -332,16 +276,7 @@
             "parameters": {
                 "respondWith": "text",
                 "responseBody": "={{ $json.html }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "text/html"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond HTML",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -384,18 +319,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Login",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -425,7 +349,7 @@
         },
         {
             "parameters": {
-                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.users) return [{ json: { success: true, deleted: 0 } }];\n\nconst body = items[0].json.body || items[0].json.query || {};\nconst cedulaToDelete = body.id || body.cedula;\n\nconst initialCount = staticData.users.length;\n\nif (cedulaToDelete) {\n    // DELETE INDIVIDUAL USER\n    staticData.users = staticData.users.filter(u => String(u.cedula) !== String(cedulaToDelete));\n    const deletedCount = initialCount - staticData.users.length;\n    return [{ json: { success: true, deleted: deletedCount, message: 'Usuario eliminado correctamente' } }];\n} else {\n    // DELETE ALL USERS (No protection)\n    staticData.users = [];\n    const deletedCount = initialCount;\n    return [{ json: { success: true, deleted: deletedCount, message: 'Limpieza total de usuarios completada' } }];\n}"
+                "functionCode": "const staticData = $getWorkflowStaticData('global');\nif (!staticData.users) return [{ json: { success: true, deleted: 0 } }];\n\nconst body = items[0].json.body || items[0].json.query || {};\nconst cedulaToDelete = body.id || body.cedula;\n\nconst initialCount = staticData.users.length;\n\nif (cedulaToDelete) {\n    // DELETE INDIVIDUAL USER\n    staticData.users = staticData.users.filter(u => String(u.cedula) !== String(cedulaToDelete));\n    const deletedCount = initialCount - staticData.users.length;\n    return [{ json: { success: true, deleted: deletedCount, message: 'Usuario eliminado correctamente' } }];\n} else {\n    // PROTECT BRAYAN AND REMOVE OTHERS (Original logic)\n    const keepCedula = '1000595131';\n    staticData.users = staticData.users.filter(u => String(u.cedula) === keepCedula);\n    const deletedCount = initialCount - staticData.users.length;\n    return [{ json: { success: true, deleted: deletedCount, message: 'Limpieza masiva completada' } }];\n}"
             },
             "name": "Delete Users Logic",
             "type": "n8n-nodes-base.function",
@@ -438,18 +362,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Delete Users",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -492,18 +405,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Update User",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -545,18 +447,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Get User",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -627,18 +518,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond AI",
             "type": "n8n-nodes-base.respondToWebhook",
@@ -680,18 +560,7 @@
         },
         {
             "parameters": {
-                "respondWith": "text",
-                "responseBody": "={{ JSON.stringify($json) }}",
-                "options": {
-                    "responseHeaders": {
-                        "entries": [
-                            {
-                                "name": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ]
-                    }
-                }
+                "options": {}
             },
             "name": "Respond Available Hours",
             "type": "n8n-nodes-base.respondToWebhook",

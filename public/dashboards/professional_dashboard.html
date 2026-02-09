@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
 
-<head>
-    <meta charset="UTF-8">
+    <head>
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Professional Dashboard - Solar Rosette</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+        <title>Professional Dashboard - Solar Rosette</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+        <!-- Supabase JS Library (para conexión directa, igual que en agenda/registro) -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -503,9 +505,9 @@
             color: #666;
         }
     </style>
-</head>
+    </head>
 
-<body>
+    <body>
     <div class="app-container">
 
         <!-- HEADER -->
@@ -705,9 +707,10 @@
     </div>
 
     <script src="../config.js"></script>
+    <!-- Helper Supabase: todo el panel profesional trabaja directo con Supabase -->
+    <script src="../supabase-client.js"></script>
     <script>
-        const API_URL = CONFIG.APPOINTMENTS_URL;
-        const USER_URL = CONFIG.USERS_URL;
+        // Ya no usamos N8N: solo Supabase
         let allAppointments = [];
         let currentFilter = 'PENDIENTE';
         let currentProfileCedula = null;
@@ -759,38 +762,47 @@
             loading.style.display = 'block';
 
             try {
-                // Call N8N Webhook that calls Gemini
-                const res = await fetch('https://n8n-n8n.xxboi7.easypanel.host/webhook/ai-insights', {
-                    method: 'POST', // or GET if we pass data in query. User said "api para ia". 
-                    // Usually we might want to send current appointments from frontend OR let backend fetch them.
-                    // User said "que le lea el historial". N8N can fetch from DB.
-                    // But if I have 'allAppointments' here, I can send them to save backend fetch?
-                    // Let's send them to be flexible.
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ appointments: allAppointments, role: 'professional' })
-                });
-                const data = await res.json();
-                container.textContent = data.suggestion || "No se pudo obtener sugerencias.";
-            } catch (e) { container.textContent = "Error consultando IA."; console.error(e); }
+                // De momento desactivamos IA si no hay backend propio (N8N)
+                container.textContent = "IA desactivada: ahora la app funciona 100% con Supabase (sin N8N).";
+            } catch (e) {
+                container.textContent = "IA desactivada temporalmente.";
+                console.error(e);
+            }
 
             loading.style.display = 'none';
             container.style.display = 'block';
         }
 
         // 4. Load Data
+        // SOLO Supabase: el profesional siempre lee directamente desde la tabla appointments
         async function loadData() {
             try {
-                const res = await fetch(`${API_URL}?cedula=${user.cedula}&role=professional`);
-                const data = await res.json();
-                if (data.success && data.appointments) {
-                    allAppointments = data.appointments;
+                if (typeof SupabaseHelper === 'undefined') {
+                    console.error('SupabaseHelper no está definido en el dashboard profesional.');
+                    allAppointments = [];
                     renderDashboard();
-                    if (document.getElementById('view-pacientes').style.display === 'block') renderPatients();
+                    return;
+                }
+
+                // Lee TODAS las citas (el helper solo filtra por rol cuando no es profesional)
+                const data = await SupabaseHelper.getAppointments(null, 'professional');
+
+                if (data && data.success && data.appointments) {
+                    allAppointments = data.appointments;
+                    console.log('Citas cargadas para profesional:', allAppointments.length);
+                    renderDashboard();
+                    if (document.getElementById('view-pacientes').style.display === 'block') {
+                        renderPatients();
+                    }
                 } else {
                     allAppointments = [];
                     renderDashboard();
                 }
-            } catch (e) { console.error("Error loading data:", e); }
+            } catch (e) {
+                console.error("Error loading data:", e);
+                allAppointments = [];
+                renderDashboard();
+            }
         }
 
         // 5. Render Dashboard
@@ -822,79 +834,77 @@
             return;
         }
 
-        // UPDATE APPOINTMENT STATUS (Professional Only)
+        // UPDATE APPOINTMENT STATUS (Professional Only) – solo Supabase
         async function updateAppointmentStatus(appointmentId, newStatus) {
-            // Optimistic UI Update
+            // Actualización optimista en memoria
             const appointment = allAppointments.find(a => a.id == appointmentId);
             if (appointment) {
                 appointment.status = newStatus;
-                renderPatients(); // Refresh the list
-                renderDashboard(); // Update stats
+                renderPatients();
+                renderDashboard();
             }
 
-            // Backend Update
             try {
-                const res = await fetch(API_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: appointmentId,
-                        status: newStatus
-                    })
-                });
-                const data = await res.json();
-                if (!data.success) {
-                    alert("Error al actualizar estado: " + (data.message || 'Error desconocido'));
-                    loadData(); // Revert on error
-                } else {
-                    // SUCCESS: Open WhatsApp to notify patient
+                if (typeof SupabaseHelper !== 'undefined') {
+                    const payload = { status: newStatus };
+                    const res = await SupabaseHelper.updateAppointment(appointmentId, payload);
+                    if (!res || !res.success) {
+                        alert("Error al actualizar estado en Supabase");
+                        await loadData(); // Revertir si falla
+                        return;
+                    }
+
+                    // Aviso por WhatsApp (opcional) usando datos de Supabase
                     if (appointment) {
-                        sendWhatsAppNotification(appointment, newStatus);
+                        await sendWhatsAppNotification(appointment, newStatus);
                     }
                 }
             } catch (e) {
-                console.error("Error updating status:", e);
-                alert("Error de conexión al actualizar estado");
-                loadData(); // Revert on error
+                console.error("Error updating status in Supabase:", e);
+                alert("Error de conexión al actualizar estado en Supabase");
+                await loadData(); // Revertir cambios
             }
         }
 
-        // SEND WHATSAPP NOTIFICATION
+        // SEND WHATSAPP NOTIFICATION – obtiene el teléfono desde Supabase
         async function sendWhatsAppNotification(appointment, newStatus) {
-            // Get patient phone from user data
             try {
-                const userRes = await fetch(`${USER_URL}?cedula=${appointment.patientCedula}`);
-                const userData = await userRes.json();
+                if (typeof SupabaseHelper === 'undefined') return;
 
-                if (userData.success && userData.user && userData.user.phone) {
-                    const phone = userData.user.phone;
-
-                    // Format message based on status
-                    let message = '';
-                    if (newStatus === 'APROBADA') {
-                        message = `✅ *Cita Aprobada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia ha sido *APROBADA*:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\n¡Te esperamos!`;
-                    } else if (newStatus === 'CANCELADA') {
-                        message = `❌ *Cita Cancelada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia del ${appointment.dateStr} a las ${appointment.time} ha sido *CANCELADA*.\n\nPor favor, agenda una nueva cita si lo necesitas.`;
-                    } else if (newStatus === 'PENDIENTE') {
-                        message = `⏳ *Cita Pendiente*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia está *PENDIENTE* de confirmación:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\nTe notificaremos cuando sea aprobada.`;
-                    }
-
-                    // Open WhatsApp with pre-filled message
-                    const whatsappUrl = `https://wa.me/57${phone}?text=${encodeURIComponent(message)}`;
-                    window.open(whatsappUrl, '_blank');
-
-                    // Mark as sent in backend
-                    await fetch(API_URL, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id: appointment.id, whatsappSent: true })
-                    });
-                    appointment.whatsappSent = true;
-                } else {
-                    console.log('No phone number found for patient');
+                const usersData = await SupabaseHelper.getAllUsers();
+                if (!usersData || !usersData.success || !Array.isArray(usersData.users)) {
+                    console.log('No se pudo obtener la lista de usuarios desde Supabase');
+                    return;
                 }
+
+                const userRow = usersData.users.find(
+                    u => String(u.cedula) === String(appointment.patientCedula)
+                );
+
+                if (!userRow || !userRow.phone) {
+                    console.log('Paciente sin teléfono registrado en Supabase');
+                    return;
+                }
+
+                const phone = userRow.phone;
+
+                // Mensaje según estado
+                let message = '';
+                if (newStatus === 'APROBADA') {
+                    message = `✅ *Cita Aprobada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia ha sido *APROBADA*:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\n¡Te esperamos!`;
+                } else if (newStatus === 'CANCELADA') {
+                    message = `❌ *Cita Cancelada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia del ${appointment.dateStr} a las ${appointment.time} ha sido *CANCELADA*.\n\nPor favor, agenda una nueva cita si lo necesitas.`;
+                } else if (newStatus === 'PENDIENTE') {
+                    message = `⏳ *Cita Pendiente*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia está *PENDIENTE* de confirmación:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\nTe notificaremos cuando sea aprobada.`;
+                }
+
+                const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+
+                // Marcamos el flag en memoria (opcional)
+                appointment.whatsappSent = true;
             } catch (e) {
-                console.error('Error getting patient phone:', e);
+                console.error('Error sending WhatsApp notification:', e);
             }
         }
 
@@ -914,63 +924,50 @@
             console.log('Patient cedula:', appointment.patientCedula);
 
             try {
-                const userUrl = `${USER_URL}?cedula=${appointment.patientCedula}`;
-                console.log('Fetching user from:', userUrl);
+                if (typeof SupabaseHelper === 'undefined') return;
 
-                const userRes = await fetch(userUrl);
-                const userData = await userRes.json();
+                const usersData = await SupabaseHelper.getAllUsers();
+                if (!usersData || !usersData.success || !Array.isArray(usersData.users)) {
+                    alert('❌ Error: No se pudo obtener información del paciente desde Supabase');
+                    return;
+                }
 
-                console.log('User data received:', userData);
+                const userRow = usersData.users.find(
+                    u => String(u.cedula) === String(appointment.patientCedula)
+                );
 
-                // Check if user exists and has phone
-                if (userData.success && userData.user) {
-                    const phone = userData.user.phone;
-                    console.log('Phone number:', phone);
+                if (!userRow || !userRow.phone || !userRow.phone.trim()) {
+                    alert(`❌ ${appointment.patientName} no tiene teléfono registrado en Supabase.`);
+                    console.log('No phone number for patient:', appointment.patientName);
+                    return;
+                }
 
-                    // Check if phone is missing or empty
-                    if (!phone || phone.trim() === '') {
-                        alert(`❌ ${appointment.patientName} no tiene teléfono registrado.\n\nEste paciente se registró antes de agregar el campo de teléfono.\n\nSolo los pacientes nuevos pueden recibir notificaciones por WhatsApp.`);
-                        console.log('No phone number for patient:', appointment.patientName);
-                        return;
-                    }
+                const phone = userRow.phone;
+                const status = appointment.status || 'PENDIENTE';
 
-                    const status = appointment.status || 'PENDIENTE';
-
-                    // Format message based on current status
-                    let message = '';
-                    if (status === 'APROBADA') {
-                        message = `✅ *Cita Aprobada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia ha sido *APROBADA*:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\n¡Te esperamos!`;
-                    } else if (status === 'CANCELADA') {
-                        message = `❌ *Cita Cancelada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia del ${appointment.dateStr} a las ${appointment.time} ha sido *CANCELADA*.\n\nPor favor, agenda una nueva cita si lo necesitas.`;
-                    } else {
-                        message = `⏳ *Cita Pendiente*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia está *PENDIENTE* de confirmación:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\nTe notificaremos cuando sea aprobada.`;
-                    }
-
-                    // Open WhatsApp with pre-filled message
-                    const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(message)}`;
-                    console.log('Opening WhatsApp URL:', whatsappUrl);
-
-                    const newWindow = window.open(whatsappUrl, '_blank');
-                    if (!newWindow) {
-                        alert('⚠️ El navegador bloqueó la ventana de WhatsApp.\n\nPor favor, permite ventanas emergentes para este sitio.');
-                        console.error('Popup blocked by browser');
-                    } else {
-                        console.log('✓ WhatsApp window opened successfully');
-                        // Mark as sent in backend
-                        await fetch(API_URL, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id: appointment.id, whatsappSent: true })
-                        });
-                        appointment.whatsappSent = true;
-                    }
+                let message = '';
+                if (status === 'APROBADA') {
+                    message = `✅ *Cita Aprobada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia ha sido *APROBADA*:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\n¡Te esperamos!`;
+                } else if (status === 'CANCELADA') {
+                    message = `❌ *Cita Cancelada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia del ${appointment.dateStr} a las ${appointment.time} ha sido *CANCELADA*.\n\nPor favor, agenda una nueva cita si lo necesitas.`;
                 } else {
-                    alert('❌ Error: No se pudo obtener información del paciente');
-                    console.error('User not found or invalid response:', userData);
+                    message = `⏳ *Cita Pendiente*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia está *PENDIENTE* de confirmación:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\nTe notificaremos cuando sea aprobada.`;
+                }
+
+                const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(message)}`;
+                console.log('Opening WhatsApp URL:', whatsappUrl);
+
+                const newWindow = window.open(whatsappUrl, '_blank');
+                if (!newWindow) {
+                    alert('⚠️ El navegador bloqueó la ventana de WhatsApp.\n\nPor favor, permite ventanas emergentes para este sitio.');
+                    console.error('Popup blocked by browser');
+                } else {
+                    console.log('✓ WhatsApp window opened successfully');
+                    appointment.whatsappSent = true;
                 }
             } catch (e) {
-                console.error('Error getting patient phone:', e);
-                alert(`❌ Error al obtener datos del paciente:\n${e.message}`);
+                console.error('Error getting patient phone from Supabase:', e);
+                alert(`❌ Error al obtener datos del paciente desde Supabase:\n${e.message}`);
             }
         }
 
@@ -1203,18 +1200,29 @@
             if (notesContainer) notesContainer.innerHTML = '<div style="color:gray;font-size:12px;">Cargando notas...</div>';
 
             try {
-                const res = await fetch(`${USER_URL}?cedula=${cedula}`);
-                const data = await res.json();
-                if (data.users && data.users.length > 0) {
-                    const raw = data.users[0].notes;
-                    if (Array.isArray(raw)) {
-                        patientNotes = raw;
-                    } else if (raw && typeof raw === 'string') {
-                        // Legacy: Convert string to 1 note
-                        patientNotes = [{ id: Date.now(), text: raw, date: new Date().toLocaleDateString() }];
+                if (typeof SupabaseHelper !== 'undefined') {
+                    const usersData = await SupabaseHelper.getAllUsers();
+                    if (usersData && usersData.success && Array.isArray(usersData.users)) {
+                        const userRow = usersData.users.find(
+                            u => String(u.cedula) === String(cedula)
+                        );
+                        if (userRow && userRow.notes) {
+                            const raw = userRow.notes;
+                            if (Array.isArray(raw)) {
+                                patientNotes = raw;
+                            } else if (typeof raw === 'string') {
+                                patientNotes = [{
+                                    id: Date.now(),
+                                    text: raw,
+                                    date: new Date().toLocaleDateString()
+                                }];
+                            }
+                        }
                     }
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error('Error loading notes from Supabase:', e);
+            }
             renderNotesList();
 
             // Update Profile Date (Snapshot of now)
@@ -1347,13 +1355,11 @@
 
         async function syncNotes() {
             try {
-                await fetch(USER_URL, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cedula: currentProfileCedula, notes: patientNotes })
-                });
+                if (typeof SupabaseHelper === 'undefined') return;
+                await SupabaseHelper.updateUser(currentProfileCedula, { notes: patientNotes });
             } catch (e) {
-                alert('Error sincronizando notas');
+                console.error('Error sincronizando notas en Supabase:', e);
+                alert('Error sincronizando notas en Supabase');
             }
         }
 
