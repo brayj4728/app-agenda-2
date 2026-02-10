@@ -25,24 +25,16 @@
             --text-label: rgba(255, 255, 255, 0.7);
             --text-gray: rgba(255, 255, 255, 0.9);
             --btn-text: #fff;
-            --input-border: rgba(255, 255, 255, 0.5);
+            --input-border: rgba(255, 255, 255, 0.4);
             --input-focus: #fff;
-            --gradient-start: #1B75BC;
-            /* Vibrant blue top */
-            --gradient-mid: #0D5AA7;
-            /* Deep blue mid */
-            --gradient-end: #003B7E;
-            /* Dark blue bottom */
-            --glow-color: #FFF9E0;
-            /* Warm cream glow */
+            --gradient-start: #FFFFFF;
+            --gradient-mid: #FFFFFF;
         }
 
         .dark-mode {
             --bg-color: #000;
-            --gradient-start: #001F3F;
-            /* Deep blue top for better vibe */
-            --gradient-mid: #001529;
-            --gradient-end: #000000;
+            --gradient-start: #000000;
+            --gradient-mid: #000000;
         }
 
         body {
@@ -64,10 +56,9 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
-            padding: clamp(50px, 10vh, 70px) clamp(25px, 6vw, 35px) 80px;
-            /* Increased bottom breathing space */
-            background: radial-gradient(circle at 80% 115%, var(--glow-color) -15%, transparent 45%),
-                linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 60%, var(--gradient-end) 100%);
+            /* Top increased to avoid overlapping buttons, Bottom for phone nav */
+            padding: clamp(100px, 15vh, 120px) clamp(25px, 6vw, 35px) 80px;
+            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
             transition: background 0.4s ease;
         }
 
@@ -79,7 +70,8 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            opacity: 0.05;
+            opacity: 0.1;
+            /* Slightly more visible for the clean white bg */
             z-index: 1;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
@@ -110,8 +102,15 @@
 
         .theme-toggle {
             right: 20px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.05);
+            /* Darker on white bg */
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #000;
+        }
+
+        .dark-mode .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
         }
