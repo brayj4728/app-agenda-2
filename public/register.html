@@ -21,20 +21,26 @@
 
         :root {
             --bg-color: #fff;
-            --text-main: #fff;
-            --text-label: rgba(255, 255, 255, 0.7);
-            --text-gray: rgba(255, 255, 255, 0.9);
+            --text-main: #000;
+            /* Fixed: Black text for white background in Light Mode */
+            --text-label: rgba(0, 0, 0, 0.65);
+            --text-gray: rgba(0, 0, 0, 0.85);
             --btn-text: #fff;
-            --input-border: rgba(255, 255, 255, 0.4);
-            --input-focus: #fff;
+            --input-border: rgba(0, 0, 0, 0.2);
+            --input-focus: #000;
             --gradient-start: #FFFFFF;
             --gradient-mid: #FFFFFF;
         }
 
         .dark-mode {
             --bg-color: #000;
-            --gradient-start: #000000;
-            --gradient-mid: #000000;
+            --text-main: #000;
+            /* User requested black text in dark mode */
+            --text-label: rgba(0, 0, 0, 0.7);
+            --text-gray: rgba(0, 0, 0, 0.9);
+            --gradient-start: #E3F2FD;
+            /* Adjusted to a light blue to make black text readable in "dark" mode */
+            --gradient-mid: #BBDEFB;
         }
 
         body {
@@ -56,8 +62,8 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
-            /* Top increased to avoid overlapping buttons, Bottom for phone nav */
-            padding: clamp(100px, 15vh, 120px) clamp(25px, 6vw, 35px) 80px;
+            /* Top padding adjusted, Bottom increased to move panel up and separate from nav bar */
+            padding: clamp(80px, 12vh, 100px) clamp(25px, 6vw, 35px) 130px;
             background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
             transition: background 0.4s ease;
         }
@@ -159,9 +165,8 @@
 
         .main-title {
             font-size: clamp(30px, 9vw, 38px);
-            /* Slightly smaller */
             font-weight: 700;
-            color: #fff;
+            color: var(--text-main);
             line-height: 1.05;
             letter-spacing: -1.2px;
         }
@@ -169,14 +174,14 @@
         .view-subtitle {
             font-size: clamp(18px, 5vw, 22px);
             font-weight: 500;
-            color: #fff;
+            color: var(--text-main);
             opacity: 0.95;
         }
 
         .helper-text {
             font-size: clamp(12.5px, 3.5vw, 14px);
             font-weight: 400;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-gray);
             line-height: 1.35;
             max-width: 100%;
         }
@@ -236,9 +241,9 @@
             background: transparent;
             border: none;
             border-bottom: 1px solid var(--input-border);
-            /* 1px white line from JSON */
             padding: 4px 0;
-            color: #fff;
+            color: var(--text-main);
+            /* Match theme text color */
             font-size: 16px;
             font-weight: 400;
             outline: none;
