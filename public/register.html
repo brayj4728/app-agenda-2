@@ -21,23 +21,25 @@
 
         :root {
             --bg-color: #fff;
-            --text-main: #fff;
-            --text-label: rgba(255, 255, 255, 0.7);
-            --text-gray: rgba(255, 255, 255, 0.9);
+            --text-main: #000;
+            --text-label: rgba(0, 0, 0, 0.6);
+            --text-gray: rgba(0, 0, 0, 0.7);
             --btn-text: #fff;
-            --input-border: rgba(255, 255, 255, 0.4);
-            --input-focus: #fff;
-            --gradient-start: #1D81C2;
-            --gradient-mid: #0D5AA7;
-            --gradient-end: #003B7E;
-            --glow-color: #FFF9E0;
+            --input-border: rgba(0, 0, 0, 0.2);
+            --input-focus: #000;
+            --gradient-start: #FFFFFF;
+            --gradient-mid: #FFFFFF;
         }
 
         .dark-mode {
             --bg-color: #000;
+            --text-main: #fff;
+            --text-label: rgba(255, 255, 255, 0.7);
+            --text-gray: rgba(255, 255, 255, 0.9);
+            --input-border: rgba(255, 255, 255, 0.4);
+            --input-focus: #fff;
             --gradient-start: #000000;
-            --gradient-mid: #002147;
-            --gradient-end: #0D5AA7;
+            --gradient-mid: #000000;
         }
 
         body {
@@ -60,8 +62,7 @@
             flex-direction: column;
             max-width: 400px;
             padding: clamp(60px, 12vh, 80px) clamp(25px, 6vw, 35px) 100px;
-            background: radial-gradient(circle at 70% 115%, var(--glow-color) -15%, transparent 45%),
-                linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 55%, var(--gradient-end) 100%);
+            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
             transition: background 0.4s ease;
         }
 
