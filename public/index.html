@@ -68,8 +68,8 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
-            padding: 60px 30px 150px;
-            /* Increased bottom padding (120px -> 150px) to shift content up by 30px */
+            padding: 80px 45px 150px;
+            /* Increased top (80px) and lateral (45px) padding for a less "tight" look, kept bottom (150px) */
             justify-content: space-between;
             background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
             transition: background 0.4s ease;
@@ -247,59 +247,6 @@
 
         .btn:active {
             transform: translateY(0);
-        }
-
-        /* MOBILE RESPONSIVENESS */
-        @media (max-width: 480px) {
-            .container {
-                padding: 40px 20px 30px;
-            }
-
-            .title-section {
-                margin-top: 30px;
-            }
-
-            .main-title {
-                font-size: 60px;
-                letter-spacing: -1.5px;
-            }
-
-            .subtitle-top,
-            .subtitle-bottom {
-                font-size: 26px;
-            }
-
-            .desc-title {
-                font-size: 16px;
-            }
-
-            .desc-text {
-                font-size: 11px;
-            }
-
-            .btn {
-                height: 58px;
-                font-size: 15px;
-            }
-
-            .theme-toggle {
-                top: 20px;
-                right: 20px;
-                width: 40px;
-                height: 40px;
-            }
-        }
-
-        /* VERY SMALL SCREENS */
-        @media (max-width: 360px) {
-            .main-title {
-                font-size: 50px;
-            }
-
-            .subtitle-top,
-            .subtitle-bottom {
-                font-size: 22px;
-            }
         }
     </style>
 </head>
