@@ -139,6 +139,10 @@
             align-items: center;
             text-align: center;
             padding-top: 0;
+            padding-bottom: 50px;
+            /* Better vertical balance */
+            gap: 12px;
+            /* Tightened gap for buttons */
         }
 
         @keyframes fadeIn {
@@ -196,12 +200,14 @@
         /* ROLE SELECTION */
         .role-btn {
             width: 100%;
-            padding: clamp(20px, 4vh, 26px);
+            padding: clamp(18px, 3.5vh, 24px);
+            /* Slightly smaller padding */
             border-radius: 40px;
             border: none;
             font-size: 18px;
             font-weight: 500;
-            margin-bottom: 20px;
+            margin-bottom: 0;
+            /* Managed by parent gap */
             cursor: pointer;
             transition: transform 0.2s ease, background 0.3s ease;
         }
@@ -366,7 +372,7 @@
 
         <!-- STEP 1: SELECT ROLE -->
         <div id="viewSelection" class="view-section active">
-            <div class="title-section" style="margin-bottom: 20px;">
+            <div class="title-section" style="margin-bottom: 10px;">
                 <h1 class="main-title">Elige tu usuario</h1>
                 <p class="view-subtitle" style="font-weight: 400; font-size: 16px; opacity: 1;">Selecciona</p>
             </div>
