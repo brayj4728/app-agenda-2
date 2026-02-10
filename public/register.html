@@ -22,25 +22,26 @@
         :root {
             --bg-color: #fff;
             --text-main: #fff;
-            --text-label: rgba(255, 255, 255, 0.61);
-            /* 61% Opacity from JSON */
-            --text-gray: rgba(255, 255, 255, 0.85);
-            --btn-text: #D9D9D9;
-            /* Button text color from JSON */
+            --text-label: rgba(255, 255, 255, 0.65);
+            --text-gray: rgba(255, 255, 255, 0.9);
+            --btn-text: #fff;
             --input-border: #fff;
-            /* Solid white lines from JSON */
             --input-focus: #fff;
-            --gradient-start: #FFFFFF;
-            --gradient-mid: #FFFFFF;
-            --gradient-end: #0D47A1;
-            --glow-color: #FEF9F0;
+            --gradient-start: #1D81C2;
+            /* Vibrant blue top from screenshot */
+            --gradient-mid: #0D5AA7;
+            /* Deep blue mid */
+            --gradient-end: #003B7E;
+            /* Dark blue bottom */
+            --glow-color: #FFF9E0;
+            /* Warm cream/yellow glow at bottom */
         }
 
         .dark-mode {
             --bg-color: #000;
             --gradient-start: #000000;
-            --gradient-mid: #000000;
-            --gradient-end: #0D47A1;
+            --gradient-mid: #002147;
+            --gradient-end: #0D5AA7;
         }
 
         body {
@@ -62,9 +63,10 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
-            padding: clamp(30px, 8vh, 50px) 30px;
-            /* Further reduced top padding for mobile */
-            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
+            padding: 50px 35px;
+            /* Fixed padding for consistent design match */
+            background: radial-gradient(circle at 60% 115%, var(--glow-color) -15%, transparent 45%),
+                linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 55%, var(--gradient-end) 100%);
             transition: background 0.4s ease;
         }
 
@@ -133,10 +135,9 @@
             animation: fadeIn 0.3s ease-out;
             position: relative;
             z-index: 2;
-            padding-top: 40px;
-            /* Reduced to match design flow better */
-            gap: 28px;
-            /* itemSpacing 28 from JSON */
+            padding-top: 50px;
+            gap: 22px;
+            /* Tighter for form flow */
         }
 
         .view-section.active {
@@ -174,11 +175,12 @@
         }
 
         .main-title {
-            font-size: 38px;
+            font-size: 42px;
+            /* Larger as per image */
             font-weight: 700;
             color: #fff;
-            line-height: 1.1;
-            letter-spacing: -1.2px;
+            line-height: 1.05;
+            letter-spacing: -1.5px;
             margin-bottom: 0;
         }
 
@@ -191,12 +193,11 @@
         }
 
         .helper-text {
-            font-size: 13px;
+            font-size: 13.5px;
             font-weight: 400;
-            color: #fff;
-            /* Solid white from JSON */
-            line-height: 1.4;
-            margin-bottom: 0;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.35;
+            margin-bottom: 5px;
             max-width: 100%;
         }
 
@@ -245,10 +246,10 @@
 
         .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 400;
             color: var(--text-label);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .form-input {
@@ -267,14 +268,15 @@
 
         .form-input.inline-val {
             display: flex;
-            align-items: center;
-            gap: 5px;
+            align-items: baseline;
+            gap: 8px;
+            padding: 2px 0 6px;
         }
 
         .prof-value {
-            color: var(--text-label);
-            /* 61% opacity for the value too */
+            color: var(--text-main);
             font-size: 16px;
+            font-weight: 400;
         }
 
         .form-input::placeholder {
@@ -383,7 +385,7 @@
         <div id="viewProfessional" class="view-section">
             <div class="title-section">
                 <!-- Text Frame from JSON (spacing handled by gap) -->
-                <h1 class="main-title">Registro Profesional</h1>
+                <h1 class="main-title">Registro<br>Profesional</h1>
                 <p class="view-subtitle">Crea tu cuenta de profesional</p>
             </div>
 
@@ -412,8 +414,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Profesional</label>
                     <div class="form-input locked inline-val">
+                        <label style="display:inline; margin:0;">Profesional</label>
                         <span class="prof-value">Fisiotresapeuta</span>
                         <input type="hidden" id="profType" value="Fisioterapeuta">
                     </div>
@@ -433,7 +435,7 @@
             <form class="reg-form" onsubmit="handleRegister(event)">
                 <div class="form-group">
                     <label>Nombre completo</label>
-                    <input type="text" class="form-input" placeholder="Tu nombre completo" id="patName" required>
+                    <input type="text" class="form-input" placeholder="" id="patName" required>
                 </div>
 
                 <div class="form-group">
