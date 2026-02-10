@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Inicio de Sesión - Solar Rosette</title>
-    <!-- Google Fonts: IBM Plex Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -15,137 +15,148 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'IBM Plex Sans', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        :root {
-            --bg-color: #fff;
-            --text-main: #000;
-            --text-label: rgba(0, 0, 0, 0.6);
-            --text-gray: rgba(0, 0, 0, 0.7);
-            --btn-text: #fff;
-            --input-border: rgba(0, 0, 0, 0.2);
-            --input-focus: #000;
-            --gradient-start: #FFFFFF;
-            --gradient-mid: #FFFFFF;
-        }
-
-        .dark-mode {
-            --bg-color: #000;
-            --text-main: #fff;
-            --text-label: rgba(255, 255, 255, 0.7);
-            --text-gray: rgba(255, 255, 255, 0.9);
-            --input-border: rgba(255, 255, 255, 0.4);
-            --input-focus: #fff;
-            --gradient-start: #000000;
-            --gradient-mid: #000000;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
             height: 100vh;
             width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            transition: background-color 0.4s ease;
+            background-color: white;
         }
 
         .container {
             width: 100%;
             height: 100%;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
             max-width: 400px;
-            padding: clamp(60px, 12vh, 80px) clamp(25px, 6vw, 35px) 100px;
-            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
-            transition: background 0.4s ease;
-        }
-
-        .container::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            opacity: 0.1;
-            z-index: 1;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-
-        /* BACK & THEME BUTTONS */
-        .back-btn,
-        .theme-toggle {
-            position: absolute;
-            top: 35px;
-            z-index: 100;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
+            padding: 20px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
-            transition: transform 0.2s ease;
-        }
-
-        .back-btn {
-            left: 20px;
-            background: #000;
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .theme-toggle {
-            right: 20px;
-            background: rgba(0, 0, 0, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            color: #000;
-        }
-
-        .dark-mode .theme-toggle {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-        }
-
-        /* VIEW TRANSITIONS */
-        .view-section {
-            display: none;
             flex-direction: column;
-            width: 100%;
-            height: 100%;
-            animation: fadeIn 0.3s ease-out;
-            position: relative;
-            z-index: 2;
-            gap: clamp(15px, 3vh, 25px);
-        }
-
-        .view-section.active {
-            display: flex;
-        }
-
-        #viewSelection.active {
             justify-content: center;
             align-items: center;
-            text-align: center;
-            padding-top: 40px;
-            padding-bottom: 40px;
-            gap: 12px;
+            position: relative;
+        }
+
+        @media (min-width: 500px) {
+            .container {
+                max-height: 850px;
+                border: 1px solid #ddd;
+                border-radius: 20px;
+                margin-top: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* BACK NAV */
+        .back-nav {
+            position: absolute;
+            top: 40px;
+            left: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* SECTIONS */
+        .view-section {
+            width: 100%;
+            max-width: 320px;
+            /* Added to match register.html */
+            display: flex;
+            flex-direction: column;
+            /* margin-top removed for vertical centering */
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .view-title {
+            font-size: 2.2rem;
+            font-family: 'Courier New', monospace;
+            font-weight: 400;
+            color: black;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .view-subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* BUTTONS */
+        .role-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 30px;
+            border: none;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+
+            /* Gray Default */
+            background-color: #D9D9D9;
+            color: #888;
+            border: 2px solid #D9D9D9;
+        }
+
+        /* Hover Black */
+        .role-btn:hover {
+            background-color: black;
+            color: white;
+            border-color: black;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .role-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* FORM */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            font-size: 1rem;
+            color: black;
+            outline: none;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: black;
+            color: white;
+            border-radius: 30px;
+            border: none;
+            font-size: 1rem;
+            margin-top: 30px;
+            cursor: pointer;
         }
 
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(5px);
+                transform: translateY(10px);
             }
 
             to {
@@ -153,237 +164,85 @@
                 transform: translateY(0);
             }
         }
-
-        /* TYPOGRAPHY - Adaptive */
-        .title-section {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .main-title {
-            font-size: clamp(30px, 9vw, 38px);
-            font-weight: 700;
-            color: var(--text-main);
-            line-height: 1.05;
-            letter-spacing: -1.2px;
-        }
-
-        .view-subtitle {
-            font-size: clamp(18px, 5vw, 22px);
-            font-weight: 500;
-            color: var(--text-main);
-            opacity: 0.95;
-        }
-
-        /* ROLE SELECTION */
-        .role-btn {
-            width: 100%;
-            padding: clamp(14px, 2.8vh, 18px);
-            border-radius: 40px;
-            border: none;
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 0;
-            cursor: pointer;
-            transition: transform 0.2s ease, background 0.3s ease;
-        }
-
-        .role-btn.prof {
-            background-color: #000;
-            color: #fff;
-        }
-
-        .role-btn.pat {
-            background-color: #D6D6D6;
-            color: #000;
-        }
-
-        .role-btn:hover {
-            transform: scale(1.02);
-            opacity: 0.9;
-        }
-
-        /* FORM STYLES */
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: clamp(10px, 2.2vh, 20px);
-        }
-
-        .form-group {
-            position: relative;
-            width: 100%;
-            margin-bottom: 0;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 400;
-            color: var(--text-label);
-            margin-bottom: 2px;
-        }
-
-        .form-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid var(--input-border);
-            padding: 4px 0;
-            color: var(--text-main);
-            font-size: 16px;
-            font-weight: 400;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .form-input:focus {
-            border-bottom-color: var(--input-focus);
-        }
-
-        .submit-btn {
-            width: 100%;
-            height: clamp(44px, 6vh, 52px);
-            background-color: #000;
-            color: var(--btn-text);
-            border-radius: 31px;
-            border: none;
-            font-size: 16px;
-            font-weight: 500;
-            margin-top: clamp(10px, 2vh, 20px);
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s;
-        }
-
-        .submit-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: wait;
-        }
-
-        /* EXIT FOOTER */
-        .exit-footer-row {
-            margin-top: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            opacity: 0.7;
-            padding-bottom: 20px;
-            transition: opacity 0.2s;
-        }
-
-        .exit-footer-row:hover {
-            opacity: 1;
-        }
-
-        .exit-footer-row span {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-top: 5px;
-        }
     </style>
 </head>
 
 <body>
 
-    <div class="container" id="appContainer">
-        <!-- Back Button -->
-        <button class="back-btn" id="globalBackBtn" onclick="goBack()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-        </button>
+    <div class="container">
+        <h1 style="position:absolute; z-index:9999; color:black; top:10px; left:10px; font-size:12px; opacity:0.5;">
+            Cargando Login...</h1>
 
-        <!-- Theme Toggle -->
-        <button class="theme-toggle" id="themeToggle">
-            <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="17.78" x2="5.64" y2="16.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        <!-- BACK BUTTON -->
+        <button class="back-nav" onclick="goBack()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="12" fill="#D9D9D9" />
+                <path d="M14 8L10 12L14 16" stroke="black" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
             </svg>
         </button>
 
         <!-- VIEW 1: SELECTION -->
-        <div id="viewSelection" class="view-section active">
-            <div class="title-section" style="margin-bottom: 10px;">
-                <h1 class="main-title">Elige tu usuario</h1>
-                <p class="view-subtitle" style="font-weight: 400; font-size: 16px; opacity: 1;">Selecciona</p>
-            </div>
-            <button class="role-btn prof" onclick="selectRole('professional')">Profesional</button>
-            <button class="role-btn pat" onclick="selectRole('patient')">Paciente</button>
+        <div id="viewSelection" class="view-section">
+            <h1 class="view-title">Elige tu usuario</h1>
+            <p class="view-subtitle">Selecciona</p>
+
+            <button class="role-btn" onclick="selectRole('professional')">Profesional</button>
+            <button class="role-btn" onclick="selectRole('patient')">Paciente</button>
         </div>
 
         <!-- VIEW 2: PATIENT LOGIN -->
-        <div id="viewPatient" class="view-section">
-            <div class="title-section">
-                <h1 class="main-title">Ingreso Paciente</h1>
-                <p class="view-subtitle">Inicia sesión como paciente</p>
-            </div>
+        <div id="viewPatient" class="view-section" style="display:none;">
+            <h1 class="view-title">Ingreso Paciente</h1>
 
-            <form class="login-form" onsubmit="handleLogin(event, 'patient')">
+            <form onsubmit="handleLogin(event, 'patient')">
                 <div class="form-group">
-                    <label>Nombre Completo</label>
-                    <input type="text" class="form-input" id="patName" required>
+                    <label>Full Name</label>
+                    <input type="text" class="form-input" placeholder="Lois Becket" id="patName">
                 </div>
                 <div class="form-group">
-                    <label>Cédula</label>
-                    <input type="text" class="form-input" id="patCedula" required>
+                    <label>Cedula</label>
+                    <input type="text" class="form-input" placeholder="1098765432" id="patCedula">
                 </div>
-                <button type="submit" class="submit-btn" id="patSubmit">Ingresar</button>
+                <button type="submit" class="submit-btn" id="patSubmit">Ingreso</button>
             </form>
 
-            <div class="exit-footer-row" onclick="goBack()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="exit-footer-row" onclick="goBack()"
+                style="margin-top:40px; display:flex; flex-direction:column; align-items:center; cursor:pointer; opacity:0.6;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
-                <span>Salir</span>
+                <span style="font-size:12px; font-weight:600; color:#666; margin-top:5px;">Salir</span>
             </div>
         </div>
 
         <!-- VIEW 3: PROFESSIONAL LOGIN -->
-        <div id="viewProfessional" class="view-section">
-            <div class="title-section">
-                <h1 class="main-title">Ingreso Profesional</h1>
-                <p class="view-subtitle">Inicia sesión como profesional</p>
-            </div>
+        <div id="viewProfessional" class="view-section" style="display:none;">
+            <h1 class="view-title">Ingreso<br>profesional</h1>
 
-            <form class="login-form" onsubmit="handleLogin(event, 'professional')">
+            <form onsubmit="handleLogin(event, 'professional')">
                 <div class="form-group">
-                    <label>Nombre Completo</label>
-                    <input type="text" class="form-input" id="profName" required>
+                    <label>Full Name</label>
+                    <input type="text" class="form-input" placeholder="Lois Becket" id="profName">
                 </div>
                 <div class="form-group">
-                    <label>Cédula</label>
-                    <input type="text" class="form-input" id="profCedula" required>
+                    <label>Cedula</label>
+                    <input type="text" class="form-input" placeholder="1098765432" id="profCedula">
                 </div>
-                <button type="submit" class="submit-btn" id="profSubmit">Ingresar</button>
+                <button type="submit" class="submit-btn" id="profSubmit">Ingreso</button>
             </form>
 
-            <div class="exit-footer-row" onclick="goBack()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <div class="exit-footer-row" onclick="goBack()"
+                style="margin-top:40px; display:flex; flex-direction:column; align-items:center; cursor:pointer; opacity:0.6;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
-                <span>Salir</span>
+                <span style="font-size:12px; font-weight:600; color:#666; margin-top:5px;">Salir</span>
             </div>
         </div>
+
     </div>
 
     <script src="config.js"></script>
@@ -392,12 +251,12 @@
         let currentView = 'selection';
 
         function selectRole(role) {
-            document.getElementById('viewSelection').classList.remove('active');
+            document.getElementById('viewSelection').style.display = 'none';
             if (role === 'patient') {
-                document.getElementById('viewPatient').classList.add('active');
+                document.getElementById('viewPatient').style.display = 'flex';
                 currentView = 'patient';
             } else {
-                document.getElementById('viewProfessional').classList.add('active');
+                document.getElementById('viewProfessional').style.display = 'flex';
                 currentView = 'professional';
             }
         }
@@ -406,36 +265,12 @@
             if (currentView === 'selection') {
                 window.location.href = 'index.html';
             } else {
-                document.getElementById('viewPatient').classList.remove('active');
-                document.getElementById('viewProfessional').classList.remove('active');
-                document.getElementById('viewSelection').classList.add('active');
+                document.getElementById('viewPatient').style.display = 'none';
+                document.getElementById('viewProfessional').style.display = 'none';
+                document.getElementById('viewSelection').style.display = 'flex';
                 currentView = 'selection';
             }
         }
-
-        // THEME LOGIC
-        const themeToggle = document.getElementById('themeToggle');
-        const appContainer = document.getElementById('appContainer');
-        const themeIcon = document.getElementById('themeIcon');
-
-        function applyTheme(isDark) {
-            if (isDark) {
-                appContainer.classList.add('dark-mode');
-                themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
-            } else {
-                appContainer.classList.remove('dark-mode');
-                themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="17.78" x2="5.64" y2="16.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
-            }
-        }
-
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') applyTheme(true);
-
-        themeToggle.addEventListener('click', () => {
-            const isDarkMode = appContainer.classList.toggle('dark-mode');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            applyTheme(isDarkMode);
-        });
 
         async function handleLogin(e, role) {
             e.preventDefault();
@@ -448,26 +283,39 @@
             submitBtn.textContent = 'Verificando...';
             submitBtn.disabled = true;
 
-            const n = role === 'patient' ? document.getElementById('patName').value : document.getElementById('profName').value;
-            const c = role === 'patient' ? document.getElementById('patCedula').value : document.getElementById('profCedula').value;
+            if (role === 'patient') {
+                const n = document.getElementById('patName').value;
+                const c = document.getElementById('patCedula').value;
+                if (!n || !c) {
+                    submitBtn.textContent = originalText; submitBtn.disabled = false;
+                    return alert('Completa los campos');
+                }
+                payload = { name: n, cedula: c, role: 'patient' };
+            } else {
+                const n = document.getElementById('profName').value;
+                const c = document.getElementById('profCedula').value;
+                if (!n || !c) {
+                    submitBtn.textContent = originalText; submitBtn.disabled = false;
+                    return alert('Completa los campos');
+                }
 
-            if (!n || !c) {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-                return alert('Completa los campos');
+                // Cualquier profesional válido en Supabase puede ingresar
+                payload = { name: n, cedula: c, role: 'professional' };
             }
-            payload = { name: n, cedula: c, role: role };
 
             try {
+                // Use Supabase direct connection if enabled
                 let data;
                 if (CONFIG.USE_SUPABASE_DIRECT) {
                     data = await SupabaseHelper.loginUser(payload.cedula, payload.role);
                 } else {
+                    // Fallback to N8N
                     const response = await fetch(CONFIG.LOGIN_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ body: payload })
                     });
+
                     const text = await response.text();
                     try {
                         data = text ? JSON.parse(text) : {};
@@ -477,7 +325,10 @@
                     }
                 }
 
+                // HANDLE BOTH STANDARD JSON SUCCESS AND N8N DEFAULT RESPONSE
                 if (data.success || data.message === 'Workflow was started') {
+
+                    // If n8n didn't return user object (default response), use form data
                     const userToSave = data.user || {
                         name: payload.name,
                         role: payload.role,
@@ -490,7 +341,9 @@
                         role: userToSave.role
                     }));
 
+                    // ROLE BASED REDIRECT
                     if (userToSave.role === 'professional' || userToSave.role === 'admin') {
+                        // Direct path to file to avoid Rewrite 404s
                         window.location.href = '/dashboards/professional_dashboard.html';
                     } else {
                         window.location.href = '/agenda.html';
