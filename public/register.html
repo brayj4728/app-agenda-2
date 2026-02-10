@@ -23,12 +23,14 @@
             --bg-color: #fff;
             --text-main: #fff;
             --text-gray: rgba(255, 255, 255, 0.85);
-            --gradient-start: #2389C9;
-            /* Exact blue from image upper section */
-            --gradient-end: #00488A;
-            /* Exact darker blue from image */
-            --glow-color: rgba(254, 249, 240, 0.15);
-            /* Soft bottom glow */
+            --gradient-start: #1E88E5;
+            /* Brighter, vibrant blue from new image */
+            --gradient-mid: #0056D2;
+            /* Deep mid blue */
+            --gradient-end: #0D47A1;
+            /* Very deep blue before glow */
+            --glow-color: #FEF9F0;
+            /* Creamy white glow from new image */
             --input-border: rgba(255, 255, 255, 0.4);
             --input-focus: #fff;
         }
@@ -36,7 +38,8 @@
         .dark-mode {
             --bg-color: #000;
             --gradient-start: #000000;
-            --gradient-end: #00488A;
+            --gradient-mid: #002171;
+            --gradient-end: #0D47A1;
         }
 
         body {
@@ -58,8 +61,10 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
-            padding: 40px 30px;
-            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 90%, var(--glow-color) 100%);
+            padding: clamp(30px, 8vh, 50px) 30px;
+            /* Further reduced top padding for mobile */
+            background: radial-gradient(circle at bottom, var(--glow-color) -20%, transparent 60%),
+                linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%);
             transition: background 0.4s ease;
         }
 
