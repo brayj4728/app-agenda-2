@@ -22,17 +22,18 @@
         :root {
             --bg-color: #fff;
             --text-main: #fff;
+            --text-label: rgba(255, 255, 255, 0.61);
+            /* 61% Opacity from JSON */
             --text-gray: rgba(255, 255, 255, 0.85);
-            --gradient-start: #1E88E5;
-            /* Brighter, vibrant blue from new image */
-            --gradient-mid: #0056D2;
-            /* Deep mid blue */
-            --gradient-end: #0D47A1;
-            /* Very deep blue before glow */
-            --glow-color: #FEF9F0;
-            /* Creamy white glow from new image */
-            --input-border: rgba(255, 255, 255, 0.4);
+            --btn-text: #D9D9D9;
+            /* Button text color from JSON */
+            --input-border: #fff;
+            /* Solid white lines from JSON */
             --input-focus: #fff;
+            --gradient-start: #1E88E5;
+            --gradient-mid: #0056D2;
+            --gradient-end: #0D47A1;
+            --glow-color: #FEF9F0;
         }
 
         .dark-mode {
@@ -133,8 +134,10 @@
             animation: fadeIn 0.3s ease-out;
             position: relative;
             z-index: 2;
-            padding-top: 60px;
-            /* Offset for back button */
+            padding-top: 40px;
+            /* Reduced to match design flow better */
+            gap: 28px;
+            /* itemSpacing 28 from JSON */
         }
 
         .view-section.active {
@@ -162,8 +165,13 @@
 
         /* TYPOGRAPHY - Exact Pixel Match */
         .title-section {
-            margin-bottom: 25px;
-            margin-top: 30px;
+            margin-bottom: 0;
+            /* Managed by section gap */
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            /* itemSpacing 12 from JSON */
         }
 
         .main-title {
@@ -172,24 +180,25 @@
             color: #fff;
             line-height: 1.1;
             letter-spacing: -1.2px;
-            margin-bottom: 8px;
+            margin-bottom: 0;
         }
 
         .view-subtitle {
             font-size: 24px;
             font-weight: 500;
             color: #fff;
-            margin-bottom: 15px;
+            margin-bottom: 0;
             letter-spacing: -0.5px;
         }
 
         .helper-text {
             font-size: 13px;
             font-weight: 400;
-            color: rgba(255, 255, 255, 0.9);
+            color: #fff;
+            /* Solid white from JSON */
             line-height: 1.4;
-            margin-bottom: 30px;
-            max-width: 95%;
+            margin-bottom: 0;
+            max-width: 100%;
         }
 
         .icon-square {
@@ -225,34 +234,48 @@
         .reg-form {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 28px;
+            /* itemSpacing 28 from JSON between groups */
         }
 
         .form-group {
             position: relative;
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 0;
         }
 
         .form-group label {
             display: block;
             font-size: 13px;
             font-weight: 400;
-            color: rgba(255, 255, 255, 0.65);
-            margin-bottom: 2px;
+            color: var(--text-label);
+            margin-bottom: 4px;
         }
 
         .form-input {
             width: 100%;
             background: transparent;
             border: none;
-            border-bottom: 1.2px solid var(--input-border);
-            padding: 6px 0;
+            border-bottom: 1px solid var(--input-border);
+            /* 1px white line from JSON */
+            padding: 4px 0;
             color: #fff;
             font-size: 16px;
             font-weight: 400;
             outline: none;
             transition: border-color 0.3s;
+        }
+
+        .form-input.inline-val {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .prof-value {
+            color: var(--text-label);
+            /* 61% opacity for the value too */
+            font-size: 16px;
         }
 
         .form-input::placeholder {
@@ -266,16 +289,18 @@
         /* SUBMIT BUTTON */
         .submit-btn {
             width: 100%;
-            height: 54px;
+            height: 48px;
+            /* Closer to Frame height from JSON */
             background-color: #000;
-            color: #fff;
-            border-radius: 60px;
+            color: var(--btn-text);
+            border-radius: 31px;
+            /* Exact cornerRadius 31 from JSON */
             border: none;
             font-size: 16px;
-            font-weight: 600;
-            margin-top: 25px;
+            font-weight: 500;
+            margin-top: 0;
             cursor: pointer;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .submit-btn:hover {
@@ -356,15 +381,15 @@
             <button class="role-btn" onclick="selectRole('patient')">Paciente</button>
         </div>
 
-        <!-- STEP 2: PROFESSIONAL FORM -->
         <div id="viewProfessional" class="view-section">
             <div class="title-section">
-                <h1 class="main-title">Registro<br>Profesional</h1>
+                <!-- Text Frame from JSON (spacing handled by gap) -->
+                <h1 class="main-title">Registro Profesional</h1>
                 <p class="view-subtitle">Crea tu cuenta de profesional</p>
-                <div class="icon-square"></div>
-                <p class="helper-text">se genera automáticamente una base de datos privada solo para ti. Allí podrás
-                    registrar, organizar y gestionar la información de tus pacientes de forma segura.</p>
             </div>
+
+            <p class="helper-text">se genera automáticamente una base de datos privada solo para ti. Allí podrás
+                registrar, organizar y gestionar la información de tus pacientes de forma segura.</p>
 
             <form class="reg-form" onsubmit="handleRegister(event)">
                 <div class="form-group">
@@ -388,11 +413,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Profesional Fisiotresapeuta</label>
-                    <input type="text" class="form-input locked" value="Fisioterapeuta" readonly id="profType">
+                    <label>Profesional</label>
+                    <div class="form-input locked inline-val">
+                        <span class="prof-value">Fisiotresapeuta</span>
+                        <input type="hidden" id="profType" value="Fisioterapeuta">
+                    </div>
                 </div>
 
-                <button type="submit" class="submit-btn">Registro</button>
+                <button type="submit" class="submit-btn" style="color: #D9D9D9;">Registro</button>
             </form>
         </div>
 
