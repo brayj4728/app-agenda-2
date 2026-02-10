@@ -30,8 +30,8 @@
             --input-border: #fff;
             /* Solid white lines from JSON */
             --input-focus: #fff;
-            --gradient-start: #1E88E5;
-            --gradient-mid: #0056D2;
+            --gradient-start: #FFFFFF;
+            --gradient-mid: #FFFFFF;
             --gradient-end: #0D47A1;
             --glow-color: #FEF9F0;
         }
@@ -39,7 +39,7 @@
         .dark-mode {
             --bg-color: #000;
             --gradient-start: #000000;
-            --gradient-mid: #002171;
+            --gradient-mid: #000000;
             --gradient-end: #0D47A1;
         }
 
@@ -64,8 +64,7 @@
             max-width: 400px;
             padding: clamp(30px, 8vh, 50px) 30px;
             /* Further reduced top padding for mobile */
-            background: radial-gradient(circle at bottom, var(--glow-color) -20%, transparent 60%),
-                linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%);
+            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
             transition: background 0.4s ease;
         }
 
