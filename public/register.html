@@ -22,7 +22,6 @@
         :root {
             --bg-color: #fff;
             --text-main: #000;
-            /* Fixed: Black text for white background in Light Mode */
             --text-label: rgba(0, 0, 0, 0.65);
             --text-gray: rgba(0, 0, 0, 0.85);
             --btn-text: #fff;
@@ -34,13 +33,13 @@
 
         .dark-mode {
             --bg-color: #000;
-            --text-main: #000;
-            /* User requested black text in dark mode */
-            --text-label: rgba(0, 0, 0, 0.7);
-            --text-gray: rgba(0, 0, 0, 0.9);
-            --gradient-start: #E3F2FD;
-            /* Adjusted to a light blue to make black text readable in "dark" mode */
-            --gradient-mid: #BBDEFB;
+            --text-main: #fff;
+            --text-label: rgba(255, 255, 255, 0.7);
+            --text-gray: rgba(255, 255, 255, 0.9);
+            --input-border: rgba(255, 255, 255, 0.4);
+            --input-focus: #fff;
+            --gradient-start: #000000;
+            --gradient-mid: #000000;
         }
 
         body {
