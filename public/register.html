@@ -64,7 +64,8 @@
             display: flex;
             flex-direction: column;
             max-width: 400px;
-            padding: clamp(60px, 12vh, 80px) clamp(25px, 6vw, 35px) 40px;
+            padding: clamp(50px, 10vh, 70px) clamp(25px, 6vw, 35px) 80px;
+            /* Increased bottom breathing space */
             background: radial-gradient(circle at 80% 115%, var(--glow-color) -15%, transparent 45%),
                 linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 60%, var(--gradient-end) 100%);
             transition: background 0.4s ease;
@@ -131,6 +132,13 @@
             display: flex;
         }
 
+        #viewSelection.active {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 0;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -151,7 +159,8 @@
         }
 
         .main-title {
-            font-size: clamp(34px, 10vw, 42px);
+            font-size: clamp(30px, 9vw, 38px);
+            /* Slightly smaller */
             font-weight: 700;
             color: #fff;
             line-height: 1.05;
@@ -174,13 +183,13 @@
         }
 
         .icon-square {
-            width: 44px;
-            height: 44px;
+            width: 38px;
+            /* Smaller from 44px */
+            height: 38px;
             background: #fff;
-            border-radius: 10px;
-            margin-bottom: 25px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            /* Strong shadow as per image */
         }
 
         /* ROLE SELECTION */
@@ -206,8 +215,7 @@
         .reg-form {
             display: flex;
             flex-direction: column;
-            gap: clamp(14px, 2.5vh, 24px);
-            /* Tighter spacing for mobile */
+            gap: clamp(10px, 2.2vh, 20px);
         }
 
         .form-group {
