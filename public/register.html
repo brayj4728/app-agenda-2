@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Registro - Solar Rosette</title>
+    <!-- Google Fonts: IBM Plex Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -15,361 +15,124 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
+            font-family: 'IBM Plex Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-color: #fff;
+            --text-main: #fff;
+            /* Most text in registration is white over blue/dark */
+            --text-gray: rgba(255, 255, 255, 0.69);
+            --gradient-start: #FFFFFF;
+            --gradient-mid: #FFFFFF;
+            --btn-reg-bg: #fff;
+            --btn-reg-text: #000;
+            --btn-log-bg: #000;
+            --btn-log-text: #fff;
+            --input-border: rgba(255, 255, 255, 0.5);
+            --input-focus: #fff;
+        }
+
+        .dark-mode {
+            --bg-color: #000;
+            --gradient-start: #000000;
+            --gradient-mid: #000000;
         }
 
         body {
+            background-color: var(--bg-color);
             height: 100vh;
             width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: white;
+            overflow: hidden;
+            transition: background-color 0.4s ease;
         }
 
         .container {
             width: 100%;
             height: 100%;
-            background: white;
             position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        @media (min-width: 500px) {
-            .container {
-                max-width: 400px;
-                max-height: 850px;
-                border: 1px solid #ddd;
-                border-radius: 20px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            }
-        }
-
-        /* 
-           Orange Card 
-        */
-        .register-card {
-            width: 100%;
             max-width: 400px;
-            background-color: #FF851B;
-            /* Solid vibrant orange */
-            border-radius: 20px;
-            padding: 40px 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            box-shadow: none;
-            position: relative;
+            padding: clamp(60px, 10vh, 100px) clamp(30px, 8vw, 45px) 40px;
+            background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-mid) 35%, #00BFFF 75%, #0056D2 100%);
+            transition: background 0.4s ease;
         }
 
-        .card-title {
-            font-size: 1.8rem;
-            color: #1a1a1a;
-            font-weight: 400;
-            margin-bottom: 10px;
-        }
-
-        /* Input Fields */
-        .input-group {
-            position: relative;
-            width: 100%;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 18px 20px 18px 55px;
-            border-radius: 30px;
-            border: none;
-            background-color: #D9D9D9;
-            font-size: 1rem;
-            color: #333;
-            outline: none;
-            font-weight: 400;
-        }
-
-        .input-field::placeholder {
-            color: #777;
-        }
-
-        .input-icon {
+        .container::before {
+            content: "";
             position: absolute;
-            left: 25px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 22px;
-            height: 22px;
-            stroke: #333;
-            fill: none;
-            stroke-width: 1.5;
-        }
-
-        /* Bottom Row (Text + Button) */
-        .card-bottom-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 30px;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        .card-footer-text {
-            font-size: 0.9rem;
-            color: #1a1a1a;
-            line-height: 1.3;
-            max-width: 65%;
-            font-weight: 400;
-        }
-
-        /* Back Button */
-        .btn-back {
-            width: 50px;
-            height: 50px;
-            background-color: #D9D9D9;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            border: none;
-            flex-shrink: 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-next:hover {
-            background-color: #cccccc;
-        }
-
-        .btn-back svg {
-            width: 20px;
-            height: 20px;
-            fill: black;
-            stroke: black;
-            stroke-width: 0;
-        }
-    </style>
-</head>
-
-<body>
-
-    <div class="container">
-
-        <!-- BACK BUTTON (Global) -->
-        <button class="back-nav" id="globalBackBtn" onclick="goBack()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="12" fill="#D9D9D9" />
-                <path d="M14 8L10 12L14 16" stroke="black" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
-        </button>
-
-        <!-- STEP 1: SELECT ROLE -->
-        <div id="viewSelection" class="view-section active">
-            <h1 class="view-title">Elige tu usuario</h1>
-            <p class="view-subtitle">Selecciona</p>
-
-            <button class="role-btn professional" onclick="selectRole('professional')">Profesional</button>
-            <button class="role-btn patient" onclick="selectRole('patient')">Paciente</button>
-        </div>
-
-        <!-- STEP 2: PROFESSIONAL FORM -->
-        <div id="viewProfessional" class="view-section" style="display:none;">
-            <h1 class="view-title">Registro<br>Profesional</h1>
-            <p class="view-subtitle">Crea tu cuenta de profesional</p>
-
-            <form class="reg-form" onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" class="form-input" placeholder="Lois Becket" id="profName">
-                </div>
-
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-input" placeholder="loisbecket@gmail.com" id="profEmail">
-                </div>
-
-                <div class="form-group">
-                    <label>Cedula</label>
-                    <input type="text" class="form-input" placeholder="1098765432" id="profCedula">
-                </div>
-
-                <div class="form-group">
-                    <label>Teléfono (WhatsApp)</label>
-                    <input type="tel" class="form-input" placeholder="3001234567" id="profPhone" maxlength="10">
-                </div>
-
-                <div class="form-group">
-                    <label>Profesional</label>
-                    <input type="text" class="form-input locked" value="Fisioterapeuta" readonly id="profType">
-                </div>
-
-                <button type="submit" class="submit-btn">Registro</button>
-            </form>
-        </div>
-
-        <!-- STEP 3: SUCCESS VIEW -->
-        <div id="viewSuccess" class="view-section" style="display:none; text-align:center; align-items:center;">
-            <div style="margin-bottom: 30px;">
-                <!-- Orange Double Check SVG -->
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#FF851B" stroke-width="3"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M2 12l5 5L15 4"></path>
-                    <path d="M12 17l2 2 9-9"></path>
-                </svg>
-            </div>
-            <h2 style="font-size: 1.2rem; font-weight: 500; color: black; margin-bottom: 50px;">Registro con exito</h2>
-
-            <button class="submit-btn" onclick="window.location.href='login.html'">Login</button>
-        </div>
-
-        <!-- STEP 2: PATIENT FORM -->
-        <div id="viewPatient" class="view-section" style="display:none;">
-            <h1 class="view-title">Registro<br>paciente</h1>
-            <p class="view-subtitle">Crea tu cuenta de profesional</p>
-
-            <form class="reg-form" onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" class="form-input" placeholder="Lois Becket" id="patName">
-                </div>
-
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-input" placeholder="loisbecket@gmail.com" id="patEmail">
-                </div>
-
-                <div class="form-group">
-                    <label>Cedula</label>
-                    <input type="text" class="form-input" placeholder="1098765432" id="patCedula">
-                </div>
-
-                <div class="form-group">
-                    <label>Teléfono (WhatsApp)</label>
-                    <input type="tel" class="form-input" placeholder="3001234567" id="patPhone" maxlength="10">
-                </div>
-
-                <button type="submit" class="submit-btn" style="margin-top:40px;">Registro</button>
-            </form>
-        </div>
-
-    </div>
-
-    <style>
-        /* NEW STYLES INJECTED HERE FOR SIMPLICITY */
-        .back-nav {
+        /* BACK BUTTON */
+        .back-btn {
             position: absolute;
             top: 40px;
-            left: 20px;
-            background: none;
-            border: none;
+            left: 25px;
+            z-index: 100;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            z-index: 10;
+            border: none;
+            transition: all 0.3s ease;
         }
 
+        .back-btn:hover {
+            transform: scale(1.1);
+            background: #111;
+        }
+
+        /* THEME TOGGLE (Synced) */
+        .theme-toggle {
+            position: absolute;
+            top: 40px;
+            right: 25px;
+            z-index: 100;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* VIEW TRANSITIONS */
         .view-section {
+            display: none;
+            flex-direction: column;
             width: 100%;
-            max-width: 320px;
-            animation: fadeIn 0.3s ease-out;
+            animation: fadeIn 0.4s ease-out;
+            position: relative;
+            z-index: 2;
         }
 
         .view-section.active {
             display: flex;
-            flex-direction: column;
-        }
-
-        .view-title {
-            font-size: 2.5rem;
-            /* Large as in design */
-            font-family: 'Courier New', monospace;
-            /* Monospace font from image */
-            font-weight: 400;
-            color: black;
-            margin-bottom: 20px;
-            /* Reduced margin */
-            line-height: 1.1;
-        }
-
-        .view-subtitle {
-            font-size: 1rem;
-            color: #666;
-            margin-bottom: 30px;
-        }
-
-        .role-btn {
-            width: 100%;
-            padding: 18px;
-            border-radius: 30px;
-            border: none;
-            font-size: 1rem;
-            margin-bottom: 15px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            transform: scale(1);
-
-            /* Default: Gray (Not Selected) */
-            background-color: #D9D9D9;
-            color: #888;
-            border: 2px solid #D9D9D9;
-        }
-
-        /* Hover: Black (Selection Hint) */
-        .role-btn:hover {
-            background-color: black;
-            color: white;
-            border-color: black;
-            transform: scale(1.02);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .role-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* If we wanted a 'selected' state, we could add a class, 
-           but since clicking navigates away, Hover is the main interaction */
-        /* FORM STYLES */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            font-size: 1rem;
-            color: black;
-            outline: none;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
-        }
-
-        .form-input.locked {
-            background-color: #f9f9f9;
-            color: #333;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 18px;
-            background-color: black;
-            color: white;
-            border-radius: 30px;
-            border: none;
-            font-size: 1rem;
-            margin-top: 20px;
-            cursor: pointer;
         }
 
         @keyframes fadeIn {
@@ -384,13 +147,285 @@
             }
         }
 
-        /* Override previous card styles if any conflict */
-        .register-card {
-            background: none;
-            padding: 0;
-            box-shadow: none;
+        /* TYPOGRAPHY */
+        .title-section {
+            margin-bottom: 25px;
+        }
+
+        .main-title {
+            font-size: clamp(32px, 8vw, 42px);
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+        }
+
+        .view-subtitle {
+            font-size: clamp(20px, 5vw, 24px);
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .helper-text {
+            font-size: 11px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.4;
+            margin-bottom: 30px;
+            max-width: 90%;
+        }
+
+        /* ROLE SELECTION */
+        .role-btn {
+            width: 100%;
+            padding: 18px;
+            border-radius: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .role-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* FORM STYLES - AS PER IMAGE */
+        .reg-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px solid var(--input-border);
+            padding: 8px 0;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 400;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-input:focus {
+            border-bottom-color: var(--input-focus);
+        }
+
+        .form-input.locked {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* SUBMIT BUTTON */
+        .submit-btn {
+            width: 100%;
+            height: 56px;
+            background-color: #000;
+            color: #fff;
+            border-radius: 50px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 30px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .submit-btn:hover {
+            background-color: #111;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        /* SUCCESS VIEW */
+        #viewSuccess {
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .success-icon {
+            margin-bottom: 30px;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 40px;
+        }
+
+        /* Desktop Frame */
+        @media (min-width: 500px) {
+            .container {
+                max-height: 850px;
+                height: 95vh;
+                border-radius: 40px;
+                box-shadow: 0 30px 100px rgba(0, 0, 0, 0.1);
+            }
         }
     </style>
+</head>
+
+<body>
+    <div class="container" id="appContainer">
+        <!-- Back Button -->
+        <button class="back-btn" onclick="goBack()" id="globalBackBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+            </svg>
+        </button>
+
+        <!-- Theme Toggle (Synced) -->
+        <button class="theme-toggle" id="themeToggle">
+            <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="17.78" x2="5.64" y2="16.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        </button>
+
+        <!-- STEP 1: SELECT ROLE -->
+        <div id="viewSelection" class="view-section active">
+            <div class="title-section">
+                <h1 class="main-title">Elige tu perfil</h1>
+                <p class="view-subtitle" style="opacity: 0.8; font-weight: 400;">¿Cómo quieres usar Solar Rosette?</p>
+            </div>
+            <button class="role-btn" onclick="selectRole('professional')">Profesional</button>
+            <button class="role-btn" onclick="selectRole('patient')">Paciente</button>
+        </div>
+
+        <!-- STEP 2: PROFESSIONAL FORM -->
+        <div id="viewProfessional" class="view-section">
+            <div class="title-section">
+                <h1 class="main-title">Registro<br>Profesional</h1>
+                <p class="view-subtitle">Crea tu cuenta de profesional</p>
+                <p class="helper-text">Se genera automáticamente una base de datos privada solo para ti. Allí podrás
+                    registrar, organizar y gestionar la información de tus pacientes de forma segura.</p>
+            </div>
+
+            <form class="reg-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" class="form-input" placeholder="Tu nombre completo" id="profName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-input" placeholder="ejemplo@correo.com" id="profEmail" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cédula</label>
+                    <input type="text" class="form-input" placeholder="Número de identificación" id="profCedula"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono (WhatsApp)</label>
+                    <input type="tel" class="form-input" placeholder="3001234567" id="profPhone" maxlength="10"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label>Profesional</label>
+                    <input type="text" class="form-input locked" value="Fisioterapeuta" readonly id="profType">
+                </div>
+
+                <button type="submit" class="submit-btn">Registro</button>
+            </form>
+        </div>
+
+        <!-- STEP 2: PATIENT FORM -->
+        <div id="viewPatient" class="view-section">
+            <div class="title-section">
+                <h1 class="main-title">Registro<br>Paciente</h1>
+                <p class="view-subtitle" style="margin-bottom: 40px;">Crea tu cuenta de paciente</p>
+            </div>
+
+            <form class="reg-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Nombre completo</label>
+                    <input type="text" class="form-input" placeholder="Tu nombre completo" id="patName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="form-input" placeholder="ejemplo@correo.com" id="patEmail" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Cédula</label>
+                    <input type="text" class="form-input" placeholder="Número de identificación" id="patCedula"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label>Teléfono (WhatsApp)</label>
+                    <input type="tel" class="form-input" placeholder="3001234567" id="patPhone" maxlength="10" required>
+                </div>
+
+                <button type="submit" class="submit-btn">Registro</button>
+            </form>
+        </div>
+
+        <!-- STEP 3: SUCCESS VIEW -->
+        <div id="viewSuccess" class="view-section">
+            <div class="success-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h2 class="success-title">Registro con éxito</h2>
+            <button class="submit-btn" onclick="window.location.href='login.html'">Ir al Login</button>
+        </div>
+    </div>
 
     <script src="config.js"></script>
     <script src="supabase-client.js"></script>
@@ -399,13 +434,12 @@
         let currentView = 'selection'; // selection, professional, patient, success
 
         function selectRole(role) {
-            document.getElementById('viewSelection').style.display = 'none';
-
+            document.getElementById('viewSelection').classList.remove('active');
             if (role === 'professional') {
-                document.getElementById('viewProfessional').style.display = 'block';
+                document.getElementById('viewProfessional').classList.add('active');
                 currentView = 'professional';
             } else {
-                document.getElementById('viewPatient').style.display = 'block';
+                document.getElementById('viewPatient').classList.add('active');
                 currentView = 'patient';
             }
         }
@@ -414,103 +448,81 @@
             if (currentView === 'selection') {
                 window.location.href = 'index.html';
             } else if (currentView === 'success') {
-                // From success back to home? Or selection
                 window.location.href = 'index.html';
             } else {
-                // Go back to selection
-                document.getElementById('viewProfessional').style.display = 'none';
-                document.getElementById('viewPatient').style.display = 'none';
-                document.getElementById('viewSelection').style.display = 'block';
+                document.getElementById('viewProfessional').classList.remove('active');
+                document.getElementById('viewPatient').classList.remove('active');
+                document.getElementById('viewSelection').classList.add('active');
                 currentView = 'selection';
             }
         }
 
+        // THEME LOGIC
+        const themeToggle = document.getElementById('themeToggle');
+        const appContainer = document.getElementById('appContainer');
+        const themeIcon = document.getElementById('themeIcon');
+
+        function applyTheme(isDark) {
+            if (isDark) {
+                appContainer.classList.add('dark-mode');
+                themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            } else {
+                appContainer.classList.remove('dark-mode');
+                themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="17.78" x2="5.64" y2="16.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') applyTheme(true);
+
+        themeToggle.addEventListener('click', () => {
+            const isDarkMode = appContainer.classList.toggle('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            applyTheme(isDarkMode);
+        });
+
+        // REGISTRATION LOGIC
         async function handleRegister(e) {
             e.preventDefault();
-
-            let payload = {};
-            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const submitBtn = e.target.querySelector('.submit-btn');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Procesando...';
             submitBtn.disabled = true;
 
-            // Validate based on current view
+            let payload = {};
             if (currentView === 'professional') {
-                const name = document.getElementById('profName').value;
-                const email = document.getElementById('profEmail').value;
-                const cedula = document.getElementById('profCedula').value;
-                const phone = document.getElementById('profPhone').value;
-                const type = document.getElementById('profType').value;
-                if (!name || !email || !cedula || !phone) {
-                    submitBtn.textContent = originalText; submitBtn.disabled = false;
-                    return alert('Completa todos los campos');
-                }
-
-                // Validate phone format (10 digits)
-                if (!/^\d{10}$/.test(phone)) {
-                    submitBtn.textContent = originalText; submitBtn.disabled = false;
-                    return alert('El teléfono debe tener 10 dígitos (ejemplo: 3001234567)');
-                }
-
-                payload = { name, email, cedula, phone, role: 'professional', type };
-            } else if (currentView === 'patient') {
-                const name = document.getElementById('patName').value;
-                const email = document.getElementById('patEmail').value;
-                const cedula = document.getElementById('patCedula').value;
-                const phone = document.getElementById('patPhone').value;
-
-                if (!name || !email || !cedula || !phone) {
-                    submitBtn.textContent = originalText; submitBtn.disabled = false;
-                    return alert('Completa todos los campos');
-                }
-
-                // Validate phone format (10 digits)
-                if (!/^\d{10}$/.test(phone)) {
-                    submitBtn.textContent = originalText; submitBtn.disabled = false;
-                    return alert('El teléfono debe tener 10 dígitos (ejemplo: 3001234567)');
-                }
-
-                payload = { name, email, cedula, phone, role: 'patient' };
+                payload = {
+                    name: document.getElementById('profName').value,
+                    email: document.getElementById('profEmail').value,
+                    cedula: document.getElementById('profCedula').value,
+                    phone: document.getElementById('profPhone').value,
+                    role: 'professional',
+                    type: document.getElementById('profType').value
+                };
+            } else {
+                payload = {
+                    name: document.getElementById('patName').value,
+                    email: document.getElementById('patEmail').value,
+                    cedula: document.getElementById('patCedula').value,
+                    phone: document.getElementById('patPhone').value,
+                    role: 'patient'
+                };
             }
 
             try {
-                // Use Supabase direct connection if enabled
-                let data;
-                if (CONFIG.USE_SUPABASE_DIRECT) {
-                    data = await SupabaseHelper.registerUser(payload);
-                } else {
-                    // Fallback to N8N
-                    const response = await fetch(CONFIG.REGISTER_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ body: payload })
-                    });
-
-                    const text = await response.text();
-                    try {
-                        data = text ? JSON.parse(text) : {};
-                    } catch {
-                        console.error("Invalid JSON:", text);
-                        data = {};
-                    }
-                }
-
-                // HANDLE BOTH STANDARD JSON SUCCESS AND N8N DEFAULT RESPONSE
+                let data = await SupabaseHelper.registerUser(payload);
                 if (data.success || data.message === 'Workflow was started') {
-                    // Show Success View
-                    document.getElementById('viewProfessional').style.display = 'none';
-                    document.getElementById('viewPatient').style.display = 'none';
-                    document.getElementById('viewSuccess').style.display = 'flex';
-                    document.getElementById('viewSuccess').style.flexDirection = 'column';
+                    document.getElementById('viewProfessional').classList.remove('active');
+                    document.getElementById('viewPatient').classList.remove('active');
+                    document.getElementById('viewSuccess').classList.add('active');
                     document.getElementById('globalBackBtn').style.display = 'none';
                     currentView = 'success';
                 } else {
-                    const errorMsg = data.message || 'Error desconocido';
-                    alert('Error en registro: ' + errorMsg);
+                    alert('Error en registro: ' + (data.message || 'Error desconocido'));
                 }
             } catch (err) {
                 console.error(err);
-                alert('Error de conexión o servidor: ' + err.message);
+                alert('Error de conexión: ' + err.message);
             } finally {
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
@@ -520,4 +532,3 @@
 </body>
 
 </html>
-```
