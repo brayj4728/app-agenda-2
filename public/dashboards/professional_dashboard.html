@@ -1439,7 +1439,27 @@
             renderNotesInHistory();
             try {
                 const cedula = String(currentProfileCedula);
-                const res = await SupabaseHelper.updateUser(cedula, { notes: pNotes });
+                const name = document.getElementById('profName').textContent;
+
+                let res = await SupabaseHelper.updateUser(cedula, { notes: pNotes });
+
+                // If user not found, try to create them
+                if (!res.success && res.message.includes("No se encontró")) {
+                    console.log("Paciente no encontrado en tabla users, creando record...");
+                    const regRes = await SupabaseHelper.registerUser({
+                        name: name,
+                        cedula: cedula,
+                        role: 'patient'
+                    });
+
+                    if (regRes.success) {
+                        // Try update again now that user exists
+                        res = await SupabaseHelper.updateUser(cedula, { notes: pNotes });
+                    } else {
+                        throw new Error("No se pudo registrar al paciente para guardar la nota: " + regRes.message);
+                    }
+                }
+
                 if (!res.success) throw new Error(res.message);
                 console.log("Nota guardada exitosamente");
             } catch (e) {

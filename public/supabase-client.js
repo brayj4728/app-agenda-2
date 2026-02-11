@@ -405,14 +405,20 @@ const SupabaseHelper = {
                 .from('users')
                 .update(updates)
                 .eq('cedula', cedula)
-                .select()
-                .single();
+                .select();
 
             if (error) throw error;
 
+            if (!data || data.length === 0) {
+                return {
+                    success: false,
+                    message: `No se encontró ningún usuario con la cédula ${cedula}. Asegúrate de que el paciente esté registrado.`
+                };
+            }
+
             return {
                 success: true,
-                user: data
+                user: data[0]
             };
         } catch (error) {
             console.error('Update user error:', error);
