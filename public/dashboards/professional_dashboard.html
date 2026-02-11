@@ -1050,9 +1050,13 @@
                 if (!userRow || !userRow.phone) return alert("Paciente sin teléfono");
 
                 let msg = '';
-                if (app.status === 'APROBADA') msg = `Hola ${app.patientName}, tu cita ha sido APROBADA para el ${app.dateStr} a las ${app.time}.`;
-                else if (app.status === 'CANCELADA') msg = `Hola ${app.patientName}, tu cita ha sido CANCELADA.`;
-                else msg = `Hola ${app.patientName}, tu cita está PENDIENTE.`;
+                if (app.status === 'APROBADA') {
+                    msg = `✅ *Cita Aprobada*\n\nHola ${app.patientName},\n\nTu cita de fisioterapia ha sido *APROBADA*:\n📅 Fecha: ${app.dateStr}\n🕐 Hora: ${app.time || '--:--'}\n\n¡Te esperamos! ✨`;
+                } else if (app.status === 'CANCELADA') {
+                    msg = `❌ *Cita Cancelada*\n\nHola ${app.patientName},\n\nTe informamos que tu cita de fisioterapia ha sido *CANCELADA*.\n\nSi deseas reagendar, por favor contáctanos. 🙏`;
+                } else {
+                    msg = `⏳ *Cita Pendiente*\n\nHola ${app.patientName},\n\nTu cita de fisioterapia para el ${app.dateStr} a las ${app.time || '--:--'} aún se encuentra *PENDIENTE* de confirmación. Te avisaremos pronto. 🔔`;
+                }
 
                 window.open(`https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${userRow.phone}?text=${encodeURIComponent(msg)}`, '_blank');
             } catch (e) { console.error(e); }
