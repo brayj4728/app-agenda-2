@@ -1217,6 +1217,10 @@
                     const usersData = await SupabaseHelper.getAllUsers();
                     const u = usersData.users.find(x => String(x.cedula) === String(currentProfileCedula));
                     let rawNotes = u && u.notes ? u.notes : [];
+                    // Parse if it's a string (compatibility with text columns or buggy saves)
+                    if (typeof rawNotes === 'string' && rawNotes.trim().startsWith('[')) {
+                        try { rawNotes = JSON.parse(rawNotes); } catch (e) { console.error("Parse error:", e); }
+                    }
                     pNotes = Array.isArray(rawNotes) ? rawNotes : (rawNotes ? [rawNotes] : []);
                 }
             } catch (e) {
@@ -1289,8 +1293,16 @@
             }
 
             const html = pNotes.map((n, idx) => {
-                const text = typeof n === 'string' ? n : (n.text || '');
+                let text = typeof n === 'string' ? n : (n.text || '');
                 const date = n.date || '';
+
+                // Final defense: if text still looks like JSON array, try to extract first item's text
+                if (typeof text === 'string' && text.trim().startsWith('[{"')) {
+                    try {
+                        const parsed = JSON.parse(text);
+                        if (Array.isArray(parsed) && parsed[0].text) text = parsed[0].text;
+                    } catch (e) { }
+                }
                 const isPatient = text.startsWith("PACIENTE:");
                 const displayLabel = isPatient ? "<b>NOTA DEL PACIENTE</b>" : "PROFESIONAL";
                 const displayColor = isPatient ? "var(--hero-right-bg)" : "var(--text-gray)";
