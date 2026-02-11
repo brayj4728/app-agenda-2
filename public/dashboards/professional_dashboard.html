@@ -12,8 +12,8 @@
             --bg-app: #FFFFFF;
             --text-main: #000000;
             --text-gray: #8E8E93;
-            --pill-active-bg: #000000;
-            --pill-active-text: #FFFFFF;
+            --pill-active-bg: #FFFFFF;
+            --pill-active-text: #000000;
             --pill-inactive-bg: #E5E5EA;
             --pill-inactive-text: #8E8E93;
             --hero-left-bg: #1C1C1E;
@@ -30,7 +30,7 @@
             --text-gray: #8E8E93;
             --pill-active-bg: #FFFFFF;
             --pill-active-text: #000000;
-            --pill-inactive-bg: #1C1C1E;
+            --pill-inactive-bg: #2C2C2E;
             --pill-inactive-text: #8E8E93;
             --hero-left-bg: #1C1C1E;
             --hero-right-bg: #4466C6;
@@ -1189,10 +1189,21 @@
         }
 
         function setTab(tab) {
-            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.filter-pill').forEach(p => {
-                if (p.textContent.toLowerCase() === tab) p.classList.add('active');
+                p.classList.remove('active');
+                p.classList.add('inactive');
             });
+
+            // Map the tab ID back to the expected display text or identification
+            const btn = Array.from(document.querySelectorAll('.filter-pill')).find(p => {
+                const clickAttr = p.getAttribute('onclick');
+                return clickAttr && clickAttr.includes(`'${tab}'`);
+            });
+
+            if (btn) {
+                btn.classList.add('active');
+                btn.classList.remove('inactive');
+            }
 
             document.getElementById('todoView').classList.add('hidden');
             document.getElementById('pacientesView').classList.add('hidden');
