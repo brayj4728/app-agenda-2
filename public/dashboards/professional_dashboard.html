@@ -1430,6 +1430,10 @@
         }
 
         async function saveGenericNote(txt) {
+            if (!currentProfileCedula) {
+                alert("No hay un paciente seleccionado para esta nota.");
+                return;
+            }
             if (!Array.isArray(pNotes)) pNotes = [];
             pNotes.unshift({ text: txt, date: new Date().toLocaleDateString() });
             renderNotesInHistory();
@@ -1437,9 +1441,10 @@
                 const cedula = String(currentProfileCedula);
                 const res = await SupabaseHelper.updateUser(cedula, { notes: pNotes });
                 if (!res.success) throw new Error(res.message);
+                console.log("Nota guardada exitosamente");
             } catch (e) {
                 console.error("Error al guardar nota:", e);
-                alert("Error al guardar en la base de datos.");
+                alert("Error al guardar en la base de datos: " + (e.message || "Error desconocido"));
             }
         }
     </script>
