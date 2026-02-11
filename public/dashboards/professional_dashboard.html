@@ -1038,9 +1038,16 @@
         async function deletePatientAction(cedula) {
             if (!confirm('¿Seguro que deseas eliminar a este paciente y todos sus datos?')) return;
             try {
-                const res = await SupabaseHelper.deleteUser(cedula);
-                if (res.success) {
-                    alert('Paciente eliminado');
+                // 1. Delete user from 'users' table
+                const resUser = await SupabaseHelper.deleteUser(cedula);
+
+                // 2. Delete all appointments for this cedula (to clear them from list)
+                const patientAppts = allAppointments.filter(a => String(a.patientCedula) === String(cedula));
+                const deletePromises = patientAppts.map(a => SupabaseHelper.deleteAppointment(a.id));
+                await Promise.all(deletePromises);
+
+                if (resUser.success) {
+                    alert('Paciente y sus citas eliminados');
                     // Force clean state and reload
                     allAppointments = [];
                     document.getElementById('patientsListContainer').innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5;">Actualizando lista...</div>';
