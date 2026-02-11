@@ -701,7 +701,8 @@
             const sel = document.getElementById('inputTime');
             sel.innerHTML = '<option value="">Buscando...</option>';
 
-            const hours = await SupabaseHelper.getAvailableHours(d);
+            const res = await SupabaseHelper.getAvailableHours(d);
+            const hours = res.availableHours || [];
             sel.innerHTML = hours.length ? '' : '<option value="">Sin horas disponibles</option>';
             hours.forEach(h => {
                 const opt = document.createElement('option');
