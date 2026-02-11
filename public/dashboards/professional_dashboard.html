@@ -1104,7 +1104,7 @@
 
                 const div = document.createElement('div');
                 div.className = 'patient-row-premium';
-                div.style.cssText = 'background:#000000; display:block; padding:16px; margin-bottom:12px; position:relative; border-radius:12px;';
+                div.style.cssText = 'background:#000000; color:#FFFFFF; display:block; padding:16px; margin-bottom:12px; position:relative; border-radius:12px;';
                 div.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <div style="display:flex; align-items:center; gap:6px; font-size:12px; opacity:0.8;">
@@ -1120,11 +1120,11 @@
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
                             <div style="font-size:13px; opacity:0.6; margin-bottom:2px;">Cédula</div>
-                            <div style="font-size:18px; font-weight:700; color:var(--text-main);">${h.patientCedula}</div>
+                            <div style="font-size:18px; font-weight:700; color:#FFFFFF;">${h.patientCedula}</div>
                         </div>
                         <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
                             <div style="text-align:right;">
-                                <div style="font-size:22px; font-weight:700; color:var(--text-main); line-height:1;">${h.time || '--:--'}</div>
+                                <div style="font-size:22px; font-weight:700; color:#FFFFFF; line-height:1;">${h.time || '--:--'}</div>
                                 <div style="font-size:12px; opacity:0.6; margin-top:4px;">${h.dateStr}</div>
                             </div>
                             <div style="display:flex; gap:8px; align-items:center;">
