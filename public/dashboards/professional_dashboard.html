@@ -1449,6 +1449,7 @@
                     const regRes = await SupabaseHelper.registerUser({
                         name: name,
                         cedula: cedula,
+                        email: `${cedula}@paciente.com`,
                         role: 'patient'
                     });
 
