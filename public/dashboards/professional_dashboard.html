@@ -1076,8 +1076,25 @@
 
             try {
                 const usersData = await SupabaseHelper.getAllUsers();
-                const userRow = usersData.users.find(u => String(u.cedula) === String(app.patientCedula));
-                if (!userRow || !userRow.phone) return alert("Paciente sin teléfono");
+                console.log("Busqueda WhatsApp - Cedula Cita:", app.patientCedula);
+
+                const userRow = usersData.users.find(u => String(u.cedula).trim() === String(app.patientCedula).trim());
+
+                let phone = userRow ? userRow.phone : null;
+
+                if (!phone) {
+                    // Prompt for phone if missing
+                    const newPhone = prompt(`El paciente ${app.patientName} no tiene teléfono registrado. Ingrésalo para continuar (ej: 3001234567):`);
+                    if (!newPhone) return;
+
+                    // Save new phone
+                    const updateRes = await SupabaseHelper.updateUser(String(app.patientCedula), { phone: newPhone });
+                    if (!updateRes.success) {
+                        alert("No se pudo guardar el teléfono: " + updateRes.message);
+                        // Continue anyway to open WA
+                    }
+                    phone = newPhone;
+                }
 
                 let msg = '';
                 if (app.status === 'APROBADA') {
@@ -1088,7 +1105,7 @@
                     msg = `⏳ *Cita Pendiente*\n\nHola ${app.patientName},\n\nTu cita de fisioterapia para el ${app.dateStr} a las ${app.time || '--:--'} aún se encuentra *PENDIENTE* de confirmación. Te avisaremos pronto. 🔔`;
                 }
 
-                window.open(`https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${userRow.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+                window.open(`https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(msg)}`, '_blank');
             } catch (e) { console.error(e); }
         }
 
