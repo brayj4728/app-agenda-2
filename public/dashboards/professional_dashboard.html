@@ -1068,29 +1068,31 @@
                 if (st.includes('CANCEL')) { color = '#FF3B30'; label = 'Cancelada'; }
 
                 const div = document.createElement('div');
-                div.className = 'patient-row-premium'; // Using same base class for consistency
-                div.style.cssText = 'background:#000000; display:block; padding:16px; margin-bottom:12px; position:relative;';
+                div.className = 'patient-row-premium';
+                div.style.cssText = 'background:#000000; display:block; padding:16px; margin-bottom:12px; position:relative; border-radius:12px;';
                 div.innerHTML = `
                     <div style="display:flex; align-items:center; gap:6px; margin-bottom:12px; font-size:12px; opacity:0.8;">
                         <div style="width:12px; height:12px; border-radius:50%; background:${color};"></div>
                         <span>${label}</span>
                     </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr auto; align-items:center; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <div>
-                            <div style="font-size:20px; font-weight:700;">${h.patientName}</div>
-                            <div style="font-size:13px; opacity:0.6;">Cédula ${h.patientCedula}</div>
+                            <div style="font-size:13px; opacity:0.6; margin-bottom:2px;">Cédula</div>
+                            <div style="font-size:18px; font-weight:700; color:var(--text-main);">${h.patientCedula}</div>
                         </div>
-                        <div style="text-align:center;">
-                            <div style="font-size:22px; font-weight:500;">${h.time || '--:--'}</div>
-                            <div style="font-size:12px; opacity:0.6;">${h.dateStr}</div>
-                        </div>
-                        <div style="display:flex; gap:6px; align-items:center;">
-                            <button class="btn-action btn-a" onclick="updateStatusFromProfile('${h.id}', 'APROBADA')">A</button>
-                            <button class="btn-action btn-p" onclick="updateStatusFromProfile('${h.id}', 'PENDIENTE')">P</button>
-                            <button class="btn-action btn-c" onclick="updateStatusFromProfile('${h.id}', 'CANCELADA')">C</button>
-                            <button class="btn-wa" onclick="openWhatsApp('${h.id}')" style="margin-left:4px;">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" style="width:32px; height:32px;">
-                            </button>
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:22px; font-weight:700; color:var(--text-main); line-height:1;">${h.time || '--:--'}</div>
+                                <div style="font-size:12px; opacity:0.6; margin-top:4px;">${h.dateStr}</div>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <button class="btn-action btn-a" onclick="updateStatusFromProfile('${h.id}', 'APROBADA')">A</button>
+                                <button class="btn-action btn-p" onclick="updateStatusFromProfile('${h.id}', 'PENDIENTE')">P</button>
+                                <button class="btn-action btn-c" onclick="updateStatusFromProfile('${h.id}', 'CANCELADA')">C</button>
+                                <button class="btn-wa" onclick="openWhatsApp('${h.id}')" style="margin-left:4px;">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" style="width:32px; height:32px;">
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
