@@ -1,1388 +1,840 @@
 <!DOCTYPE html>
 <html lang="es">
 
-    <head>
-        <meta charset="UTF-8">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Professional Dashboard - Solar Rosette</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-        <!-- Supabase JS Library (para conexión directa, igual que en agenda/registro) -->
-        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Professional Dashboard - Solar Rosette</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        :root {
+            --bg-app: #FFFFFF;
+            --text-main: #000000;
+            --text-gray: #8E8E93;
+            --pill-active-bg: #000000;
+            --pill-active-text: #FFFFFF;
+            --pill-inactive-bg: #E5E5EA;
+            --pill-inactive-text: #8E8E93;
+            --hero-left-bg: #1C1C1E;
+            --hero-right-bg: #4466C6;
+            --card-bg: #F2F2F7;
+            --card-text: #000000;
+            --border-color: #E5E5EA;
+            --bar-color: #8E8E93;
+        }
+
+        .dark-mode {
+            --bg-app: #000000;
+            --text-main: #FFFFFF;
+            --text-gray: #8E8E93;
+            --pill-active-bg: #FFFFFF;
+            --pill-active-text: #000000;
+            --pill-inactive-bg: #1C1C1E;
+            --pill-inactive-text: #8E8E93;
+            --hero-left-bg: #1C1C1E;
+            --hero-right-bg: #4466C6;
+            --card-bg: #1C1C1E;
+            --card-text: #FFFFFF;
+            --border-color: #2C2C2E;
+            --bar-color: #48484A;
+        }
+
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
             font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         body {
-            background-color: #F2F2F7;
+            background-color: #f0f2f5;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
             display: flex;
             justify-content: center;
+            align-items: center;
+            margin: 0;
         }
 
         .app-container {
             width: 100%;
             height: 100%;
-            background: #ffffff;
+            background-color: var(--bg-app);
             position: relative;
-            overflow-y: auto;
-            max-width: 400px;
-            /* Mobile Frame */
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
-        /* HEADER SECTION */
-        .profile-header {
-            padding: 30px 24px 10px;
+        @media (min-width: 500px) {
+            .app-container {
+                max-width: 400px;
+                max-height: 850px;
+                height: 95vh;
+                border-radius: 30px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--border-color);
+            }
+        }
+
+        .scroll-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 30px;
+            scrollbar-width: none;
+        }
+
+        .scroll-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* HEADER */
+        .top-bar {
+            padding: 40px 24px 10px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .user-name {
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 800;
-            color: #000;
-            margin-bottom: 20px;
-            text-transform: capitalize;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
-        .date-row {
+        .controls-row {
             display: flex;
             align-items: center;
-            margin-bottom: 30px;
+            justify-content: center;
+            width: 100%;
         }
 
-        .date-block {
+        .segmented-control {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .filter-pill {
+            padding: 10px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .filter-pill.active {
+            background: var(--pill-active-bg);
+            color: var(--pill-active-text);
+        }
+
+        .filter-pill.inactive {
+            background: var(--pill-inactive-bg);
+            color: var(--pill-inactive-text);
+        }
+
+        /* HERO DATE CARD */
+        .hero-date-card {
+            margin: 10px 24px 20px 24px;
+            height: 160px;
+            display: flex;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+
+        .hero-left {
+            flex: 1.2;
+            background: var(--hero-left-bg);
+            padding: 24px;
             display: flex;
             flex-direction: column;
-            line-height: 1;
+            justify-content: center;
+            color: #FFFFFF;
         }
 
-        .date-small {
+        .hero-day-name {
             font-size: 16px;
-            color: #000;
             font-weight: 400;
-            margin-bottom: 4px;
+            opacity: 0.8;
+            text-transform: lowercase;
         }
 
-        .date-big-year {
-            font-size: 22px;
-            color: #000;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-            margin-bottom: -5px;
+        .hero-ym {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 2px;
         }
 
-        .date-huge-month {
-            font-size: 72px;
+        .hero-month-big {
+            font-size: 64px;
             font-weight: 900;
-            color: #000;
+            line-height: 0.9;
             letter-spacing: -2px;
             text-transform: uppercase;
         }
 
-        .divider {
-            width: 2px;
-            height: 65px;
-            background-color: #000;
-            margin: 0 20px;
+        .hero-right {
+            flex: 1;
+            background: var(--hero-right-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: #FFFFFF;
         }
 
-        .time-display {
-            font-size: 28px;
-            color: #000;
+        .hero-time {
+            font-size: 26px;
             font-weight: 400;
-            letter-spacing: 0.5px;
+            text-align: center;
+            line-height: 1.1;
         }
 
-        /* MAIN STAT (Double Check) */
-        .main-stat-container {
+        /* STAT CARDS */
+        .stats-list {
+            padding: 0 24px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            margin-bottom: 35px;
-        }
-
-        .check-icon {
-            margin-bottom: 5px;
-        }
-
-        .stat-number {
-            font-size: 60px;
-            font-weight: 800;
-            color: #000;
-            line-height: 1;
-            margin-bottom: 0px;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #8E8E93;
-            font-weight: 400;
-            margin-top: 5px;
-        }
-
-        /* TABS */
-        .segment-control {
-            display: flex;
-            background: transparent;
-            padding: 0 24px;
-            margin-bottom: 25px;
-            gap: 12px;
-        }
-
-        .segment-btn {
-            background: #E5E5EA;
-            color: #aeaeb2;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .segment-btn.active {
-            background: #000000;
-            color: #ffffff;
-        }
-
-        /* CARDS GRID */
-        .dashboard-grid {
-            padding: 0 24px 40px;
-            display: flex;
-            flex-wrap: wrap;
             gap: 16px;
         }
 
         .stat-card {
-            flex: 1;
-            min-width: 45%;
-            border-radius: 20px;
+            background: var(--card-bg);
+            border-radius: 30px;
             padding: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            height: 150px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            border: none;
+            gap: 12px;
+            color: var(--card-text);
         }
 
-        .card-red {
-            background-color: #FF3B30;
-            color: white;
-        }
-
-        .card-green {
-            background-color: #34C759;
-            color: white;
-        }
-
-        .card-orange {
-            background-color: #FF9500;
-            color: white;
-            width: 100%;
-            flex: 100%;
-        }
-
-        .card-val {
-            font-size: 48px;
-            font-weight: 500;
-            margin-bottom: 0;
-            line-height: 1;
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.95;
-        }
-
-        /* Patient Tab Styles */
-        .toggle-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: #000;
-            padding: 4px;
-            border-radius: 30px;
-            border: 2px solid white;
-        }
-
-        .toggle-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 24px;
-            text-align: center;
-            font-weight: 700;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .toggle-btn.active-green {
-            background: #96BD88;
-            color: white;
-            border-color: #96BD88;
-        }
-
-        .toggle-btn.active-red {
-            background: #FF3B30;
-            color: white;
-            border-color: #FF3B30;
-        }
-
-        .toggle-btn.inactive {
-            background: transparent;
-            opacity: 0.6;
-        }
-
-        .patient-row {
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
+        .stat-header {
             display: flex;
             justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stat-title-group {
+            display: flex;
             align-items: center;
-            color: white;
+            gap: 8px;
         }
 
-        .row-green {
-            background: #96BD88;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
         }
 
-        .row-red {
+        .status-dot.pending {
+            background: #FF9500;
+        }
+
+        .status-dot.approved {
+            background: #34C759;
+        }
+
+        .status-dot.cancelled {
             background: #FF3B30;
         }
 
-        .arrow-btn {
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
+        .stat-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-count {
+            text-align: right;
+        }
+
+        .count-num {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .count-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-left: 4px;
+        }
+
+        /* BAR CHART */
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 60px;
+            gap: 8px;
+            padding: 0 5px;
+        }
+
+        .bar {
+            flex: 1;
+            background: var(--bar-color);
+            border-radius: 10px;
+            min-height: 10px;
+            transition: height 0.5s ease;
+        }
+
+        .bar.active {
+            background: #FFFFFF;
+        }
+
+        .dark-mode .bar.active {
+            background: #FFFFFF;
+        }
+
+        /* CALENDAR STYLES */
+        .cal-month-block {
+            margin-bottom: 30px;
+            padding: 0 24px;
+        }
+
+        .cal-month-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            text-transform: capitalize;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .cal-head {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-gray);
+            padding-bottom: 8px;
+        }
+
+        .cal-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            background: var(--card-bg);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .cal-cell.today {
+            background: var(--hero-right-bg);
+            color: #FFFFFF;
+        }
+
+        .dots-row {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+            position: absolute;
+            bottom: 4px;
+        }
+
+        .dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .dot.orange {
+            background: #FF9500;
+        }
+
+        .dot.green {
+            background: #34C759;
+        }
+
+        .dot.red {
+            background: #FF3B30;
+        }
+
+        /* EXIT BUTTON */
+        .tab-bar {
+            padding: 20px 24px 40px 24px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-app);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .exit-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            color: var(--text-gray);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .exit-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* PACIENTES VIEW */
+        .patient-list {
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .patient-card {
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .patient-info h4 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .patient-info p {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .action-arrow {
             width: 32px;
             height: 32px;
             border-radius: 8px;
+            background: #E5E5EA;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
         }
 
-        /* Profile Overlay */
-        .profile-overlay {
-            position: fixed;
+        .dark-mode .action-arrow {
+            background: #2C2C2E;
+        }
+
+        /* PROFILE OVERLAY */
+        .overlay {
+            position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 0;
             width: 100%;
-            max-width: 400px;
             height: 100%;
-            background: white;
-            z-index: 9999;
+            background: var(--bg-app);
+            z-index: 1000;
             display: none;
             flex-direction: column;
-            overflow-y: auto;
-            padding-bottom: 40px;
         }
 
-        .profile-header-content {
-            padding: 20px 24px;
+        .overlay.active {
+            display: flex;
+        }
+
+        .overlay-header {
+            padding: 40px 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
         .back-circle {
             width: 36px;
             height: 36px;
-            background: #E5E5EA;
             border-radius: 50%;
+            background: var(--pill-inactive-bg);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            margin-bottom: 20px;
         }
 
-        .prof-main-name {
-            font-size: 28px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            color: #000;
-        }
-
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #F2F2F7;
-            width: 100%;
-        }
-
-        .history-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .history-date {
-            font-size: 15px;
-            font-weight: 600;
-            color: #000;
-        }
-
-        .status-pill {
-            padding: 6px 14px;
-            border-radius: 20px;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
-            min-width: 90px;
-            text-align: center;
-        }
-
-        /* SWIPE TO DELETE STYLES */
-        .swipe-container {
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 12px;
-            border-radius: 12px;
-            user-select: none;
-            touch-action: pan-y;
-        }
-
-        .delete-background {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            background: #FF3B30;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 20px;
-            border-radius: 12px;
-            z-index: 1;
-        }
-
-        .delete-icon {
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .patient-card-wrapper {
-            position: relative;
-            background: white;
-            z-index: 2;
-            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            cursor: grab;
-        }
-
-        .patient-card-wrapper.swiping {
-            transition: none;
-        }
-
-        /* FILTER TOGGLE BUTTONS */
-        .toggle-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-
-        .toggle-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-
-        .toggle-btn.inactive {
-            background: #E5E5EA;
-            color: #8E8E93;
-        }
-
-        .toggle-btn.active-orange {
-            background: #FF9500;
-            color: white;
-        }
-
-        .toggle-btn.active-green {
-            background: #34C759;
-            color: white;
-        }
-
-        .toggle-btn.active-red {
-            background: #FF3B30;
-            color: white;
-        }
-
-        /* PATIENT ROW IMPROVEMENTS */
-        .patient-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px;
-            border-radius: 16px;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .row-green {
-            border-left: 4px solid #34C759;
-        }
-
-        .row-red {
-            border-left: 4px solid #FF3B30;
-        }
-
-        .row-orange {
-            border-left: 4px solid #FF9500;
-        }
-
-        /* ACTION BUTTONS */
-        .st-btn {
-            width: 28px;
-            height: 28px;
-            font-size: 11px;
-            flex-shrink: 0;
-        }
-
-        .arrow-btn {
-            background: #E5E5EA;
-            border: none;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        /* EXIT BUTTON BOTTOM */
-        .exit-footer {
-            margin-top: 40px;
-            padding-bottom: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-            user-select: none;
-            width: 100%;
-        }
-
-        .exit-footer:hover {
-            opacity: 1;
-        }
-
-        .exit-footer svg {
-            margin-bottom: 8px;
-        }
-
-        .exit-footer span {
-            font-size: 14px;
-            font-weight: 600;
-            color: #666;
+        .overlay-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 24px 40px;
         }
     </style>
-    </head>
+</head>
 
-    <body>
+<body>
     <div class="app-container">
-
         <!-- HEADER -->
-        <div class="profile-header">
-            <div class="user-name" id="proName">Profesional</div>
-
-            <div class="date-row">
-                <div class="date-block">
-                    <div class="date-small" id="dateDay">lunes</div>
-                    <div class="date-big-year" id="dateYear">2026/12</div>
-                    <div class="date-huge-month" id="dateMon">DEC</div>
+        <div class="top-bar">
+            <h1 class="user-name" id="userName">Brayan Rojas</h1>
+            <div class="controls-row">
+                <div class="segmented-control">
+                    <button class="filter-pill active" onclick="setTab('todo')">Todo</button>
+                    <button class="filter-pill inactive" onclick="setTab('pacientes')">Pacientes</button>
+                    <button class="filter-pill inactive" onclick="setTab('calendario')">Calendario</button>
                 </div>
-                <div class="divider"></div>
-                <div class="time-display" id="dateTime"> --:-- </div>
             </div>
         </div>
 
-        <!-- CENTER STAT -->
-        <div class="main-stat-container">
-            <div class="check-icon">
-                <!-- Improved Double Check SVG -->
-                <svg width="68" height="46" viewBox="0 0 68 46" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Second Check (Back) -->
-                    <path d="M22 24L32 34L58 8" stroke="#FF9500" stroke-width="7" stroke-linecap="round"
-                        stroke-linejoin="round" stroke-opacity="0.4" />
-                    <!-- First Check (Front) -->
-                    <path d="M10 24L20 34L46 8" stroke="#FF9500" stroke-width="7" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
+        <!-- HERO DATE CARD -->
+        <div class="hero-date-card">
+            <div class="hero-left">
+                <div class="hero-day-name" id="headDay">lunes</div>
+                <div class="hero-ym" id="headYM">2026/12</div>
+                <div class="hero-month-big" id="headBigMon">DEC</div>
             </div>
-            <div class="stat-number">0</div>
-            <div class="stat-label">citas pendientes por revisar</div>
-        </div>
-
-        <!-- TABS -->
-        <!-- TABS -->
-        <div class="segment-control">
-            <button class="segment-btn active tab-btn" onclick="switchTab('todo')">Todo</button>
-            <button class="segment-btn tab-btn" onclick="switchTab('pacientes')">Pacientes</button>
-            <button class="segment-btn tab-btn" onclick="switchTab('ia')">IA Sugerencias</button>
-        </div>
-
-        <!-- VIEW: TODO (Default) -->
-        <div id="view-todo" class="tab-content" style="display:block;">
-            <!-- CARDS -->
-            <div class="dashboard-grid">
-                <div class="stat-card card-red">
-                    <div class="card-val">50</div>
-                    <div class="card-title">CANCELADA</div>
-                </div>
-                <div class="stat-card card-green">
-                    <div class="card-val">50</div>
-                    <div class="card-title">APROBADO</div>
-                </div>
-                <div class="stat-card card-orange" onclick="switchTab('ia')" style="cursor:pointer;">
-                    <div class="card-title" style="font-size: 20px; margin-top: auto;">IA SUGERENCIAS</div>
-                </div>
-            </div>
-
-            <!-- APPOINTMENTS LIST -->
-            <div id="appointmentsList" class="dashboard-grid" style="padding-top:0;">
-                <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;color:#1C1C1E;padding:0 4px;">Citas
-                    Recientes</h3>
-                <!-- List Items Injected Here -->
+            <div class="hero-right">
+                <div class="hero-time" id="headTime">01:40 PM</div>
             </div>
         </div>
 
-        <!-- VIEW: PACIENTES -->
-        <div id="view-pacientes" class="tab-content" style="display:none; padding: 0 24px 100px;">
-            <div class="toggle-container">
-                <div class="toggle-btn active-orange" onclick="setPatientFilter('PENDIENTE')">Pendientes</div>
-                <div class="toggle-btn inactive" onclick="setPatientFilter('APROBADA')">Aprobadas</div>
-                <div class="toggle-btn inactive" onclick="setPatientFilter('CANCELADA')">Canceladas</div>
-            </div>
-            <div id="patientsListContainer" style="display:flex;flex-direction:column;gap:8px;"></div>
-        </div>
-
-        <!-- VIEW: CALENDARIO -->
-        <!-- VIEW: IA SUGERENCIAS -->
-        <div id="view-ia" class="tab-content" style="display:none; padding: 24px;">
-            <div style="background:white; border-radius:16px; padding:24px; box-shadow:0 10px 30px rgba(0,0,0,0.05);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                    <div style="font-weight:700; font-size:18px;"> Inteligencia Artificial</div>
-                    <button onclick="loadAIInsights()"
-                        style="background:#000; color:white; border-radius:12px; padding:10px 20px; border:none; font-size:14px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path
-                                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                        </svg>
-                        Analizar Agenda
-                    </button>
-                </div>
-                <div id="aiLoading" style="display:none; text-align:center; padding:20px; color:#8E8E93;">
-                    <div class="spinner"
-                        style="border:3px solid #f3f3f3; border-top:3px solid #000; border-radius:50%; width:20px; height:20px; animation:spin 1s linear infinite; margin:0 auto 10px;">
+        <!-- SCROLLABLE CONTENT -->
+        <div class="scroll-content">
+            <!-- TODO VIEW -->
+            <div id="todoView">
+                <div class="stats-list">
+                    <!-- Stat Card: Pending -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title-group">
+                                <div class="status-dot pending"></div>
+                                <span class="stat-label">Pendientes</span>
+                            </div>
+                            <div class="stat-count">
+                                <span class="count-num" id="pendingCount">0</span>
+                                <span class="count-text">Citas</span>
+                            </div>
+                        </div>
+                        <div class="bar-chart" id="chartPending">
+                            <!-- Bars injected by JS -->
+                        </div>
                     </div>
-                    Consultando a Gemini Pro...
-                </div>
-                <div id="aiContent"
-                    style="font-size:14px; color:#1C1C1E; line-height:1.6; min-height:100px; white-space: pre-wrap;">
-                    Haz clic en "Analizar Agenda" para recibir sugerencias inteligentes sobre tu programación, alertas
-                    de citas próximas y optimización de tiempos.
+                    <!-- Stat Card: Approved -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title-group">
+                                <div class="status-dot approved"></div>
+                                <span class="stat-label">Aprobadas</span>
+                            </div>
+                            <div class="stat-count">
+                                <span class="count-num" id="approvedCount">0</span>
+                                <span class="count-text">Citas</span>
+                            </div>
+                        </div>
+                        <div class="bar-chart" id="chartApproved">
+                            <!-- Bars injected by JS -->
+                        </div>
+                    </div>
+                    <!-- Stat Card: Cancelled -->
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-title-group">
+                                <div class="status-dot cancelled"></div>
+                                <span class="stat-label">Canceladas</span>
+                            </div>
+                            <div class="stat-count">
+                                <span class="count-num" id="cancelledCount">0</span>
+                                <span class="count-text">Citas</span>
+                            </div>
+                        </div>
+                        <div class="bar-chart" id="chartCancelled">
+                            <!-- Bars injected by JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
-            <style>
-                @keyframes spin {
-                    0% {
-                        transform: rotate(0deg);
-                    }
 
-                    100% {
-                        transform: rotate(360deg);
-                    }
-                }
-            </style>
+            <!-- PACIENTES VIEW -->
+            <div id="pacientesView" class="hidden">
+                <div class="patient-list" id="patientsListContainer">
+                    <!-- Patients injected here -->
+                </div>
+            </div>
+
+            <!-- CALENDARIO VIEW -->
+            <div id="calendarioView" class="hidden">
+            </div>
         </div>
 
-
-
-
-        <!-- EXIT FOOTER -->
-        <div class="exit-footer" onclick="logout()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-            <span>Salir</span>
+        <!-- TAB BAR (BOTTOM) -->
+        <div class="tab-bar">
+            <div class="exit-btn" onclick="logout()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                <span>Salir</span>
+            </div>
         </div>
 
-        <!-- PROFILE OVERLAY -->
-        <div id="profileOverlay" class="profile-overlay">
-            <div class="profile-header-content">
-                <!-- Back Button -->
+        <!-- PROFILE OVERLAY (Detalle Paciente) -->
+        <div id="profileOverlay" class="overlay">
+            <div class="overlay-header">
                 <div class="back-circle" onclick="closeProfile()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                         <path d="M15 18l-6-6 6-6" />
                     </svg>
                 </div>
-
-                <!-- Name Header -->
-                <div class="prof-main-name" id="profName">Nombre Paciente</div>
-
-                <!-- Date Block -->
-                <div class="date-row" style="margin-bottom:20px;">
-                    <div class="date-block">
-                        <div class="date-small" id="profDateDay">lunes</div>
-                        <div class="date-big-year" id="profDateYear">2026/12</div>
-                        <div class="date-huge-month" id="profDateMon">DEC</div>
-                    </div>
-                    <!-- Time is on the right in screenshot, maybe vertical separator? -->
-                    <!-- Screenshot shows vertical line and time 1:40 PM -->
-                    <div class="divider"></div>
-                    <div class="time-display" id="profDateTime"> --:-- </div>
-                </div>
-
-                <!-- User Sub-Block -->
-                <div style="display:flex; align-items:center; gap:12px; margin-bottom:30px;">
-                    <div
-                        style="width:48px; height:48px; background:#FF9500; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                        <svg width="24" height="24" fill="none" stroke="white" stroke-width="2">
-                            <circle cx="12" cy="8" r="4" />
-                            <path d="M20 21a8 8 0 1 0-16 0" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div id="profNameSmall" style="font-weight:700; font-size:16px;">Nombre Paciente</div>
-                        <div id="profCedula" style="font-size:14px; color:#8E8E93;">Cedula 1000595135</div>
-                    </div>
-                </div>
-
-                <!-- History -->
-                <div style="margin-bottom:30px;">
-                    <h3 style="font-size:16px; margin-bottom:12px; font-weight:600;">Historial de citas</h3>
-                    <div id="historyList" style="display:flex; flex-direction:column;"></div>
-                </div>
-
-                <!-- Notes -->
-                <div>
-                    <h3 style="font-size:16px; margin-bottom:12px; font-weight:600;">Notas</h3>
-
-                    <!-- Saved Notes List -->
-                    <div id="notesListContainer"
-                        style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;">
-                    </div>
-
-                    <textarea id="profNotes" placeholder="Escribir nota del paciente..."
-                        style="width:100%; height:80px; background:#E5E5EA; border:none; border-radius:12px; padding:16px; font-family:inherit; resize:none; margin-bottom:12px; font-size:14px;"></textarea>
-
-                    <button id="btnSaveNote" onclick="saveNotes()"
-                        style="width:100%; background:#000; color:white; padding:16px; border-radius:12px; border:none; font-weight:700; cursor:pointer;">Guardar
-                        Nota</button>
-                </div>
+                <h2 id="profName" style="font-size:24px; font-weight:800;">Paciente</h2>
+            </div>
+            <div class="overlay-content">
+                <!-- Se puede expandir aquí la lógica de notas y historial -->
+                <p style="color:var(--text-gray); margin-bottom:20px;">Gestión de paciente en desarrollo...</p>
+                <div id="historyList"></div>
             </div>
         </div>
     </div>
 
     <script src="../config.js"></script>
-    <!-- Helper Supabase: todo el panel profesional trabaja directo con Supabase -->
     <script src="../supabase-client.js"></script>
     <script>
-        // Ya no usamos N8N: solo Supabase
         let allAppointments = [];
-        let currentFilter = 'PENDIENTE';
-        let currentProfileCedula = null;
-        let currentAppointmentDate = null; // New global to store date
+        let currentUser = { name: 'Profesional', role: 'professional' };
 
-        // 1. Clock
-        function updateClock() {
+        function init() {
+            applyTheme();
+            loadUserData();
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+            loadData();
+            setInterval(loadData, 30000); // Sync 30s
+        }
+
+        function applyTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+        }
+
+        function loadUserData() {
+            try {
+                const stored = localStorage.getItem('solarUser');
+                if (stored && stored !== "undefined") {
+                    currentUser = JSON.parse(stored);
+                }
+            } catch (e) { console.error(e); }
+            document.getElementById('userName').textContent = currentUser.name || 'Profesional';
+        }
+
+        function updateLiveClock() {
             const now = new Date();
             const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
             const mons = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 
-            document.getElementById('dateDay').textContent = days[now.getDay()];
-            document.getElementById('dateYear').textContent = `${now.getFullYear()}/${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-            document.getElementById('dateMon').textContent = mons[now.getMonth()];
+            document.getElementById('headDay').textContent = days[now.getDay()];
+            document.getElementById('headYM').textContent = `${now.getFullYear()}/${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+            document.getElementById('headBigMon').textContent = mons[now.getMonth()];
 
-            let h = now.getHours(); let m = now.getMinutes(); let ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
-            document.getElementById('dateTime').textContent = `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
-        }
-        setInterval(updateClock, 1000); updateClock();
-
-        // 2. User Info
-        const user = JSON.parse(localStorage.getItem('solarUser')) || { name: 'Carmona Cesar', role: 'professional', cedula: '1000491639' };
-        if (user && user.name) document.getElementById('proName').textContent = user.name;
-
-        // 3. Tab Logic
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            const btns = document.querySelectorAll('.tab-btn');
-            if (tab === 'todo' && btns[0]) btns[0].classList.add('active');
-            if (tab === 'pacientes' && btns[1]) btns[1].classList.add('active');
-            if (tab === 'ia' && btns[2]) btns[2].classList.add('active');
-
-            document.getElementById('view-todo').style.display = 'none';
-            document.getElementById('view-pacientes').style.display = 'none';
-            document.getElementById('view-ia').style.display = 'none';
-
-            if (tab === 'todo') document.getElementById('view-todo').style.display = 'block';
-            if (tab === 'pacientes') {
-                document.getElementById('view-pacientes').style.display = 'block';
-                renderPatients();
-            }
-            if (tab === 'ia') document.getElementById('view-ia').style.display = 'block';
+            let h = now.getHours(), m = now.getMinutes(), ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            document.getElementById('headTime').textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
         }
 
-        async function loadAIInsights() {
-            const container = document.getElementById('aiContent');
-            const loading = document.getElementById('aiLoading');
-            container.style.display = 'none';
-            loading.style.display = 'block';
-
-            try {
-                // De momento desactivamos IA si no hay backend propio (N8N)
-                container.textContent = "IA desactivada: ahora la app funciona 100% con Supabase (sin N8N).";
-            } catch (e) {
-                container.textContent = "IA desactivada temporalmente.";
-                console.error(e);
-            }
-
-            loading.style.display = 'none';
-            container.style.display = 'block';
-        }
-
-        // 4. Load Data
-        // SOLO Supabase: el profesional siempre lee directamente desde la tabla appointments
         async function loadData() {
             try {
-                if (typeof SupabaseHelper === 'undefined') {
-                    console.error('SupabaseHelper no está definido en el dashboard profesional.');
-                    allAppointments = [];
-                    renderDashboard();
-                    return;
-                }
-
-                // Lee TODAS las citas (el helper solo filtra por rol cuando no es profesional)
+                if (typeof SupabaseHelper === 'undefined') return;
                 const data = await SupabaseHelper.getAppointments(null, 'professional');
-
-                if (data && data.success && data.appointments) {
+                if (data.success && data.appointments) {
                     allAppointments = data.appointments;
-                    console.log('Citas cargadas para profesional:', allAppointments.length);
                     renderDashboard();
-                    if (document.getElementById('view-pacientes').style.display === 'block') {
-                        renderPatients();
+                    renderPatients();
+                    if (!document.getElementById('calendarioView').classList.contains('hidden')) {
+                        renderCalendar();
                     }
-                } else {
-                    allAppointments = [];
-                    renderDashboard();
                 }
-            } catch (e) {
-                console.error("Error loading data:", e);
-                allAppointments = [];
-                renderDashboard();
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // 5. Render Dashboard
         function renderDashboard() {
-            let cancelled = 0, approved = 0, pending = 0;
+            let pending = 0, approved = 0, cancelled = 0;
             allAppointments.forEach(a => {
-                const s = (a.status || 'PENDIENTE').toUpperCase();
-                if (s.includes('CANCEL')) cancelled++;
-                else if (s.includes('APROB') || s.includes('REALIZ')) approved++;
+                const st = (a.status || '').toLowerCase();
+                if (st.includes('aprob')) approved++;
+                else if (st.includes('cancel')) cancelled++;
                 else pending++;
             });
 
-            // Mostrar al profesional cuántas citas tiene pendientes por revisar
-            document.querySelector('.stat-number').textContent = pending;
-            const cards = document.querySelectorAll('.stat-card');
-            if (cards[0]) cards[0].querySelector('.card-val').textContent = cancelled;
-            if (cards[1]) cards[1].querySelector('.card-val').textContent = approved;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('approvedCount').textContent = approved;
+            document.getElementById('cancelledCount').textContent = cancelled;
 
-            const listContainer = document.getElementById('appointmentsList');
-            if (!listContainer) return;
-
-            // REMOVED HEADER "Citas Recientes" per user request
-            listContainer.innerHTML = '';
-
-            // LIST HIDDEN PER USER REQUEST (First Image)
-            // const sorted = [...allAppointments].sort((a, b) => b.id - a.id);
-            // if (sorted.length === 0) { ... }
-            // sorted.forEach(...)
-            listContainer.style.display = 'none'; // Ensure it's hidden or just empty
-            return;
+            renderChart('chartPending', 8);
+            renderChart('chartApproved', 8);
+            renderChart('chartCancelled', 8);
         }
 
-        // UPDATE APPOINTMENT STATUS (Professional Only) – solo Supabase
-        async function updateAppointmentStatus(appointmentId, newStatus) {
-            // Actualización optimista en memoria
-            const appointment = allAppointments.find(a => a.id == appointmentId);
-            if (appointment) {
-                appointment.status = newStatus;
-                renderPatients();
-                renderDashboard();
-            }
-
-            try {
-                if (typeof SupabaseHelper !== 'undefined') {
-                    const payload = { status: newStatus };
-                    const res = await SupabaseHelper.updateAppointment(appointmentId, payload);
-                    if (!res || !res.success) {
-                        alert("Error al actualizar estado en Supabase");
-                        await loadData(); // Revertir si falla
-                        return;
-                    }
-
-                    // Aviso por WhatsApp (opcional) usando datos de Supabase
-                    if (appointment) {
-                        await sendWhatsAppNotification(appointment, newStatus);
-                    }
-                }
-            } catch (e) {
-                console.error("Error updating status in Supabase:", e);
-                alert("Error de conexión al actualizar estado en Supabase");
-                await loadData(); // Revertir cambios
+        function renderChart(containerId, barCount) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                // Random height for visual effect as per screenshot
+                const h = Math.floor(Math.random() * 50) + 10;
+                bar.style.height = `${h}px`;
+                if (i === 4) bar.classList.add('active'); // Middle bar highlighted
+                container.appendChild(bar);
             }
         }
-
-        // SEND WHATSAPP NOTIFICATION – obtiene el teléfono desde Supabase
-        async function sendWhatsAppNotification(appointment, newStatus) {
-            try {
-                if (typeof SupabaseHelper === 'undefined') return;
-
-                const usersData = await SupabaseHelper.getAllUsers();
-                if (!usersData || !usersData.success || !Array.isArray(usersData.users)) {
-                    console.log('No se pudo obtener la lista de usuarios desde Supabase');
-                    return;
-                }
-
-                const userRow = usersData.users.find(
-                    u => String(u.cedula) === String(appointment.patientCedula)
-                );
-
-                if (!userRow || !userRow.phone) {
-                    console.log('Paciente sin teléfono registrado en Supabase');
-                    return;
-                }
-
-                const phone = userRow.phone;
-
-                // Mensaje según estado
-                let message = '';
-                if (newStatus === 'APROBADA') {
-                    message = `✅ *Cita Aprobada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia ha sido *APROBADA*:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\n¡Te esperamos!`;
-                } else if (newStatus === 'CANCELADA') {
-                    message = `❌ *Cita Cancelada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia del ${appointment.dateStr} a las ${appointment.time} ha sido *CANCELADA*.\n\nPor favor, agenda una nueva cita si lo necesitas.`;
-                } else if (newStatus === 'PENDIENTE') {
-                    message = `⏳ *Cita Pendiente*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia está *PENDIENTE* de confirmación:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\nTe notificaremos cuando sea aprobada.`;
-                }
-
-                const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(message)}`;
-                window.open(whatsappUrl, '_blank');
-
-                // Marcamos el flag en memoria (opcional)
-                appointment.whatsappSent = true;
-            } catch (e) {
-                console.error('Error sending WhatsApp notification:', e);
-            }
-        }
-
-        // OPEN WHATSAPP MANUALLY (from WhatsApp button)
-        window.openWhatsApp = async function (appointmentId) {
-            console.log('=== WhatsApp Button Clicked ===');
-            console.log('Appointment ID:', appointmentId);
-
-            const appointment = allAppointments.find(a => a.id == appointmentId);
-            if (!appointment) {
-                alert('❌ Error: Cita no encontrada');
-                console.error('Appointment not found:', appointmentId);
-                return;
-            }
-
-            console.log('Appointment found:', appointment);
-            console.log('Patient cedula:', appointment.patientCedula);
-
-            try {
-                if (typeof SupabaseHelper === 'undefined') return;
-
-                const usersData = await SupabaseHelper.getAllUsers();
-                if (!usersData || !usersData.success || !Array.isArray(usersData.users)) {
-                    alert('❌ Error: No se pudo obtener información del paciente desde Supabase');
-                    return;
-                }
-
-                const userRow = usersData.users.find(
-                    u => String(u.cedula) === String(appointment.patientCedula)
-                );
-
-                if (!userRow || !userRow.phone || !userRow.phone.trim()) {
-                    alert(`❌ ${appointment.patientName} no tiene teléfono registrado en Supabase.`);
-                    console.log('No phone number for patient:', appointment.patientName);
-                    return;
-                }
-
-                const phone = userRow.phone;
-                const status = appointment.status || 'PENDIENTE';
-
-                let message = '';
-                if (status === 'APROBADA') {
-                    message = `✅ *Cita Aprobada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia ha sido *APROBADA*:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\n¡Te esperamos!`;
-                } else if (status === 'CANCELADA') {
-                    message = `❌ *Cita Cancelada*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia del ${appointment.dateStr} a las ${appointment.time} ha sido *CANCELADA*.\n\nPor favor, agenda una nueva cita si lo necesitas.`;
-                } else {
-                    message = `⏳ *Cita Pendiente*\n\nHola ${appointment.patientName},\n\nTu cita de fisioterapia está *PENDIENTE* de confirmación:\n📅 Fecha: ${appointment.dateStr}\n🕐 Hora: ${appointment.time}\n\nTe notificaremos cuando sea aprobada.`;
-                }
-
-                const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${phone}?text=${encodeURIComponent(message)}`;
-                console.log('Opening WhatsApp URL:', whatsappUrl);
-
-                const newWindow = window.open(whatsappUrl, '_blank');
-                if (!newWindow) {
-                    alert('⚠️ El navegador bloqueó la ventana de WhatsApp.\n\nPor favor, permite ventanas emergentes para este sitio.');
-                    console.error('Popup blocked by browser');
-                } else {
-                    console.log('✓ WhatsApp window opened successfully');
-                    appointment.whatsappSent = true;
-                }
-            } catch (e) {
-                console.error('Error getting patient phone from Supabase:', e);
-                alert(`❌ Error al obtener datos del paciente desde Supabase:\n${e.message}`);
-            }
-        }
-
-        // 6. Patients Logic
-        function setPatientFilter(status) {
-            currentFilter = status;
-            const btns = document.querySelectorAll('.toggle-btn');
-
-            // Reset all buttons
-            btns.forEach(btn => btn.className = 'toggle-btn inactive');
-
-            // Set active button with appropriate color
-            if (status === 'PENDIENTE') {
-                btns[0].className = 'toggle-btn active-orange';
-            } else if (status === 'APROBADA') {
-                btns[1].className = 'toggle-btn active-green';
-            } else if (status === 'CANCELADA') {
-                btns[2].className = 'toggle-btn active-red';
-            }
-
-            renderPatients();
-        }
-
 
         function renderPatients() {
             const container = document.getElementById('patientsListContainer');
             if (!container) return;
             container.innerHTML = '';
 
-            const filtered = allAppointments.filter(a => {
-                const s = (a.status || '').toUpperCase();
-                if (currentFilter === 'PENDIENTE') return s.includes('PEND');
-                if (currentFilter === 'APROBADA') return s.includes('APROB') || s.includes('REALIZ');
-                if (currentFilter === 'CANCELADA') return s.includes('CANCEL');
-                return false;
+            // Unique patients list
+            const uniquePatients = {};
+            allAppointments.forEach(a => {
+                if (!uniquePatients[a.patientCedula]) {
+                    uniquePatients[a.patientCedula] = {
+                        name: a.patientName,
+                        cedula: a.patientCedula,
+                        count: 0
+                    };
+                }
+                uniquePatients[a.patientCedula].count++;
             });
 
-            if (filtered.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:20px;color:gray;">No se encontraron resultados.</div>';
-                return;
-            }
-
-            filtered.forEach(app => {
-                const swipeContainer = document.createElement('div');
-                swipeContainer.className = 'swipe-container';
-
-                const deleteBg = document.createElement('div');
-                deleteBg.className = 'delete-background';
-                deleteBg.innerHTML = '<span class="delete-icon">ELIMINAR</span>';
-
-                const cardWrapper = document.createElement('div');
-                cardWrapper.className = 'patient-card-wrapper';
-                cardWrapper.dataset.id = app.id;
-
-                const colorClass = currentFilter === 'PENDIENTE' ? 'row-orange' : (currentFilter === 'APROBADA' ? 'row-green' : 'row-red');
-                cardWrapper.innerHTML = `
-                    <div class="patient-row ${colorClass}" style="margin-bottom:0; border-radius:0;">
-                         <div style="display:flex; align-items:center; flex:1; min-width:0;">
-                            <div style="min-width:0; flex:1;">
-                                <div style="font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#000;">${app.patientName}</div>
-                            </div>
-                        </div>
-                        <div style="text-align:right; margin-right:8px; flex-shrink:0;">
-                            <div style="font-weight:700; font-size:11px; color:#8E8E93;">CITA</div>
-                            <div style="font-size:10px; color:#000;">${app.dateStr}</div>
-                            <div style="font-size:10px; color:#000;">${app.time || ''}</div>
-                        </div>
-                        <div style="display:flex; gap:4px; align-items:center; flex-shrink:0;">
-                            <button class="st-btn" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.stopPropagation(); updateAppointmentStatus('${app.id}', 'APROBADA')" style="background:#34C759; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer;">A</button>
-                            <button class="st-btn" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.stopPropagation(); updateAppointmentStatus('${app.id}', 'PENDIENTE')" style="background:#FF9500; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer;">P</button>
-                            <button class="st-btn" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.stopPropagation(); updateAppointmentStatus('${app.id}', 'CANCELADA')" style="background:#FF3B30; color:white; border:none; border-radius:6px; font-weight:700; cursor:pointer;">C</button>
-                            <button class="st-btn" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.preventDefault(); event.stopPropagation(); window.openWhatsApp('${app.id}')" style="background:#25D366; color:white; border:none; border-radius:6px; width:28px; height:28px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;" title="Enviar WhatsApp">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                                </svg>
-                            </button>
-                            <button class="st-btn" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()" onclick="event.stopPropagation(); openProfile('${app.patientCedula}', '${app.patientName}', '${app.dateStr}')" style="background:#F2F2F7; border:none; border-radius:6px; width:28px; height:28px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2">
-                                    <path d="M7 17l9.2-9.2M17 17V7H7" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </button>
-                        </div>
+            Object.values(uniquePatients).forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'patient-card';
+                card.onclick = () => openProfile(p.cedula, p.name);
+                card.innerHTML = `
+                    <div class="patient-info">
+                        <h4>${p.name}</h4>
+                        <p>Cédula: ${p.cedula} | ${p.count} Citas</p>
+                    </div>
+                    <div class="action-arrow">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>
                     </div>
                 `;
-
-                swipeContainer.appendChild(deleteBg);
-                swipeContainer.appendChild(cardWrapper);
-                container.appendChild(swipeContainer);
-
-                // Add Swipe Events
-                initSwipeEvents(cardWrapper, app);
+                container.appendChild(card);
             });
         }
 
-        function initSwipeEvents(card, appointment) {
-            let startX = 0;
-            let currentX = 0;
-            let isSwiping = false;
-
-            card.addEventListener('touchstart', (e) => {
-                // Solo permitir swipe en citas APROBADAS / CANCELADAS / REALIZADAS
-                const status = (appointment.status || '').toUpperCase();
-                const isFinalStatus = status.includes('APROB') || status.includes('CANCEL') || status.includes('REALIZ');
-
-                if (!isFinalStatus) return;
-
-                startX = e.touches[0].clientX;
-                isSwiping = true;
-                card.classList.add('swiping');
-            }, { passive: true });
-
-            card.addEventListener('touchmove', (e) => {
-                if (!isSwiping) return;
-                currentX = e.touches[0].clientX;
-                let diff = currentX - startX;
-
-                // Only allow swiping left (negative diff)
-                if (diff > 0) diff = 0;
-
-                // Limit swipe distance
-                if (diff < -150) diff = -150;
-
-                card.style.transform = `translateX(${diff}px)`;
-            }, { passive: true });
-
-            card.addEventListener('touchend', async (e) => {
-                if (!isSwiping) return;
-                isSwiping = false;
-                card.classList.remove('swiping');
-
-                let diff = currentX - startX;
-
-                // Threshold to trigger delete
-                if (diff < -100) {
-                    card.style.transform = 'translateX(-100%)';
-                    setTimeout(async () => {
-                        if (confirm(`¿Eliminar registro de ${appointment.patientName}? (Se borrará permanentemente de la lista)`)) {
-                            await deleteAppointment(appointment.id);
-                        } else {
-                            card.style.transform = 'translateX(0)';
-                        }
-                    }, 200);
-                } else {
-                    card.style.transform = 'translateX(0)';
-                }
-            });
-
-            // Mouse support for testing on Desktop
-            card.addEventListener('mousedown', (e) => {
-                const status = (appointment.status || '').toUpperCase();
-                const isFinalStatus = status.includes('APROB') || status.includes('CANCEL') || status.includes('REALIZ');
-                if (!isFinalStatus) return;
-
-                startX = e.clientX;
-                isSwiping = true;
-                card.classList.add('swiping');
-
-                const onMouseMove = (me) => {
-                    if (!isSwiping) return;
-                    currentX = me.clientX;
-                    let diff = currentX - startX;
-                    if (diff > 0) diff = 0;
-                    if (diff < -150) diff = -150;
-                    card.style.transform = `translateX(${diff}px)`;
-                };
-
-                const onMouseUp = async (me) => {
-                    isSwiping = false;
-                    card.classList.remove('swiping');
-                    window.removeEventListener('mousemove', onMouseMove);
-                    window.removeEventListener('mouseup', onMouseUp);
-
-                    let diff = currentX - startX;
-                    if (diff < -100) {
-                        card.style.transform = 'translateX(-100%)';
-                        setTimeout(async () => {
-                            if (confirm(`¿Eliminar registro de ${appointment.patientName}?`)) {
-                                await deleteAppointment(appointment.id);
-                            } else {
-                                card.style.transform = 'translateX(0)';
-                            }
-                        }, 200);
-                    } else {
-                        card.style.transform = 'translateX(0)';
-                    }
-                };
-
-                window.addEventListener('mousemove', onMouseMove);
-                window.addEventListener('mouseup', onMouseUp);
-            });
-        }
-
-        async function deleteAppointment(id) {
-            try {
-                if (typeof SupabaseHelper === 'undefined') {
-                    alert('SupabaseHelper no está disponible para eliminar la cita.');
-                    return;
-                }
-
-                const res = await SupabaseHelper.deleteAppointment(id);
-
-                if (res && res.success) {
-                    allAppointments = allAppointments.filter(a => String(a.id) !== String(id));
-                    renderPatients();
-                    renderDashboard();
-                } else {
-                    alert('Error al eliminar cita en Supabase');
-                    renderPatients();
-                }
-            } catch (e) {
-                console.error('Error de conexión al eliminar en Supabase:', e);
-                alert('Error de conexión al eliminar');
-                renderPatients();
-            }
-        }
-
-        // 7. Profile Logic
-        let patientNotes = [];
-        async function openProfile(cedula, name, appointmentDate) {
-            currentProfileCedula = cedula;
-            currentAppointmentDate = appointmentDate; // Store the date
-            document.getElementById('profileOverlay').style.display = 'flex';
-            document.getElementById('profName').textContent = name || 'Paciente';
-            document.getElementById('profNameSmall').textContent = name || 'Paciente';
-            document.getElementById('profCedula').textContent = `Cedula ${cedula}`;
-
-            // Reset Notes UI
-            patientNotes = [];
-            editingNoteId = null;
-            document.getElementById('profNotes').value = '';
-            const btn = document.getElementById('btnSaveNote');
-            if (btn) btn.textContent = 'Guardar Nota';
-
-            const notesContainer = document.getElementById('notesListContainer');
-            if (notesContainer) notesContainer.innerHTML = '<div style="color:gray;font-size:12px;">Cargando notas...</div>';
-
-            try {
-                if (typeof SupabaseHelper !== 'undefined') {
-                    const usersData = await SupabaseHelper.getAllUsers();
-                    if (usersData && usersData.success && Array.isArray(usersData.users)) {
-                        const userRow = usersData.users.find(
-                            u => String(u.cedula) === String(cedula)
-                        );
-                        if (userRow && userRow.notes) {
-                            const raw = userRow.notes;
-                            if (Array.isArray(raw)) {
-                                patientNotes = raw;
-                            } else if (typeof raw === 'string') {
-                                patientNotes = [{
-                                    id: Date.now(),
-                                    text: raw,
-                                    date: new Date().toLocaleDateString()
-                                }];
-                            }
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error('Error loading notes from Supabase:', e);
-            }
-            renderNotesList();
-
-            // Update Profile Date (Snapshot of now)
+        function renderCalendar() {
+            const cv = document.getElementById('calendarioView');
+            cv.innerHTML = '';
             const now = new Date();
-            const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-            const mons = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+            let mSet = new Set();
+            mSet.add(`${now.getFullYear()}-${now.getMonth()}`);
 
-            if (document.getElementById('profDateDay')) document.getElementById('profDateDay').textContent = days[now.getDay()];
-            if (document.getElementById('profDateYear')) document.getElementById('profDateYear').textContent = `${now.getFullYear()}/${(now.getMonth() + 1).toString().padStart(2, '0')}`;
-            if (document.getElementById('profDateMon')) document.getElementById('profDateMon').textContent = mons[now.getMonth()];
-
-            let h = now.getHours(); let m = now.getMinutes(); let ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
-            if (document.getElementById('profDateTime')) document.getElementById('profDateTime').textContent = `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
-
-
-            // Filter history
-            const history = allAppointments.filter(a => String(a.patientCedula) === String(cedula));
-            const histContainer = document.getElementById('historyList');
-            histContainer.innerHTML = '';
-
-            history.forEach(h => {
-                const s = (h.status || '').toUpperCase();
-                let isCancel = s.includes('CANCEL');
-                let colorClass = isCancel ? 'dot-red' : 'dot-green';
-                // The pill color in screenshot is Red for Cancelled, Green for Realized
-                let pillClass = isCancel ? 'row-red' : 'row-green';
-                // Wait, row-red background is light, we want the pill to be SOLID color?
-                // Screenshot shows Solid Red/Green Pills.
-                // My CSS: .status-pill has dynamic background?
-                // I need to set inline style or specific class for solid bg.
-                // Let's use inline style for simplicity to match screenshot 'red' 'green'.
-                let pillBg = isCancel ? '#FF3B30' : '#34C759';
-                let label = isCancel ? 'Cancelada' : 'Realizada';
-
-                const item = document.createElement('div');
-                item.className = 'history-item';
-                item.innerHTML = `
-                     <div class="history-left">
-                        <div class="history-dot ${colorClass}" style="background:${pillBg}; width:10px; height:10px; border-radius:50%;"></div>
-                        <span class="history-date">${h.dateStr}</span>
-                     </div>
-                     <div class="status-pill" style="background:${pillBg};">${label}</div>
-                `;
-                histContainer.appendChild(item);
+            allAppointments.forEach(a => {
+                if (a.dateStr) {
+                    const [y, m] = a.dateStr.split('-');
+                    mSet.add(`${y}-${parseInt(m) - 1}`);
+                }
             });
+
+            const months = Array.from(mSet).map(s => {
+                const [y, m] = s.split('-');
+                return { year: parseInt(y), month: parseInt(m) };
+            }).sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month));
+
+            months.forEach(met => {
+                const d = document.createElement('div');
+                d.className = 'cal-month-block';
+                const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                d.innerHTML = `<div class="cal-month-title">${monthNames[met.month]} ${met.year}</div>`;
+
+                const g = document.createElement('div');
+                g.className = 'cal-grid';
+                ['D', 'L', 'M', 'M', 'J', 'V', 'S'].forEach(h => g.innerHTML += `<div class="cal-head">${h}</div>`);
+
+                const firstDay = new Date(met.year, met.month, 1).getDay();
+                const daysInMonth = new Date(met.year, met.month + 1, 0).getDate();
+                for (let i = 0; i < firstDay; i++) g.innerHTML += '<div></div>';
+
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'cal-cell';
+                    c.textContent = i;
+                    if (met.year === now.getFullYear() && met.month === now.getMonth() && i === now.getDate()) c.classList.add('today');
+
+                    const ds = `${met.year}-${(met.month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+                    const ap = allAppointments.filter(a => a.dateStr === ds);
+
+                    if (ap.length > 0) {
+                        let h = '<div class="dots-row">';
+                        ap.slice(0, 3).forEach(a => {
+                            let cl = 'orange';
+                            let s = (a.status || '').toLowerCase();
+                            if (s.includes('aprob')) cl = 'green';
+                            if (s.includes('cancel')) cl = 'red';
+                            h += `<div class="dot ${cl}"></div>`;
+                        });
+                        h += '</div>';
+                        c.innerHTML += h;
+                    }
+                    g.appendChild(c);
+                }
+                d.appendChild(g);
+                cv.appendChild(d);
+            });
+        }
+
+        function setTab(tab) {
+            document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.filter-pill').forEach(p => {
+                if (p.textContent.toLowerCase() === tab) p.classList.add('active');
+            });
+
+            document.getElementById('todoView').classList.add('hidden');
+            document.getElementById('pacientesView').classList.add('hidden');
+            document.getElementById('calendarioView').classList.add('hidden');
+
+            if (tab === 'todo') document.getElementById('todoView').classList.remove('hidden');
+            if (tab === 'pacientes') document.getElementById('pacientesView').classList.remove('hidden');
+            if (tab === 'calendario') {
+                document.getElementById('calendarioView').classList.remove('hidden');
+                renderCalendar();
+            }
+        }
+
+        function openProfile(cedula, name) {
+            document.getElementById('profName').textContent = name;
+            document.getElementById('profileOverlay').classList.add('active');
+            // Cargar historial si es necesario
         }
 
         function closeProfile() {
-            document.getElementById('profileOverlay').style.display = 'none';
+            document.getElementById('profileOverlay').classList.remove('active');
         }
-
-        function renderNotesList() {
-            const container = document.getElementById('notesListContainer');
-            if (!container) return;
-            container.innerHTML = '';
-            if (patientNotes.length === 0) {
-                container.innerHTML = '<div style="color:#C7C7CC;font-size:12px;font-style:italic;">Sin notas previas</div>';
-                return;
-            }
-            patientNotes.forEach(n => {
-                const div = document.createElement('div');
-                div.style.cssText = 'background: #F2F2F7; padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid transparent; transition: border 0.2s; position:relative;';
-                div.innerHTML = `
-                    <div style="font-size:14px; color:#000; margin-bottom:6px; white-space: pre-wrap; padding-right: 20px;">${n.text}</div>
-                    <div style="font-size:11px; color:#8E8E93; display:flex; justify-content:space-between; align-items:center;">
-                        <span>${n.date || ''}</span>
-                        <div style="display:flex; gap:12px; align-items:center;">
-                            <span onclick="editNote(${n.id})" style="font-weight:600; color:#007AFF; cursor:pointer;">Editar</span>
-                            <span onclick="deleteNote(${n.id})" style="cursor:pointer; display:flex; align-items:center;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
-                            </span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function editNote(id) {
-            const n = patientNotes.find(x => x.id === id);
-            if (n) {
-                document.getElementById('profNotes').value = n.text;
-                editingNoteId = id;
-                document.getElementById('btnSaveNote').textContent = 'Actualizar Nota';
-                document.getElementById('profNotes').focus();
-            }
-        }
-
-        async function deleteNote(id) {
-            if (!confirm('¿Eliminar esta nota?')) return;
-            patientNotes = patientNotes.filter(x => x.id !== id);
-            if (editingNoteId === id) {
-                editingNoteId = null;
-                document.getElementById('profNotes').value = '';
-                document.getElementById('btnSaveNote').textContent = 'Guardar Nota';
-            }
-            renderNotesList();
-            await syncNotes();
-        }
-
-        async function saveNotes() {
-            const txt = document.getElementById('profNotes').value;
-            if (!txt.trim()) return;
-            if (!currentProfileCedula) return;
-
-            if (editingNoteId) {
-                // Edit existing
-                const n = patientNotes.find(x => x.id === editingNoteId);
-                if (n) {
-                    n.text = txt;
-                }
-                editingNoteId = null;
-                document.getElementById('btnSaveNote').textContent = 'Guardar Nota';
-            } else {
-                // Add new
-                // Use currentAppointmentDate if available, otherwise today
-                const dateToSave = currentAppointmentDate || new Date().toLocaleDateString();
-                patientNotes.push({ id: Date.now(), text: txt, date: dateToSave });
-            }
-
-            // Optimistic Render
-            renderNotesList();
-            document.getElementById('profNotes').value = '';
-            await syncNotes();
-        }
-
-        async function syncNotes() {
-            try {
-                if (typeof SupabaseHelper === 'undefined') return;
-                await SupabaseHelper.updateUser(currentProfileCedula, { notes: patientNotes });
-            } catch (e) {
-                console.error('Error sincronizando notas en Supabase:', e);
-                alert('Error sincronizando notas en Supabase');
-            }
-        }
-
-
-        // INITIALIZATION
-        loadData();
-        switchTab('todo');
-
-        // AUTO-SYNC: Reload data every 10 seconds to sync with changes
-        setInterval(() => {
-            loadData();
-        }, 10000); // 10 seconds
 
         function logout() {
             localStorage.removeItem('solarUser');
             window.location.href = '../login.html';
         }
+
+        init();
     </script>
 </body>
 
