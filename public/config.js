@@ -1,5 +1,5 @@
 /**
- * Solar Rosette - Centralized Configuration
+ * Solar - Centralized Configuration
  * 
  * Edit this file to change the backend URLs for different clients or environments.
  */
