@@ -134,11 +134,22 @@
         .filter-pill.active {
             background: var(--pill-active-bg);
             color: var(--pill-active-text);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .filter-pill.inactive {
             background: var(--pill-inactive-bg);
             color: var(--pill-inactive-text);
+        }
+
+        .filter-pill:active {
+            transform: scale(0.95);
+        }
+
+        .btn-action.selected-status {
+            border: 2px solid #FFFFFF !important;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
         }
 
         /* HERO DATE CARD */
@@ -710,7 +721,7 @@
                 <div class="segmented-control">
                     <button class="filter-pill active" onclick="setTab('todo')">Todo</button>
                     <button class="filter-pill inactive" onclick="setTab('pacientes')">Pacientes</button>
-                    <button class="filter-pill inactive" onclick="setTab('calendario')">Calendario</button>
+                    <button class="filter-pill inactive" onclick="setTab('calendario')">Contacto</button>
                 </div>
             </div>
         </div>
@@ -1080,15 +1091,15 @@
                             <div style="font-size:13px; opacity:0.6; margin-bottom:2px;">Cédula</div>
                             <div style="font-size:18px; font-weight:700; color:var(--text-main);">${h.patientCedula}</div>
                         </div>
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
-                            <div style="text-align:center;">
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                            <div style="text-align:right;">
                                 <div style="font-size:22px; font-weight:700; color:var(--text-main); line-height:1;">${h.time || '--:--'}</div>
                                 <div style="font-size:12px; opacity:0.6; margin-top:4px;">${h.dateStr}</div>
                             </div>
                             <div style="display:flex; gap:8px; align-items:center;">
-                                <button class="btn-action btn-a" onclick="updateStatusFromProfile('${h.id}', 'APROBADA')">A</button>
-                                <button class="btn-action btn-p" onclick="updateStatusFromProfile('${h.id}', 'PENDIENTE')">P</button>
-                                <button class="btn-action btn-c" onclick="updateStatusFromProfile('${h.id}', 'CANCELADA')">C</button>
+                                <button class="btn-action btn-a ${st.includes('APROB') ? 'selected-status' : ''}" onclick="updateStatusFromProfile('${h.id}', 'APROBADA')">A</button>
+                                <button class="btn-action btn-p ${st.includes('PEND') ? 'selected-status' : ''}" onclick="updateStatusFromProfile('${h.id}', 'PENDIENTE')">P</button>
+                                <button class="btn-action btn-c ${st.includes('CANCEL') ? 'selected-status' : ''}" onclick="updateStatusFromProfile('${h.id}', 'CANCELADA')">C</button>
                                 <button class="btn-wa" onclick="openWhatsApp('${h.id}')" style="margin-left:4px;">
                                     <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" style="width:32px; height:32px;">
                                 </button>
