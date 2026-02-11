@@ -614,6 +614,16 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            color: var(--text-main);
+            /* Default color */
+        }
+
+        /* Dark mode: Icons (svg) inside back-circle should be blue */
+        .dark-mode .back-circle {
+            color: var(--hero-right-bg);
+            /* Blue */
+            background: rgba(255, 255, 255, 0.1);
+            /* Slight background for contrast if needed, or keep transparent/dark */
         }
 
         .overlay-content {
@@ -662,29 +672,31 @@
         }
 
         .notes-container-mockup {
-            background: #E5E5EA;
-            /* Grey box as requested */
+            background: transparent;
             border-radius: 12px;
-            padding: 16px;
-            min-height: 150px;
+            padding: 0;
+            min-height: auto;
             margin-bottom: 15px;
         }
 
         .dark-mode .notes-container-mockup {
-            background: #2C2C2E;
+            background: transparent;
         }
 
         .note-card-mockup {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 8px;
+            padding: 16px;
+            background: #E5E5EA;
+            border-radius: 12px;
             margin-bottom: 10px;
             font-size: 14px;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
         }
 
         .dark-mode .note-card-mockup {
-            background: rgba(0, 0, 0, 0.3);
+            background: #2C2C2E;
             color: white;
+            border: 1px solid #3A3A3C;
         }
     </style>
 </head>
@@ -840,42 +852,41 @@
                     </div>
                 </div>
 
-                <!-- Notes -->
-                <!-- Notes section removed as per user request -->
             </div>
         </div>
-    </div>
 
-    <!-- HISTORY & NOTES OVERLAY -->
-    <div id="historyNotesOverlay" class="overlay">
-        <div class="overlay-header">
-            <div class="back-circle" onclick="closeHistoryNotes()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <path d="M15 18l-6-6 6-6" />
-                </svg>
+        <!-- HISTORY & NOTES OVERLAY MOVED INSIDE CONTAINER -->
+        <div id="historyNotesOverlay" class="overlay">
+            <div class="overlay-header">
+                <div class="back-circle" onclick="closeHistoryNotes()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </div>
+                <h2 style="font-size:24px; font-weight:800; color:var(--text-main);">Historial y Notas</h2>
             </div>
-            <h2 style="font-size:24px; font-weight:800; color:var(--text-main);">Historial y Notas</h2>
-        </div>
-        <div class="overlay-content">
-            <div style="margin-bottom:30px;">
-                <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:15px;">Historial de
-                    citas</h3>
-                <div id="fullHistoryContainer"></div>
-            </div>
-
-            <div>
-                <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:10px;">Notas</h3>
-                <div id="fullNotesContainer" class="notes-container-mockup">
-                    <!-- Notes list injected here -->
+            <div class="overlay-content">
+                <div style="margin-bottom:30px;">
+                    <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:15px;">Historial
+                        de citas</h3>
+                    <div id="fullHistoryContainer"></div>
                 </div>
 
-                <textarea id="mockNotesInput" class="notes-area" placeholder="Añadir nueva nota..."></textarea>
-                <button onclick="saveMockNotes()"
-                    style="width:100%; background:var(--hero-right-bg); color:white; border:none; padding:16px; border-radius:12px; font-weight:700; margin-top:12px; cursor:pointer;">Guardar
-                    Nota</button>
+                <div>
+                    <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:10px;">Notas</h3>
+                    <div id="fullNotesContainer" class="notes-container-mockup">
+                        <!-- Notes list injected here -->
+                    </div>
+
+                    <textarea id="mockNotesInput" class="notes-area" placeholder="Añadir nueva nota..."></textarea>
+                    <button onclick="saveMockNotes()"
+                        style="width:100%; background:var(--hero-right-bg); color:white; border:none; padding:16px; border-radius:12px; font-weight:700; margin-top:12px; cursor:pointer;">Guardar
+                        Nota</button>
+                </div>
             </div>
         </div>
     </div>
+
 
     <script src="../config.js"></script>
     <script src="../supabase-client.js"></script>
@@ -1087,7 +1098,50 @@
             });
 
             // Notes
-            loadNotes();
+            // Notes removed from profile as per user request (Voice Note)
+            // loadNotesForProfile(); // Disabled
+        }
+
+
+        function renderNotesInHistory() {
+            const historyContainer = document.getElementById('fullNotesContainer');
+            if (!historyContainer) return;
+
+            const html = pNotes.map((n, idx) => {
+                const text = typeof n === 'string' ? n : (n.text || '');
+                const date = n.date || '';
+                return `
+                    <div class="note-card-mockup">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px; opacity:0.6;">
+                            <span>${date}</span>
+                            <div>
+                                <span onclick="editNote(${idx})" style="cursor:pointer; margin-right:8px; color:blue;">Editar</span>
+                                <span onclick="deleteNote(${idx})" style="cursor:pointer; color:red;">Borrar</span>
+                            </div>
+                        </div>
+                        <div>${text}</div>
+                    </div>
+                `;
+            }).join('');
+
+            historyContainer.innerHTML = html;
+        }
+
+
+        async function saveMockNotes() {
+            const txt = document.getElementById('mockNotesInput').value;
+            if (!txt.trim()) return;
+            saveGenericNote(txt);
+            document.getElementById('mockNotesInput').value = '';
+        }
+
+        async function saveGenericNote(txt) {
+            if (!pNotes) pNotes = [];
+            pNotes.unshift({ text: txt, date: new Date().toLocaleDateString() });
+            renderNotesInHistory();
+            try {
+                await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
+            } catch (e) { console.error(e); }
         }
 
         async function updateStatusFromProfile(id, newStatus) {
@@ -1097,39 +1151,8 @@
             openProfile(currentProfileCedula, storedName);
         }
 
-        async function loadNotes() {
-            const container = document.getElementById('notesListContainer');
-            container.innerHTML = 'Cargando notas...';
-            try {
-                const users = await SupabaseHelper.getAllUsers();
-                const user = users.users.find(u => String(u.cedula) === String(currentProfileCedula));
-                pNotes = user?.notes || [];
-                renderNotes();
-            } catch (e) { console.error(e); }
-        }
 
-        function renderNotes() {
-            const container = document.getElementById('notesListContainer');
-            container.innerHTML = '';
-            pNotes.forEach((n, idx) => {
-                const div = document.createElement('div');
-                div.style.cssText = 'background:var(--card-bg); padding:12px; border-radius:12px; margin-bottom:8px; color:var(--text-main); font-size:14px;';
-                div.textContent = typeof n === 'string' ? n : (n.text || '');
-                container.appendChild(div);
-            });
-        }
 
-        async function saveNotes() {
-            const txt = document.getElementById('profNotes').value;
-            if (!txt.trim()) return;
-            pNotes.push({ text: txt, date: new Date().toLocaleDateString() });
-
-            try {
-                await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
-                document.getElementById('profNotes').value = '';
-                renderNotes();
-            } catch (e) { console.error(e); }
-        }
 
         function renderCalendar() {
             const cv = document.getElementById('calendarioView');
@@ -1221,8 +1244,21 @@
 
         init();
         // History & Notes Logic
-        function openHistoryNotes() {
+        async function openHistoryNotes() {
             document.getElementById('historyNotesOverlay').classList.add('active');
+
+            // Fetch notes for this user ONCE when opening
+            try {
+                if (currentProfileCedula) {
+                    const usersData = await SupabaseHelper.getAllUsers();
+                    const u = usersData.users.find(x => String(x.cedula) === String(currentProfileCedula));
+                    pNotes = u && u.notes ? u.notes : [];
+                }
+            } catch (e) {
+                console.error("Error fetching notes:", e);
+                pNotes = [];
+            }
+
             renderFullHistory();
             renderNotesInHistory();
         }
@@ -1278,60 +1314,28 @@
         // currentProfileCedula is needed. It seems it wasn't defined global in the snippet I saw.
         // I should define it if it's missing or ensure openProfile sets it.
 
-        async function renderNotesInHistory() {
-            const container = document.getElementById('fullNotesContainer');
-            if (!container) return;
-            container.innerHTML = '';
+        function renderNotesInHistory() {
+            const historyContainer = document.getElementById('fullNotesContainer');
+            if (!historyContainer) return;
 
-            // Fetch latest user data to get notes
-            try {
-                if (currentProfileCedula) {
-                    const usersData = await SupabaseHelper.getAllUsers();
-                    const u = usersData.users.find(x => String(x.cedula) === String(currentProfileCedula));
-                    if (u && u.notes) pNotes = u.notes;
-                    else if (!u) pNotes = []; // or keep existing if offline?
-                }
-            } catch (e) { console.error(e); }
-
-            if (!pNotes) pNotes = [];
-
-            pNotes.forEach((n, idx) => {
+            const html = pNotes.map((n, idx) => {
                 const text = typeof n === 'string' ? n : (n.text || '');
                 const date = n.date || '';
-
-                const div = document.createElement('div');
-                div.className = 'note-card-mockup';
-                div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px; opacity:0.6;">
-                        <span>${date}</span>
-                        <div>
-                            <span onclick="editNote(${idx})" style="cursor:pointer; margin-right:8px; color:blue;">Editar</span>
-                            <span onclick="deleteNote(${idx})" style="cursor:pointer; color:red;">Borrar</span>
+                return `
+                    <div class="note-card-mockup">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px; opacity:0.6;">
+                            <span>${date}</span>
+                            <div>
+                                <span onclick="editNote(${idx})" style="cursor:pointer; margin-right:8px; color:blue;">Editar</span>
+                                <span onclick="deleteNote(${idx})" style="cursor:pointer; color:red;">Borrar</span>
+                            </div>
                         </div>
+                        <div>${text}</div>
                     </div>
-                    <div>${text}</div>
                 `;
-                container.appendChild(div);
-            });
-        }
+            }).join('');
 
-        async function saveMockNotes() {
-            const txt = document.getElementById('mockNotesInput').value;
-            if (!txt.trim()) return;
-
-            pNotes.unshift({ text: txt, date: new Date().toLocaleDateString() });
-
-            // Optimistic update
-            renderNotesInHistory();
-            document.getElementById('mockNotesInput').value = '';
-
-            // Persist
-            try {
-                await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
-            } catch (e) {
-                console.error(e);
-                alert('Error guardando nota');
-            }
+            historyContainer.innerHTML = html;
         }
 
         async function deleteNote(idx) {
