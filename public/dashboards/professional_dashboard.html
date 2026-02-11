@@ -879,34 +879,34 @@
             if (!container) return;
             container.innerHTML = '';
 
-            // Sort by pending first
-            const sorted = [...allAppointments].sort((a, b) => {
-                const sA = (a.status || '').toLowerCase();
-                const sB = (b.status || '').toLowerCase();
-                if (sA.includes('pend') && !sB.includes('pend')) return -1;
-                if (!sA.includes('pend') && sB.includes('pend')) return 1;
-                return 0;
+            // Group by unique patient
+            const uniquePatients = {};
+            allAppointments.forEach(a => {
+                if (!uniquePatients[a.patientCedula]) {
+                    uniquePatients[a.patientCedula] = {
+                        name: a.patientName,
+                        cedula: a.patientCedula,
+                        count: 0
+                    };
+                }
+                uniquePatients[a.patientCedula].count++;
             });
 
-            sorted.forEach(app => {
+            const sorted = Object.values(uniquePatients).sort((a, b) => b.count - a.count);
+
+            sorted.forEach(p => {
                 const row = document.createElement('div');
                 row.className = 'patient-row-premium';
+                row.onclick = () => openProfile(p.cedula, p.name);
+                row.style.cursor = 'pointer';
                 row.innerHTML = `
-                    <div class="p-info-group" onclick="openProfile('${app.patientCedula}', '${app.patientName}')" style="cursor:pointer;">
-                        <div class="p-name">${app.patientName}</div>
-                        <div class="p-sub">Cédula ${app.patientCedula}</div>
+                    <div class="p-info-group">
+                        <div class="p-name">${p.name}</div>
+                        <div class="p-sub">Cédula ${p.cedula}</div>
                     </div>
-                    <div class="p-time-group">
-                        <div class="p-time">${app.time || '--:--'}</div>
-                        <div class="p-date">${app.dateStr}</div>
-                    </div>
-                    <div class="p-actions">
-                        <button class="btn-action btn-a" onclick="updateStatus('${app.id}', 'APROBADA')">A</button>
-                        <button class="btn-action btn-p" onclick="updateStatus('${app.id}', 'PENDIENTE')">P</button>
-                        <button class="btn-action btn-c" onclick="updateStatus('${app.id}', 'CANCELADA')">C</button>
-                        <button class="btn-wa" onclick="openWhatsApp('${app.id}')">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
-                        </button>
+                    <div class="p-time-group" style="text-align:right;">
+                        <div class="p-time">${p.count}</div>
+                        <div class="p-date">CITAS</div>
                     </div>
                 `;
                 container.appendChild(row);
@@ -950,30 +950,44 @@
             document.getElementById('profCedula').textContent = `Cedula ${cedula}`;
             document.getElementById('profileOverlay').classList.add('active');
 
-            // History
+            // Appointments List with Management
             const history = allAppointments.filter(a => String(a.patientCedula) === String(cedula));
             const container = document.getElementById('historyList');
             container.innerHTML = '';
             history.forEach(h => {
                 const st = (h.status || '').toLowerCase();
-                const isCancel = st.includes('cancel');
-                const label = isCancel ? 'Cancelada' : 'Realizada';
-                const bg = isCancel ? '#FF3B30' : '#34C759';
+                const color = st.includes('aprob') ? '#34C759' : (st.includes('cancel') ? '#FF3B30' : '#FF9500');
 
                 const div = document.createElement('div');
-                div.className = 'history-row';
+                div.style.cssText = 'background:var(--card-bg); padding:16px; border-radius:12px; margin-bottom:12px;';
                 div.innerHTML = `
-                    <div class="history-info">
-                        <div style="width:8px; height:8px; border-radius:50%; background:${bg};"></div>
-                        <span style="font-weight:600; color:var(--text-main);">${h.dateStr}</span>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <div>
+                            <div style="font-weight:700; color:var(--text-main); font-size:14px;">${h.dateStr}</div>
+                            <div style="font-size:12px; color:var(--text-gray);">${h.time || '--:--'}</div>
+                        </div>
+                        <div style="font-size:11px; font-weight:800; color:${color}; text-transform:uppercase;">${h.status || 'PENDIENTE'}</div>
                     </div>
-                    <div class="prof-status-pill" style="background:${bg};">${label}</div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button class="btn-action btn-a" onclick="updateStatusFromProfile('${h.id}', 'APROBADA')">A</button>
+                        <button class="btn-action btn-p" onclick="updateStatusFromProfile('${h.id}', 'PENDIENTE')">P</button>
+                        <button class="btn-action btn-c" onclick="updateStatusFromProfile('${h.id}', 'CANCELADA')">C</button>
+                        <button class="btn-wa" onclick="openWhatsApp('${h.id}')" style="margin-left:auto;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" style="width:28px;">
+                        </button>
+                    </div>
                 `;
                 container.appendChild(div);
             });
 
             // Notes
             loadNotes();
+        }
+
+        async function updateStatusFromProfile(id, newStatus) {
+            await updateStatus(id, newStatus);
+            // Refresh profile view to show new status
+            openProfile(currentProfileCedula, document.getElementById('profName').textContent);
         }
 
         async function loadNotes() {
