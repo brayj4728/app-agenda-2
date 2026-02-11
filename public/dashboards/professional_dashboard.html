@@ -1205,14 +1205,19 @@
         init();
         // History & Notes Logic
         async function openHistoryNotes() {
-            document.getElementById('historyNotesOverlay').classList.add('active');
+            const historyOverlay = document.getElementById('historyNotesOverlay');
+            historyOverlay.classList.add('active');
 
-            // Fetch notes for this user ONCE when opening
+            const notesContainer = document.getElementById('fullNotesContainer');
+            if (notesContainer) notesContainer.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.6;">Cargando notas...</div>';
+
+            // Fetch notes for this user
             try {
                 if (currentProfileCedula) {
                     const usersData = await SupabaseHelper.getAllUsers();
                     const u = usersData.users.find(x => String(x.cedula) === String(currentProfileCedula));
-                    pNotes = u && u.notes ? u.notes : [];
+                    let rawNotes = u && u.notes ? u.notes : [];
+                    pNotes = Array.isArray(rawNotes) ? rawNotes : (rawNotes ? [rawNotes] : []);
                 }
             } catch (e) {
                 console.error("Error fetching notes:", e);
@@ -1278,19 +1283,30 @@
             const historyContainer = document.getElementById('fullNotesContainer');
             if (!historyContainer) return;
 
+            if (!Array.isArray(pNotes) || pNotes.length === 0) {
+                historyContainer.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.5;">No hay notas registradas.</div>';
+                return;
+            }
+
             const html = pNotes.map((n, idx) => {
                 const text = typeof n === 'string' ? n : (n.text || '');
                 const date = n.date || '';
+                const isPatient = text.startsWith("PACIENTE:");
+                const displayLabel = isPatient ? "<b>NOTA DEL PACIENTE</b>" : "PROFESIONAL";
+                const displayColor = isPatient ? "var(--hero-right-bg)" : "var(--text-gray)";
+                const displayText = isPatient ? text.replace("PACIENTE: ", "") : text;
+
                 return `
-                    <div class="note-card-mockup">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px; opacity:0.6;">
-                            <span>${date}</span>
-                            <div>
-                                <span onclick="editNote(${idx})" style="cursor:pointer; margin-right:8px; color:blue;">Editar</span>
-                                <span onclick="deleteNote(${idx})" style="cursor:pointer; color:red;">Borrar</span>
-                            </div>
+                    <div class="note-card-mockup" style="${isPatient ? 'border-left: 4px solid var(--hero-right-bg);' : ''}">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:11px;">
+                            <span style="color:${displayColor}; font-weight:700;">${displayLabel}</span>
+                            <span style="opacity:0.6;">${date}</span>
                         </div>
-                        <div>${text}</div>
+                        <div style="font-size:14px; line-height:1.4;">${displayText}</div>
+                        <div style="display:flex; justify-content:flex-end; margin-top:8px; gap:12px; font-size:11px;">
+                            <span onclick="editNote(${idx})" style="cursor:pointer; color:var(--hero-right-bg); font-weight:600;">Editar</span>
+                            <span onclick="deleteNote(${idx})" style="cursor:pointer; color:#FF3B30; font-weight:600;">Borrar</span>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1327,12 +1343,17 @@
         }
 
         async function saveGenericNote(txt) {
-            if (!pNotes) pNotes = [];
+            if (!Array.isArray(pNotes)) pNotes = [];
             pNotes.unshift({ text: txt, date: new Date().toLocaleDateString() });
             renderNotesInHistory();
             try {
-                await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
-            } catch (e) { console.error(e); }
+                const cedula = String(currentProfileCedula);
+                const res = await SupabaseHelper.updateUser(cedula, { notes: pNotes });
+                if (!res.success) throw new Error(res.message);
+            } catch (e) {
+                console.error("Error al guardar nota:", e);
+                alert("Error al guardar en la base de datos.");
+            }
         }
     </script>
 </body>

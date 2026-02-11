@@ -569,6 +569,11 @@
                     <select class="input-field" id="inputTime">
                         <option value="">Buscando horas...</option>
                     </select>
+                    <label
+                        style="color:var(--text-gray);font-size:12px;font-weight:700;margin-bottom:8px;display:block;text-transform:uppercase;">Notas
+                        / Observaciones</label>
+                    <textarea class="input-field" id="inputNotes" placeholder="Escribe algo para el profesional..."
+                        style="height:100px; resize:none;"></textarea>
                     <button class="modal-btn" onclick="confirmAdd()">Agendar Cita</button>
                 </div>
             </div>
@@ -798,7 +803,20 @@
 
             const res = await SupabaseHelper.createAppointment(payload);
             if (res.success) {
-                closeModal();
+                // Save note to user record as well
+                const noteTxt = document.getElementById('inputNotes').value;
+                if (noteTxt.trim()) {
+                    try {
+                        const userData = await SupabaseHelper.loginUser(currentUser.cedula);
+                        const user = userData.user;
+                        let notes = user.notes || [];
+                        if (!Array.isArray(notes)) notes = [];
+                        notes.unshift({ text: "PACIENTE: " + noteTxt, date: new Date().toLocaleDateString() });
+                        await SupabaseHelper.updateUser(currentUser.cedula, { notes });
+                    } catch (e) { console.error("Error saving patient note:", e); }
+                }
+
+                alert('Cita agendada con éxito');
                 loadAppointments();
             } else {
                 alert('Error al agendar');
