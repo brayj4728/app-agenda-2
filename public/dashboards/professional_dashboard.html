@@ -1041,7 +1041,10 @@
                 const res = await SupabaseHelper.deleteUser(cedula);
                 if (res.success) {
                     alert('Paciente eliminado');
-                    loadData();
+                    // Force clean state and reload
+                    allAppointments = [];
+                    document.getElementById('patientsListContainer').innerHTML = '<div style="padding:20px; text-align:center; opacity:0.5;">Actualizando lista...</div>';
+                    await loadData();
                 } else {
                     alert('Error al eliminar: ' + res.message);
                 }
