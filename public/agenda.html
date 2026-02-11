@@ -6,20 +6,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda - Solar Rosette</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        :root {
+            --bg-app: #FFFFFF;
+            --text-main: #000000;
+            --text-gray: #8E8E93;
+            --pill-active-bg: #000000;
+            --pill-active-text: #FFFFFF;
+            --pill-inactive-bg: #E5E5EA;
+            --pill-inactive-text: #8E8E93;
+            --hero-left-bg: #1C1C1E;
+            --hero-right-bg: #4466C6;
+            --card-bg: #F2F2F7;
+            --card-text: #000000;
+            --border-color: #E5E5EA;
+            --add-btn-bg: #F2F2F7;
+            --add-btn-text: #000000;
+        }
+
+        .dark-mode {
+            --bg-app: #000000;
+            --text-main: #FFFFFF;
+            --text-gray: #8E8E93;
+            --pill-active-bg: #FFFFFF;
+            --pill-active-text: #000000;
+            --pill-inactive-bg: #1C1C1E;
+            --pill-inactive-text: #8E8E93;
+            --hero-left-bg: #1C1C1E;
+            --hero-right-bg: #4466C6;
+            --card-bg: #1C1C1E;
+            --card-text: #FFFFFF;
+            --border-color: #2C2C2E;
+            --add-btn-bg: #1C1C1E;
+            --add-btn-text: #FFFFFF;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* DESKTOP / BODY CENTERING (Like Register.html) */
         body {
             background-color: #f0f2f5;
-            /* Light gray for desktop background */
             height: 100vh;
             width: 100vw;
             display: flex;
@@ -28,38 +60,31 @@
             margin: 0;
         }
 
-        /* MOBILE APP CONTAINER */
         .app-container {
             width: 100%;
             height: 100%;
-            background-color: #FAFAFA;
+            background-color: var(--bg-app);
             position: relative;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            /* Contain scrolls */
         }
 
-        /* Responsive Frame for Desktop */
         @media (min-width: 500px) {
             .app-container {
                 max-width: 400px;
                 max-height: 850px;
                 height: 95vh;
                 border-radius: 30px;
-                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-                border: 1px solid rgba(0, 0, 0, 0.05);
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+                border: 1px solid var(--border-color);
             }
         }
 
-        /* SCROLLABLE CONTENT AREA */
-        /* To allow scrolling behind fixed headers/footers */
         .scroll-content {
             flex: 1;
             overflow-y: auto;
-            padding-bottom: 100px;
-            /* Space for Tab Bar */
-            -webkit-overflow-scrolling: touch;
+            padding-bottom: 30px;
             scrollbar-width: none;
         }
 
@@ -68,383 +93,264 @@
         }
 
         /* HEADER */
-        /* MOBILE TWEAKS */
-        @media (max-width: 480px) {
-            .card {
-                padding: 15px !important;
-            }
-
-            .card-time {
-                font-size: 20px !important;
-            }
-
-            .card-status-text {
-                font-size: 16px !important;
-            }
-
-            .big-month {
-                font-size: 40px !important;
-            }
-
-            .live-time {
-                font-size: 18px !important;
-            }
-
-            .card-date-bottom {
-                font-size: 12px !important;
-                bottom: 12px !important;
-                left: 15px !important;
-            }
-        }
-
         .top-bar {
-            padding: 40px 20px 10px 20px;
+            padding: 40px 24px 10px 24px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #fff;
-            flex-shrink: 0;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .user-block h1 {
-            font-size: 26px;
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-name {
+            font-size: 28px;
             font-weight: 800;
-            margin: 0;
-            color: #1C1C1E;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
 
         .controls-row {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 10px;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .segmented-control {
+            display: flex;
+            gap: 8px;
         }
 
         .filter-pill {
-            padding: 8px 18px;
-            border-radius: 20px;
+            padding: 10px 22px;
+            border-radius: 14px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             border: none;
             cursor: pointer;
-            transition: 0.2s;
         }
 
         .filter-pill.active {
-            background: #000;
-            color: #fff;
+            background: var(--pill-active-bg);
+            color: var(--pill-active-text);
         }
 
         .filter-pill.inactive {
-            background: #E5E5EA;
-            color: #8E8E93;
+            background: var(--pill-inactive-bg);
+            color: var(--pill-inactive-text);
         }
 
-        .add-circle-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #E5E5EA;
+        .add-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--add-btn-bg);
+            color: var(--add-btn-text);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             border: none;
-            font-size: 24px;
-            font-weight: 300;
+            font-size: 22px;
         }
 
-        /* BIG DATE HEADER */
-        .big-date-container {
-            padding: 20px;
-            background: #fff;
+        /* HERO DATE CARD */
+        .hero-date-card {
+            margin: 10px 24px 20px 24px;
+            height: 160px;
             display: flex;
-            align-items: center;
-            margin-bottom: 10px;
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             flex-shrink: 0;
         }
 
-        .date-left {
+        .hero-left {
+            flex: 1.2;
+            background: var(--hero-left-bg);
+            padding: 24px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            color: #FFFFFF;
         }
 
-        .day-name {
+        .hero-day-name {
             font-size: 16px;
             font-weight: 400;
-            color: #000;
-            margin-bottom: -2px;
+            opacity: 0.8;
+            text-transform: lowercase;
         }
 
-        .ym-row {
+        .hero-ym {
             font-size: 18px;
-            font-weight: 500;
-            color: #000;
+            font-weight: 600;
+            margin-top: 2px;
         }
 
-        .big-month {
-            font-size: 56px;
+        .hero-month-big {
+            font-size: 64px;
             font-weight: 900;
-            line-height: 0.8;
+            line-height: 0.9;
             letter-spacing: -2px;
             text-transform: uppercase;
         }
 
-        .separator-line {
-            width: 2px;
-            height: 50px;
-            background: #000;
-            margin: 0 15px;
-        }
-
-        .live-time {
-            font-size: 24px;
-            font-weight: 400;
-        }
-
-        /* CARDS */
-        .cards-list {
-            padding: 10px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            isolation: isolate;
-            /* Prevent z-index issues */
-        }
-
-        .card-wrapper {
-            position: relative;
-            overflow: hidden;
-            border-radius: 20px;
-            height: 140px;
-            flex-shrink: 0;
-            margin-bottom: 0;
-            /* Explicit spacing, gap handles it */
-        }
-
-        .delete-bg {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            right: 0;
-            width: 100%;
-            background: #FF3B30;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 30px;
-            z-index: 1;
-        }
-
-        .card {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            padding: 20px;
-            border-radius: 20px;
-            z-index: 2;
-            background: #FF9500;
-            color: white;
-            transition: background 0.3s ease;
-            touch-action: pan-y;
-        }
-
-        .card.bg-orange {
-            background: #FF9500;
-        }
-
-        .card.bg-green {
-            background: #8CD37F;
-        }
-
-        .card.bg-red {
-            background: #FF1A1A;
-        }
-
-        .card-type {
-            font-size: 15px;
-            font-weight: 400;
-            position: absolute;
-            top: 15px;
-            left: 20px;
-        }
-
-        .card-date-bottom {
-            font-size: 14px;
-            position: absolute;
-            bottom: 15px;
-            left: 20px;
-            opacity: 1;
-            /* Make it fully opaque to be sure */
-            font-weight: 600;
-            /* Bolder to see better */
-        }
-
-        .card-right-group {
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            text-align: right;
-        }
-
-        .card-time {
-            font-size: 28px;
-            font-weight: 500;
-            display: block;
-        }
-
-        .card-status-text {
-            font-size: 20px;
-            font-weight: 700;
-            display: block;
-            margin-top: 2px;
-            text-transform: uppercase;
-        }
-
-        /* BUTTONS inside Card */
-        .status-actions {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            display: flex;
-            gap: 8px;
-            z-index: 100;
-        }
-
-        .st-btn {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 1.5px solid rgba(255, 255, 255, 0.8);
-            background: transparent;
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
+        .hero-right {
+            flex: 1;
+            background: var(--hero-right-bg);
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
+            color: #FFFFFF;
+        }
+
+        .hero-time {
+            font-size: 26px;
+            font-weight: 400;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        /* TITLES */
+        .section-header {
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .section-title,
+        .section-label {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        /* APPOINTMENT LIST */
+        .appointments-list {
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .appt-card-wrapper {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .appt-card {
+            background: var(--card-bg);
+            padding: 16px 20px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--card-text);
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s ease;
             cursor: pointer;
         }
 
-        .st-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* CALENDAR */
-        #calendarView {
-            display: none;
-            padding: 20px;
-        }
-
-        .cal-month-block {
-            margin-bottom: 30px;
-        }
-
-        .cal-month-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            border-left: 3px solid #000;
-            padding-left: 10px;
-        }
-
-        .cal-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            text-align: center;
-        }
-
-        .cal-head {
-            font-size: 11px;
-            color: #8E8E93;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .cal-cell {
-            aspect-ratio: 1;
+        .appt-left {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding-top: 4px;
-            border-radius: 8px;
-            font-size: 14px;
-            position: relative;
-            color: #1C1C1E;
+            gap: 12px;
         }
 
-        .cal-cell.today {
-            background: #000;
-            color: #fff;
+        .status-circle {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
+            flex-shrink: 0;
         }
 
-        .dots-row {
-            display: flex;
-            gap: 2px;
-            margin-top: 2px;
+        .status-circle.pending {
+            background: #FF9500;
         }
 
-        .dot {
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-        }
-
-        .dot.green {
+        .status-circle.approved {
             background: #34C759;
         }
 
-        .dot.red {
+        .status-circle.cancelled {
             background: #FF3B30;
         }
 
-        .dot.orange {
-            background: #FF9500;
-        }
-
-        /* TAB BAR (Bottom) */
-        .tab-bar {
-            position: absolute;
-            /* Absolute relative to container */
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #fff;
-            height: 70px;
+        .appt-info {
             display: flex;
-            border-top: 1px solid #E5E5EA;
-            padding-bottom: 15px;
-            z-index: 90;
+            flex-direction: column;
         }
 
-        .tab-item {
-            flex: 1;
+        .status-label {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .appt-date {
+            font-size: 11px;
+            font-weight: 500;
+            opacity: 0.5;
+            margin-top: 2px;
+        }
+
+        .appt-time {
+            font-size: 24px;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+        }
+
+        .delete-btn-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: #FF3B30;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 25px;
+            z-index: 1;
+        }
+
+        /* TAB BAR */
+        .tab-bar {
+            padding: 20px 24px 40px 24px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-app);
+            display: flex;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .exit-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            color: #8E8E93;
+            gap: 5px;
             cursor: pointer;
+            color: var(--text-gray);
+            font-size: 11px;
+            font-weight: 600;
         }
 
-        .tab-item.active {
-            color: #000;
-        }
-
-        .tab-item svg {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 4px;
-            fill: currentColor;
-        }
-
-        .tab-label {
-            font-size: 10px;
-            font-weight: 500;
+        .exit-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            stroke-width: 3;
         }
 
         /* MODAL */
@@ -454,23 +360,23 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
             z-index: 200;
             display: none;
             align-items: flex-end;
-        }
-
-        .modal.active {
-            display: flex;
+            justify-content: center;
         }
 
         .modal-content {
             width: 100%;
-            background: #F2F2F7;
-            border-top-left-radius: 25px;
-            border-top-right-radius: 25px;
+            max-width: 400px;
+            background: var(--bg-app);
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
             padding: 30px;
-            animation: slideUp 0.3s ease;
+            color: var(--text-main);
+            animation: slideUp 0.3s ease-out;
         }
 
         @keyframes slideUp {
@@ -485,21 +391,25 @@
 
         .input-field {
             width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            border: none;
+            padding: 18px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            font-size: 16px;
+            outline: none;
         }
 
         .modal-btn {
             width: 100%;
-            padding: 15px;
-            background: #000;
-            color: #fff;
+            padding: 18px;
+            background: var(--pill-active-bg);
+            color: var(--pill-active-text);
             border: none;
-            border-radius: 12px;
+            border-radius: 15px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
         }
 
@@ -511,66 +421,84 @@
 
 <body>
     <div class="app-container">
-        <!-- TOP SECTION -->
+        <!-- HEADER -->
         <div class="top-bar">
-            <div class="user-block">
-                <h1 class="user-name">Usuario</h1>
-                <div class="controls-row">
+            <div class="user-header">
+                <h1 class="user-name" id="userName">Brayan Rojas</h1>
+            </div>
+            <div class="controls-row">
+                <div class="segmented-control">
                     <button class="filter-pill active" onclick="setTab('list')">Todo</button>
                     <button class="filter-pill inactive" onclick="setTab('calendar')">Calendario</button>
                 </div>
+                <button class="add-btn" onclick="openModal()">+</button>
             </div>
-            <button class="add-circle-btn" onclick="openModal()">+</button>
         </div>
 
-        <!-- DATE HEADER (Live) -->
-        <div class="big-date-container">
-            <div class="date-left">
-                <div class="day-name" id="headDay">--</div>
-                <div class="ym-row" id="headYM">--</div>
-                <div class="big-month" id="headBigMon">--</div>
+        <!-- HERO DATE CARD -->
+        <div class="hero-date-card">
+            <div class="hero-left">
+                <div class="hero-day-name" id="headDay">martes</div>
+                <div class="hero-ym" id="headYM">2026/02</div>
+                <div class="hero-month-big" id="headBigMon">FEB</div>
             </div>
-            <div class="separator-line"></div>
-            <div class="live-time" id="headTime">--:--</div>
+            <div class="hero-right">
+                <div class="hero-time" id="headTime">07:50 PM</div>
+            </div>
         </div>
 
         <!-- SCROLLABLE CONTENT -->
         <div class="scroll-content">
-            <div class="cards-list" id="cardsList"></div>
-            <div id="calendarView"></div>
+            <div id="listView">
+                <div class="section-header">
+                    <span class="section-title">Citas agendadas</span>
+                    <span class="section-label">Horas</span>
+                </div>
+                <div class="appointments-list" id="appointmentsList">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+            <div id="calendarView" class="hidden">
+                <div style="text-align:center; padding: 40px; color: var(--text-gray);">Vista de calendario próximamente
+                </div>
+            </div>
         </div>
 
-        <!-- TAB BAR -->
+        <!-- TAB BAR (BOTTOM) -->
         <div class="tab-bar">
-            <!-- 'Inicio' removed as requested -->
-            <div class="tab-item" onclick="logout()">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" transform="rotate(45 12 12)" />
+            <div class="exit-btn" onclick="logout()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
-                <span class="tab-label">Salir</span>
+                <span>Salir</span>
             </div>
         </div>
 
         <!-- MODAL -->
         <div class="modal" id="addModal">
             <div class="modal-content">
-                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
-                    <h2 style="font-size:20px;margin:0;color:black;">Nueva Cita</h2>
-                    <span onclick="closeModal()" style="font-size:24px;cursor:pointer;color:black;">&times;</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;">
+                    <h2 style="font-size:20px;font-weight:700;">Nueva Cita</h2>
+                    <span onclick="closeModal()" style="font-size:32px;cursor:pointer;line-height:1;">&times;</span>
                 </div>
                 <div id="stepDate">
                     <label
-                        style="color:#8E8E93;font-size:12px;font-weight:600;margin-bottom:5px;display:block;">FECHA</label>
+                        style="color:var(--text-gray);font-size:12px;font-weight:700;margin-bottom:8px;display:block;text-transform:uppercase;">Selecciona
+                        Fecha</label>
                     <input type="date" class="input-field" id="inputDate">
                     <button class="modal-btn" onclick="goToTimeStep()">Continuar</button>
                 </div>
                 <div id="stepTime" class="hidden">
                     <label
-                        style="color:#8E8E93;font-size:12px;font-weight:600;margin-bottom:5px;display:block;">HORA</label>
-                    <select class="input-field" id="inputTime" style="background:white;color:#000;">
-                        <option value="">Cargando horas disponibles...</option>
+                        style="color:var(--text-gray);font-size:12px;font-weight:700;margin-bottom:8px;display:block;text-transform:uppercase;">Selecciona
+                        Hora</label>
+                    <select class="input-field" id="inputTime">
+                        <option value="">Buscando horas...</option>
                     </select>
-                    <button class="modal-btn" onclick="confirmAdd()">Agendar</button>
+                    <button class="modal-btn" onclick="confirmAdd()">Agendar Cita</button>
                 </div>
             </div>
         </div>
@@ -580,35 +508,51 @@
     <script src="supabase-client.js"></script>
     <script>
         const API_URL = CONFIG.APPOINTMENTS_URL;
-        let currentUser = { name: 'Guest', role: 'patient', cedula: '000' };
-        try {
-            const stored = localStorage.getItem('solarUser');
-            if (stored && stored !== "undefined") {
-                currentUser = JSON.parse(stored);
-            }
-        } catch (e) {
-            console.error("Error parsing user data", e);
-            localStorage.removeItem('solarUser');
+        let currentUser = { name: 'Brayan Rojas', role: 'patient', cedula: '000' };
+
+        // INITIALIZE APP
+        function init() {
+            applyTheme();
+            loadUserData();
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+            loadAppointments();
+            // Sync every 30s
+            setInterval(loadAppointments, 30000);
         }
 
-        document.querySelector('.user-name').textContent = currentUser.name;
+        function applyTheme() {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.classList.toggle('dark-mode', theme === 'dark');
+        }
 
-        /* CLOCK */
-        function updateLiveHeader() {
+        function loadUserData() {
+            try {
+                const stored = localStorage.getItem('solarUser');
+                if (stored && stored !== "undefined") {
+                    currentUser = JSON.parse(stored);
+                }
+            } catch (e) {
+                console.error("Error loading user", e);
+            }
+            document.getElementById('userName').textContent = currentUser.name || 'Brayan Rojas';
+        }
+
+        function updateLiveClock() {
             const now = new Date();
             const days = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
             const mons = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+
             document.getElementById('headDay').textContent = days[now.getDay()];
             document.getElementById('headYM').textContent = `${now.getFullYear()}/${(now.getMonth() + 1).toString().padStart(2, '0')}`;
             document.getElementById('headBigMon').textContent = mons[now.getMonth()];
-            let h = now.getHours(), m = now.getMinutes(); let ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
-            document.getElementById('headTime').textContent = `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
+
+            let h = now.getHours(), m = now.getMinutes(), ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            document.getElementById('headTime').textContent = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
         }
-        setInterval(updateLiveHeader, 1000); updateLiveHeader();
 
         let appointments = [];
-        loadAppointments();
-
         async function loadAppointments() {
             try {
                 let data;
@@ -620,481 +564,198 @@
                 }
 
                 if (data.success && data.appointments) {
-                    // STRICT ISOLATION: Client-side filter to prevent any mix-up
                     appointments = data.appointments.filter(a => String(a.patientCedula) === String(currentUser.cedula));
                     render();
                 } else {
                     appointments = [];
                     render();
                 }
-            } catch (e) { appointments = []; render(); }
+            } catch (e) { console.error(e); }
         }
 
-        async function createAppointment(payload) {
-            try {
-                if (CONFIG.USE_SUPABASE_DIRECT) {
-                    return await SupabaseHelper.createAppointment(payload);
-                } else {
-                    return await (await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })).json();
-                }
-            } catch (e) { return { success: false }; }
-        }
-        async function updateStatus(id, newStatus, newColor) {
-            // Optimistic UI Update
-            const appt = appointments.find(a => a.id == id);
-            if (appt) { appt.status = newStatus; appt.color = newColor; render(); }
-
-            // Persist to backend
-            try {
-                let data;
-                if (CONFIG.USE_SUPABASE_DIRECT) {
-                    data = await SupabaseHelper.updateAppointment(id, { status: newStatus, color: newColor });
-                } else {
-                    const res = await fetch(API_URL, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id, status: newStatus, color: newColor })
-                    });
-                    data = await res.json();
-                }
-
-                if (!data.success) {
-                    alert('Error al actualizar la cita');
-                    loadAppointments(); // Reload to revert
-                }
-            } catch (e) {
-                console.error(e);
-                alert('Error de conexión');
-                loadAppointments(); // Revert
-            }
-        }
-
-        async function deleteAppointment(id) {
-            try {
-                if (CONFIG.USE_SUPABASE_DIRECT) {
-                    return await SupabaseHelper.deleteAppointment(id);
-                } else {
-                    return await (await fetch(API_URL, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })).json();
-                }
-            } catch (e) { return { success: false }; }
-        }
-
-        // Modified render function to use updateStatus
         function render() {
-            const list = document.getElementById('cardsList');
-            const calView = document.getElementById('calendarView');
+            const list = document.getElementById('appointmentsList');
+            if (!list) return;
             list.innerHTML = '';
 
-            // EMPTY STATE MESSAGE (Requested by User)
             if (appointments.length === 0) {
                 list.innerHTML = `
-                    <div style="text-align:center; padding: 60px 20px;">
-                        <div style="font-size: 18px; font-weight: 700; color: #1C1C1E; margin-bottom: 8px;">No tienes ninguna cita agendada</div>
-                        <div style="font-size: 14px; color: #8E8E93;">Toca el botón + para agendar una cita ahora.</div>
+                    <div style="text-align:center; padding: 40px 0;">
+                        <div style="font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 5px;">No tienes citas</div>
+                        <div style="font-size: 13px; color: var(--text-gray);">Toca el botón + para empezar</div>
                     </div>
                 `;
+                return;
             }
 
-            appointments.forEach(app => {
-                let st = (app.status || 'Pendiente').toLowerCase();
-                let colorClass = 'bg-orange'; let displayText = 'Pendiente';
+            // Sort by date/time
+            const sorted = [...appointments].sort((a, b) => {
+                const da = new Date(a.dateStr + 'T' + a.time);
+                const db = new Date(b.dateStr + 'T' + b.time);
+                return da - db;
+            });
 
-                // Normalize Display Logic
-                if (st.includes('aprob')) { colorClass = 'bg-green'; displayText = 'Aprobada'; }
-                else if (st.includes('cancel')) { colorClass = 'bg-red'; displayText = 'CANCELADA'; }
+            sorted.forEach(app => {
+                const st = (app.status || 'Pendiente').toLowerCase();
+                let statusClass = 'pending', labelText = 'PENDIENTE';
+
+                if (st.includes('aprob')) { statusClass = 'approved'; labelText = 'APROBADA'; }
+                else if (st.includes('cancel')) { statusClass = 'cancelled'; labelText = 'CANCELADA'; }
+
+                const formattedDate = formatDate(app.dateStr);
 
                 const wrapper = document.createElement('div');
-                wrapper.className = 'card-wrapper';
+                wrapper.className = 'appt-card-wrapper';
                 wrapper.innerHTML = `
-                        <div class="delete-bg">
-                            <svg style="width:24px;height:24px;fill:white"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                        </div>
-                        <div class="card ${colorClass}" id="card-${app.id}">
-                            <!-- Status control removed: Only professionals can change appointment status -->
-                            <div class="card-type">${app.type || 'Cita'}</div>
-                            <div class="card-date-bottom">${formatDateDisplay(app.dateStr)}</div>
-                            <div class="card-right-group">
-                                <div class="card-time">${app.time}</div>
-                                <div class="card-status-text">${displayText}</div>
+                    <div class="delete-btn-bg">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                    </div>
+                    <div class="appt-card" id="card-${app.id}">
+                        <div class="appt-left">
+                            <div class="status-circle ${statusClass}"></div>
+                            <div class="appt-info">
+                                <span class="status-label">${labelText}</span>
+                                <span class="appt-date">${formattedDate}</span>
                             </div>
                         </div>
-                    `;
+                        <div class="appt-right">
+                            <span class="appt-time">${app.time}</span>
+                        </div>
+                    </div>
+                `;
                 list.appendChild(wrapper);
                 addSwipeLogic(wrapper, app.id);
             });
-
-            if (calView.style.display === 'block') renderMultiMonthCalendar();
         }
 
-        // Deprecated: window.updateStatus old handler replaced by new async function above.
+        function formatDate(d) {
+            if (!d) return '--/--/----';
+            const p = d.split('-');
+            return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d;
+        }
 
         function addSwipeLogic(element, id) {
-            const card = element.querySelector('.card');
-            let startX, startY, currentX, currentY;
-            let isDragging = false;
+            const card = element.querySelector('.appt-card');
+            let startX, currentX;
 
-            // --- TOUCH EVENTS ---
             card.addEventListener('touchstart', e => {
                 startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
                 card.style.transition = 'none';
-            }, { passive: false });
+            }, { passive: true });
 
             card.addEventListener('touchmove', e => {
                 currentX = e.touches[0].clientX;
-                currentY = e.touches[0].clientY;
-                handleMove(e, currentX, currentY);
-            }, { passive: false });
-
-            card.addEventListener('touchend', e => {
-                handleEnd();
-            });
-
-            // --- MOUSE EVENTS (Desktop) ---
-            card.addEventListener('mousedown', e => {
-                startX = e.clientX;
-                startY = e.clientY;
-                isDragging = true;
-                card.style.transition = 'none';
-                card.style.cursor = 'grabbing';
-            });
-
-            window.addEventListener('mousemove', e => {
-                if (!isDragging) return;
-                currentX = e.clientX;
-                currentY = e.clientY;
-                handleMove(e, currentX, currentY);
-            });
-
-            window.addEventListener('mouseup', e => {
-                if (!isDragging) return;
-                isDragging = false;
-                card.style.cursor = 'grab';
-                handleEnd();
-            });
-
-            // --- SHARED LOGIC ---
-            function handleMove(e, curX, curY) {
-                const diffX = curX - startX;
-                const diffY = curY - startY;
-
-                // ONLY allow Left Swipe if horizontal capability > vertical
-                // And strictly if diffX < 0 (Moving Left)
-                if (Math.abs(diffX) > Math.abs(diffY) && diffX < 0) {
-                    if (e.cancelable) e.preventDefault(); // Stop scrolling
-                    card.style.transform = `translate3d(${diffX}px, 0, 0)`;
+                const diffX = currentX - startX;
+                if (diffX < 0) {
+                    card.style.transform = `translateX(${diffX}px)`;
                 }
-            }
+            }, { passive: true });
 
-            function handleEnd() {
-                card.style.transition = 'transform 0.3s ease-out';
-                const diffX = (currentX || startX) - startX;
-
-                // Threshold to trigger delete
-                if (diffX < -100 && (currentX !== undefined)) {
-                    card.style.transform = `translate3d(-150%, 0, 0)`;
-                    removeAppointment(id);
+            card.addEventListener('touchend', () => {
+                card.style.transition = 'transform 0.3s ease';
+                const diffX = currentX - startX;
+                if (diffX < -100) {
+                    card.style.transform = 'translateX(-100%)';
+                    handleDelete(id);
                 } else {
-                    card.style.transform = `translate3d(0, 0, 0)`;
+                    card.style.transform = 'translateX(0)';
                 }
-                currentX = undefined;
-            }
+            });
         }
-        async function removeAppointment(id) {
-            console.log('Attempting to delete ID:', id); // Debug
-            if (!id) { alert('Error: ID de cita no válido'); return; }
 
-            try {
-                const res = await deleteAppointment(id);
+        async function handleDelete(id) {
+            if (confirm('¿Deseas eliminar esta cita?')) {
+                const res = await SupabaseHelper.deleteAppointment(id);
                 if (res.success) {
-                    appointments = appointments.filter(a => a.id !== id);
+                    appointments = appointments.filter(a => a.id != id);
                     render();
                 } else {
-                    alert('Error del servidor: ' + (res.message || 'No se pudo eliminar'));
-                    loadAppointments();
+                    alert('Error al eliminar');
+                    render();
                 }
-            } catch (e) {
-                alert('Error de conexión: ' + e.message);
-                loadAppointments();
-            }
-        }
-
-        function formatDateDisplay(s) {
-            if (!s) return 'Fecha pendiente';
-            // Handle YYYY-MM-DD
-            if (s.includes('-')) {
-                const p = s.split('-');
-                if (p.length === 3) return `${p[2]}/${p[1]}/${p[0]}`;
-            }
-            // Handle other formats or return as is
-            return s;
-        }
-        function setTab(t) {
-            const list = document.getElementById('cardsList'); const cal = document.getElementById('calendarView');
-            if (t === 'list') {
-                list.style.display = 'flex'; cal.style.display = 'none';
-                document.querySelectorAll('.filter-pill')[0].className = 'filter-pill active';
-                document.querySelectorAll('.filter-pill')[1].className = 'filter-pill inactive';
             } else {
-                list.style.display = 'none'; cal.style.display = 'block';
-                document.querySelectorAll('.filter-pill')[0].className = 'filter-pill inactive';
-                document.querySelectorAll('.filter-pill')[1].className = 'filter-pill active';
-                renderMultiMonthCalendar();
-            }
-        }
-        function renderMultiMonthCalendar() {
-            const cv = document.getElementById('calendarView'); cv.innerHTML = '';
-            const now = new Date(); let mSet = new Set(); mSet.add(`${now.getFullYear()}-${now.getMonth()}`);
-            appointments.forEach(a => { if (a.dateStr) { const [y, m] = a.dateStr.split('-'); mSet.add(`${y}-${parseInt(m) - 1}`); } });
-            Array.from(mSet).map(s => { const [y, m] = s.split('-'); return { year: parseInt(y), month: parseInt(m) } }).sort((a, b) => a.month - b.month).forEach(met => {
-                const d = document.createElement('div'); d.className = 'cal-month-block';
-                d.innerHTML = `<div class="cal-month-title">${["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][met.month]} ${met.year}</div>`;
-                const g = document.createElement('div'); g.className = 'cal-grid';
-                ['D', 'L', 'M', 'M', 'J', 'V', 'S'].forEach(h => g.innerHTML += `<div class="cal-head">${h}</div>`);
-                const f = new Date(met.year, met.month, 1).getDay(); const dim = new Date(met.year, met.month + 1, 0).getDate();
-                for (let i = 0; i < f; i++)g.innerHTML += '<div></div>';
-                for (let i = 1; i <= dim; i++) {
-                    const c = document.createElement('div'); c.className = 'cal-cell'; c.textContent = i;
-                    if (met.year === now.getFullYear() && met.month === now.getMonth() && i === now.getDate()) c.classList.add('today');
-                    const ds = `${met.year}-${(met.month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
-                    const ap = appointments.filter(a => a.dateStr === ds);
-                    if (ap.length > 0) { let h = '<div class="dots-row">'; ap.slice(0, 3).forEach(a => { let cl = 'orange'; let s = (a.status || '').toLowerCase(); if (s.includes('aprob')) cl = 'green'; if (s.includes('cancel')) cl = 'red'; h += `<div class="dot ${cl}"></div>`; }); h += '</div>'; c.innerHTML += h; }
-                    g.appendChild(c);
-                }
-                d.appendChild(g); cv.appendChild(d);
-            });
-        }
-        // GENERATE 20-MINUTE TIME SLOTS (9:00 AM - 6:00 PM)
-        function generateTimeSlots() {
-            const slots = [];
-            const startHour = 9;  // 9:00 AM
-            const endHour = 18;   // 6:00 PM
-            const intervalMinutes = 20;
-
-            for (let hour = startHour; hour <= endHour; hour++) {
-                for (let minute = 0; minute < 60; minute += intervalMinutes) {
-                    // Stop at 6:00 PM exactly
-                    if (hour === endHour && minute > 0) break;
-
-                    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                    slots.push(timeStr);
-                }
-            }
-            return slots;
-        }
-
-        // GET AVAILABLE TIME SLOTS FOR A SPECIFIC DATE
-        function getAvailableSlots(dateStr) {
-            const allSlots = generateTimeSlots();
-
-            // Get all appointments for the selected date
-            const bookedSlots = appointments
-                .filter(a => a.dateStr === dateStr)
-                .map(a => a.time);
-
-            // Return only slots that are NOT booked
-            return allSlots.filter(slot => !bookedSlots.includes(slot));
-        }
-
-        // VALIDATE IF TIME IS WITHIN BUSINESS HOURS
-        function isValidBusinessHour(timeStr) {
-            const [hour, minute] = timeStr.split(':').map(Number);
-            const totalMinutes = hour * 60 + minute;
-            const startMinutes = 9 * 60;  // 9:00 AM
-            const endMinutes = 18 * 60;   // 6:00 PM
-
-            return totalMinutes >= startMinutes && totalMinutes <= endMinutes;
-        }
-
-        async function goToTimeStep() {
-            const date = document.getElementById('inputDate').value;
-            if (!date) return alert('Selecciona una fecha');
-
-            // Load available hours for selected date
-            await loadAvailableHours(date);
-
-            document.getElementById('stepDate').classList.add('hidden');
-            document.getElementById('stepTime').classList.remove('hidden');
-        }
-
-        // NEW: Load available hours from backend
-        async function loadAvailableHours(selectedDate) {
-            const timeSelect = document.getElementById('inputTime');
-            timeSelect.innerHTML = '<option value="">Cargando...</option>';
-            timeSelect.disabled = true;
-
-            try {
-                let data;
-                if (CONFIG.USE_SUPABASE_DIRECT) {
-                    data = await SupabaseHelper.getAvailableHours(selectedDate);
-                } else {
-                    const res = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${selectedDate}`);
-                    data = await res.json();
-                }
-
-                if (data.success && data.availableHours) {
-                    if (data.availableHours.length === 0) {
-                        timeSelect.innerHTML = '<option value="">No hay horas disponibles este día</option>';
-                        return;
-                    }
-
-                    // Populate dropdown with available hours
-                    timeSelect.innerHTML = '<option value="">Selecciona una hora</option>';
-                    data.availableHours.forEach(hour => {
-                        const option = document.createElement('option');
-                        option.value = hour;
-                        option.textContent = formatHourDisplay(hour);
-                        timeSelect.appendChild(option);
-                    });
-                    timeSelect.disabled = false;
-                } else {
-                    timeSelect.innerHTML = '<option value="">Error cargando horas</option>';
-                }
-            } catch (e) {
-                console.error('Error loading hours:', e);
-                timeSelect.innerHTML = '<option value="">Error de conexión</option>';
+                render();
             }
         }
 
-        // Format hour for display (e.g., "09:00" -> "9:00 AM")
-        function formatHourDisplay(hour) {
-            const [h, m] = hour.split(':');
-            const hourNum = parseInt(h);
-            const hour12 = hourNum % 12 || 12;
-            const ampm = hourNum >= 12 ? 'PM' : 'AM';
-            return `${hour12}:${m} ${ampm}`;
-        }
+        /* MODAL LOGIC */
         function openModal() {
-            const modal = document.getElementById('addModal');
-            modal.classList.add('active');
-            document.getElementById('stepDate').classList.remove('hidden');
-            document.getElementById('stepTime').classList.add('hidden');
-
-            // Set minimum date to today (prevent past dates)
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('inputDate').min = today;
-            document.getElementById('inputDate').value = ''; // Reset
+            const m = document.getElementById('addModal');
+            m.style.display = 'flex';
+            document.getElementById('inputDate').min = new Date().toISOString().split('T')[0];
         }
 
         function closeModal() {
-            document.getElementById('addModal').classList.remove('active');
-            // Reset fields
-            document.getElementById('inputDate').value = '';
-            const timeSelect = document.getElementById('inputTime');
-            if (timeSelect) timeSelect.innerHTML = '';
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('stepDate').classList.remove('hidden');
+            document.getElementById('stepTime').classList.add('hidden');
         }
 
+        async function goToTimeStep() {
+            const d = document.getElementById('inputDate').value;
+            if (!d) return alert('Selecciona fecha');
+
+            document.getElementById('stepDate').classList.add('hidden');
+            document.getElementById('stepTime').classList.remove('hidden');
+
+            const sel = document.getElementById('inputTime');
+            sel.innerHTML = '<option value="">Buscando...</option>';
+
+            const hours = await SupabaseHelper.getAvailableHours(d);
+            sel.innerHTML = hours.length ? '' : '<option value="">Sin horas disponibles</option>';
+            hours.forEach(h => {
+                const opt = document.createElement('option');
+                opt.value = h; opt.textContent = h;
+                sel.appendChild(opt);
+            });
+        }
 
         async function confirmAdd() {
             const d = document.getElementById('inputDate').value;
-            const timeSelect = document.getElementById('inputTime');
-            const t = timeSelect ? timeSelect.value : '';
-
-            if (!d || !t) {
-                alert('Por favor selecciona fecha y hora');
-                return;
-            }
-
-            // Validate date is not in the past
-            const selectedDate = new Date(d);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            if (selectedDate < today) {
-                alert('No puedes agendar citas en fechas pasadas');
-                return;
-            }
-
-            // BACKEND VALIDATION: Double-check availability before creating
-            try {
-                let checkData;
-                if (CONFIG.USE_SUPABASE_DIRECT) {
-                    checkData = await SupabaseHelper.getAvailableHours(d);
-                } else {
-                    const checkRes = await fetch(`${CONFIG.AVAILABLE_HOURS_URL}?date=${d}`);
-                    checkData = await checkRes.json();
-                }
-
-                if (checkData.success && checkData.availableHours) {
-                    if (!checkData.availableHours.includes(t)) {
-                        alert('⚠️ Esta hora acaba de ser reservada por otro paciente. Por favor selecciona otra hora.');
-                        // Reload available hours
-                        await loadAvailableHours(d);
-                        return;
-                    }
-                }
-            } catch (e) {
-                console.error('Error validating availability:', e);
-                // Continue anyway if backend check fails
-            }
+            const t = document.getElementById('inputTime').value;
+            if (!d || !t) return alert('Completa los datos');
 
             const payload = {
                 patientCedula: currentUser.cedula,
                 patientName: currentUser.name,
                 dateStr: d,
                 time: t,
-                type: 'Fisioterapia',
-                status: 'PENDIENTE'
+                status: 'Pendiente',
+                type: 'Fisioterapia'
             };
 
-            const res = await createAppointment(payload);
-
+            const res = await SupabaseHelper.createAppointment(payload);
             if (res.success) {
-                const createdAppt = res.appointment || payload;
-
-                // Notificar al profesional por Telegram vía n8n
-                try {
-                    await notifyProfessionalTelegram(createdAppt);
-                } catch (e) {
-                    console.error('Error enviando notificación Telegram al profesional:', e);
-                }
-
                 closeModal();
                 loadAppointments();
             } else {
-                // Check if error is due to conflict
-                if (res.message && res.message.includes('conflict')) {
-                    alert('⚠️ Esta hora ya no está disponible. Por favor selecciona otra.');
-                    await loadAvailableHours(d);
-                } else {
-                    alert('Error al agendar: ' + (res.message || JSON.stringify(res)));
-                }
+                alert('Error al agendar');
             }
         }
 
-        // Enviar notificación de nueva cita al profesional (solo Supabase, sin N8N)
-        // Notificación al profesional por Telegram usando n8n
-        async function notifyProfessionalTelegram(appointment) {
-            if (!CONFIG.N8N_BASE_URL) return;
+        function setTab(tab) {
+            const list = document.getElementById('listView');
+            const cal = document.getElementById('calendarView');
+            const pills = document.querySelectorAll('.filter-pill');
 
-            const url = `${CONFIG.N8N_BASE_URL}/notify-telegram`;
-            const body = {
-                patientName: appointment.patientName || currentUser.name,
-                patientCedula: appointment.patientCedula || currentUser.cedula,
-                dateStr: appointment.dateStr,
-                time: appointment.time,
-                status: appointment.status || 'PENDIENTE'
-            };
+            pills[0].className = `filter-pill ${tab === 'list' ? 'active' : 'inactive'}`;
+            pills[1].className = `filter-pill ${tab === 'calendar' ? 'active' : 'inactive'}`;
 
-            try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
-                });
-            } catch (e) {
-                console.error('Error llamando al webhook de Telegram en n8n:', e);
+            if (tab === 'list') {
+                list.classList.remove('hidden');
+                cal.classList.add('hidden');
+            } else {
+                list.classList.add('hidden');
+                cal.classList.remove('hidden');
             }
         }
-        function logout() { localStorage.removeItem('solarUser'); window.location.href = 'index.html'; }
 
-        // INITIALIZATION
-        loadAppointments();
+        function logout() {
+            localStorage.removeItem('solarUser');
+            window.location.href = 'index.html';
+        }
 
-        // AUTO-SYNC: Check for status updates every 10 seconds
-        setInterval(() => {
-            loadAppointments();
-        }, 10000); // 10 seconds
+        init();
     </script>
 </body>
 
