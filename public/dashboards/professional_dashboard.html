@@ -1103,46 +1103,6 @@
         }
 
 
-        function renderNotesInHistory() {
-            const historyContainer = document.getElementById('fullNotesContainer');
-            if (!historyContainer) return;
-
-            const html = pNotes.map((n, idx) => {
-                const text = typeof n === 'string' ? n : (n.text || '');
-                const date = n.date || '';
-                return `
-                    <div class="note-card-mockup">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:11px; opacity:0.6;">
-                            <span>${date}</span>
-                            <div>
-                                <span onclick="editNote(${idx})" style="cursor:pointer; margin-right:8px; color:blue;">Editar</span>
-                                <span onclick="deleteNote(${idx})" style="cursor:pointer; color:red;">Borrar</span>
-                            </div>
-                        </div>
-                        <div>${text}</div>
-                    </div>
-                `;
-            }).join('');
-
-            historyContainer.innerHTML = html;
-        }
-
-
-        async function saveMockNotes() {
-            const txt = document.getElementById('mockNotesInput').value;
-            if (!txt.trim()) return;
-            saveGenericNote(txt);
-            document.getElementById('mockNotesInput').value = '';
-        }
-
-        async function saveGenericNote(txt) {
-            if (!pNotes) pNotes = [];
-            pNotes.unshift({ text: txt, date: new Date().toLocaleDateString() });
-            renderNotesInHistory();
-            try {
-                await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
-            } catch (e) { console.error(e); }
-        }
 
         async function updateStatusFromProfile(id, newStatus) {
             await updateStatus(id, newStatus);
@@ -1353,6 +1313,22 @@
             if (newTxt === null) return;
 
             pNotes[idx] = { text: newTxt, date: new Date().toLocaleDateString() };
+            renderNotesInHistory();
+            try {
+                await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
+            } catch (e) { console.error(e); }
+        }
+
+        async function saveMockNotes() {
+            const txt = document.getElementById('mockNotesInput').value;
+            if (!txt.trim()) return;
+            saveGenericNote(txt);
+            document.getElementById('mockNotesInput').value = '';
+        }
+
+        async function saveGenericNote(txt) {
+            if (!pNotes) pNotes = [];
+            pNotes.unshift({ text: txt, date: new Date().toLocaleDateString() });
             renderNotesInHistory();
             try {
                 await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
