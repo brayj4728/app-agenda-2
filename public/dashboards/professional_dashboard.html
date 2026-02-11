@@ -445,6 +445,142 @@
             background: #2C2C2E;
         }
 
+        /* NEW PATIENT ROW STYLES (Figma based) */
+        .patient-row-premium {
+            background: #000000;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #FFFFFF;
+        }
+
+        .dark-mode .patient-row-premium {
+            background: #1C1C1E;
+            border: 1px solid #2C2C2E;
+        }
+
+        .p-info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .p-name {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .p-sub {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .p-time-group {
+            text-align: center;
+        }
+
+        .p-time {
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .p-date {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        .p-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-action {
+            width: 28px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            color: #FFFFFF;
+            font-weight: 800;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-a {
+            background: #34C759;
+        }
+
+        .btn-p {
+            background: #FF9500;
+        }
+
+        .btn-c {
+            background: #FF3B30;
+        }
+
+        .btn-wa {
+            background: transparent;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-wa img {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* PROFILE SPECIFIC */
+        .prof-status-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        .history-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notes-area {
+            width: 100%;
+            height: 120px;
+            background: #E5E5EA;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 10px;
+            font-size: 14px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .dark-mode .notes-area {
+            background: #2C2C2E;
+            color: white;
+        }
+
         /* PROFILE OVERLAY */
         .overlay {
             position: absolute;
@@ -595,7 +731,7 @@
             </div>
         </div>
 
-        <!-- PROFILE OVERLAY (Detalle Paciente) -->
+        <!-- PROFILE OVERLAY -->
         <div id="profileOverlay" class="overlay">
             <div class="overlay-header">
                 <div class="back-circle" onclick="closeProfile()">
@@ -603,12 +739,45 @@
                         <path d="M15 18l-6-6 6-6" />
                     </svg>
                 </div>
-                <h2 id="profName" style="font-size:24px; font-weight:800;">Paciente</h2>
+                <h2 style="font-size:24px; font-weight:800; color:var(--text-main);">Detalle Paciente</h2>
             </div>
+
             <div class="overlay-content">
-                <!-- Se puede expandir aquí la lógica de notas y historial -->
-                <p style="color:var(--text-gray); margin-bottom:20px;">Gestión de paciente en desarrollo...</p>
-                <div id="historyList"></div>
+                <!-- Profile Summary -->
+                <div style="display:flex; align-items:center; gap:16px; margin-bottom:30px;">
+                    <div
+                        style="width:56px; height:56px; background:#FF9500; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div id="profName" style="font-size:18px; font-weight:700; color:var(--text-main);">Paciente
+                        </div>
+                        <div id="profCedula" style="font-size:13px; color:var(--text-gray);">Cedula ...</div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div style="margin-bottom:30px;">
+                    <h3 style="font-size:16px; font-weight:700; color:var(--text-main); margin-bottom:15px;">Historial
+                        de citas</h3>
+                    <div id="historyList">
+                        <!-- History items injected here -->
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <h3 style="font-size:16px; font-weight:700; color:var(--text-main);">Notas</h3>
+                    <div id="notesListContainer" style="margin-top:10px;"></div>
+                    <textarea id="profNotes" class="notes-area" placeholder="Escribir nota..."></textarea>
+                    <button onclick="saveNotes()"
+                        style="width:100%; background:var(--hero-right-bg); color:white; border:none; padding:16px; border-radius:12px; font-weight:700; margin-top:12px; cursor:pointer;">Guardar
+                        Nota</button>
+                </div>
             </div>
         </div>
     </div>
@@ -710,34 +879,135 @@
             if (!container) return;
             container.innerHTML = '';
 
-            // Unique patients list
-            const uniquePatients = {};
-            allAppointments.forEach(a => {
-                if (!uniquePatients[a.patientCedula]) {
-                    uniquePatients[a.patientCedula] = {
-                        name: a.patientName,
-                        cedula: a.patientCedula,
-                        count: 0
-                    };
-                }
-                uniquePatients[a.patientCedula].count++;
+            // Sort by pending first
+            const sorted = [...allAppointments].sort((a, b) => {
+                const sA = (a.status || '').toLowerCase();
+                const sB = (b.status || '').toLowerCase();
+                if (sA.includes('pend') && !sB.includes('pend')) return -1;
+                if (!sA.includes('pend') && sB.includes('pend')) return 1;
+                return 0;
             });
 
-            Object.values(uniquePatients).forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'patient-card';
-                card.onclick = () => openProfile(p.cedula, p.name);
-                card.innerHTML = `
-                    <div class="patient-info">
-                        <h4>${p.name}</h4>
-                        <p>Cédula: ${p.cedula} | ${p.count} Citas</p>
+            sorted.forEach(app => {
+                const row = document.createElement('div');
+                row.className = 'patient-row-premium';
+                row.innerHTML = `
+                    <div class="p-info-group" onclick="openProfile('${app.patientCedula}', '${app.patientName}')" style="cursor:pointer;">
+                        <div class="p-name">${app.patientName}</div>
+                        <div class="p-sub">Cédula ${app.patientCedula}</div>
                     </div>
-                    <div class="action-arrow">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>
+                    <div class="p-time-group">
+                        <div class="p-time">${app.time || '--:--'}</div>
+                        <div class="p-date">${app.dateStr}</div>
+                    </div>
+                    <div class="p-actions">
+                        <button class="btn-action btn-a" onclick="updateStatus('${app.id}', 'APROBADA')">A</button>
+                        <button class="btn-action btn-p" onclick="updateStatus('${app.id}', 'PENDIENTE')">P</button>
+                        <button class="btn-action btn-c" onclick="updateStatus('${app.id}', 'CANCELADA')">C</button>
+                        <button class="btn-wa" onclick="openWhatsApp('${app.id}')">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA">
+                        </button>
                     </div>
                 `;
-                container.appendChild(card);
+                container.appendChild(row);
             });
+        }
+
+        async function updateStatus(id, newStatus) {
+            try {
+                const res = await SupabaseHelper.updateAppointment(id, { status: newStatus });
+                if (res.success) {
+                    loadData();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function openWhatsApp(appointmentId) {
+            const app = allAppointments.find(a => a.id == appointmentId);
+            if (!app) return;
+
+            try {
+                const usersData = await SupabaseHelper.getAllUsers();
+                const userRow = usersData.users.find(u => String(u.cedula) === String(app.patientCedula));
+                if (!userRow || !userRow.phone) return alert("Paciente sin teléfono");
+
+                let msg = '';
+                if (app.status === 'APROBADA') msg = `Hola ${app.patientName}, tu cita ha sido APROBADA para el ${app.dateStr} a las ${app.time}.`;
+                else if (app.status === 'CANCELADA') msg = `Hola ${app.patientName}, tu cita ha sido CANCELADA.`;
+                else msg = `Hola ${app.patientName}, tu cita está PENDIENTE.`;
+
+                window.open(`https://wa.me/${CONFIG.WHATSAPP_COUNTRY_CODE}${userRow.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            } catch (e) { console.error(e); }
+        }
+
+        // PROFILE LOGIC
+        let currentProfileCedula = null;
+        let pNotes = [];
+
+        async function openProfile(cedula, name) {
+            currentProfileCedula = cedula;
+            document.getElementById('profName').textContent = name;
+            document.getElementById('profCedula').textContent = `Cedula ${cedula}`;
+            document.getElementById('profileOverlay').classList.add('active');
+
+            // History
+            const history = allAppointments.filter(a => String(a.patientCedula) === String(cedula));
+            const container = document.getElementById('historyList');
+            container.innerHTML = '';
+            history.forEach(h => {
+                const st = (h.status || '').toLowerCase();
+                const isCancel = st.includes('cancel');
+                const label = isCancel ? 'Cancelada' : 'Realizada';
+                const bg = isCancel ? '#FF3B30' : '#34C759';
+
+                const div = document.createElement('div');
+                div.className = 'history-row';
+                div.innerHTML = `
+                    <div class="history-info">
+                        <div style="width:8px; height:8px; border-radius:50%; background:${bg};"></div>
+                        <span style="font-weight:600; color:var(--text-main);">${h.dateStr}</span>
+                    </div>
+                    <div class="prof-status-pill" style="background:${bg};">${label}</div>
+                `;
+                container.appendChild(div);
+            });
+
+            // Notes
+            loadNotes();
+        }
+
+        async function loadNotes() {
+            const container = document.getElementById('notesListContainer');
+            container.innerHTML = 'Cargando notas...';
+            try {
+                const users = await SupabaseHelper.getAllUsers();
+                const user = users.users.find(u => String(u.cedula) === String(currentProfileCedula));
+                pNotes = user?.notes || [];
+                renderNotes();
+            } catch (e) { console.error(e); }
+        }
+
+        function renderNotes() {
+            const container = document.getElementById('notesListContainer');
+            container.innerHTML = '';
+            pNotes.forEach((n, idx) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'background:var(--card-bg); padding:12px; border-radius:12px; margin-bottom:8px; color:var(--text-main); font-size:14px;';
+                div.textContent = typeof n === 'string' ? n : (n.text || '');
+                container.appendChild(div);
+            });
+        }
+
+        async function saveNotes() {
+            const txt = document.getElementById('profNotes').value;
+            if (!txt.trim()) return;
+            pNotes.push({ text: txt, date: new Date().toLocaleDateString() });
+
+            try {
+                await SupabaseHelper.updateUser(currentProfileCedula, { notes: pNotes });
+                document.getElementById('profNotes').value = '';
+                renderNotes();
+            } catch (e) { console.error(e); }
         }
 
         function renderCalendar() {
