@@ -798,9 +798,9 @@
 
             const res = await SupabaseHelper.createAppointment(payload);
             if (res.success) {
-                // Notificar a n8n (para avisar al profesional)
+                // Notificar a n8n (para avisar al profesional vía Telegram)
                 try {
-                    fetch(CONFIG.APPOINTMENTS_URL, {
+                    fetch(CONFIG.TELEGRAM_NOTIFY_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ ...payload, clientId: 'cliente2' })

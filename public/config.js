@@ -16,6 +16,7 @@ const CONFIG = {
     APPOINTMENTS_URL: 'https://n8n-n8n-cliente2.xxboi7.easypanel.host/webhook/appointments',
     USERS_URL: 'https://n8n-n8n-cliente2.xxboi7.easypanel.host/webhook/users',
     AVAILABLE_HOURS_URL: 'https://n8n-n8n-cliente2.xxboi7.easypanel.host/webhook/appointments/available-hours',
+    TELEGRAM_NOTIFY_URL: 'https://n8n-n8n-cliente2.xxboi7.easypanel.host/webhook/notify-telegram',
 
     // Feature Flag: usar Supabase directo (true) o N8N (false)
     USE_SUPABASE_DIRECT: true,
