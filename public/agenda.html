@@ -416,6 +416,79 @@
         .hidden {
             display: none;
         }
+
+        /* CALENDAR STYLES */
+        .cal-month-block {
+            margin-bottom: 30px;
+            padding: 0 24px;
+        }
+
+        .cal-month-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            text-transform: capitalize;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .cal-head {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-gray);
+            padding-bottom: 8px;
+        }
+
+        .cal-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-main);
+            background: var(--card-bg);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .cal-cell.today {
+            background: var(--hero-right-bg);
+            color: #FFFFFF;
+        }
+
+        .dots-row {
+            display: flex;
+            gap: 2px;
+            margin-top: 2px;
+            position: absolute;
+            bottom: 4px;
+        }
+
+        .dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        .dot.orange {
+            background: #FF9500;
+        }
+
+        .dot.green {
+            background: #34C759;
+        }
+
+        .dot.red {
+            background: #FF3B30;
+        }
     </style>
 </head>
 
@@ -459,8 +532,6 @@
                 </div>
             </div>
             <div id="calendarView" class="hidden">
-                <div style="text-align:center; padding: 40px; color: var(--text-gray);">Vista de calendario próximamente
-                </div>
             </div>
         </div>
 
@@ -748,7 +819,76 @@
             } else {
                 list.classList.add('hidden');
                 cal.classList.remove('hidden');
+                renderCalendar();
             }
+        }
+
+        function renderCalendar() {
+            const cv = document.getElementById('calendarView');
+            cv.innerHTML = '';
+            const now = new Date();
+            let mSet = new Set();
+
+            // Current month
+            mSet.add(`${now.getFullYear()}-${now.getMonth()}`);
+
+            // Months with appointments
+            appointments.forEach(a => {
+                if (a.dateStr) {
+                    const [y, m] = a.dateStr.split('-');
+                    mSet.add(`${y}-${parseInt(m) - 1}`);
+                }
+            });
+
+            const months = Array.from(mSet).map(s => {
+                const [y, m] = s.split('-');
+                return { year: parseInt(y), month: parseInt(m) };
+            }).sort((a, b) => (a.year * 12 + a.month) - (b.year * 12 + b.month));
+
+            months.forEach(met => {
+                const d = document.createElement('div');
+                d.className = 'cal-month-block';
+                const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                d.innerHTML = `<div class="cal-month-title">${monthNames[met.month]} ${met.year}</div>`;
+
+                const g = document.createElement('div');
+                g.className = 'cal-grid';
+                ['D', 'L', 'M', 'M', 'J', 'V', 'S'].forEach(h => g.innerHTML += `<div class="cal-head">${h}</div>`);
+
+                const firstDay = new Date(met.year, met.month, 1).getDay();
+                const daysInMonth = new Date(met.year, met.month + 1, 0).getDate();
+
+                for (let i = 0; i < firstDay; i++) g.innerHTML += '<div></div>';
+
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'cal-cell';
+                    c.textContent = i;
+
+                    if (met.year === now.getFullYear() && met.month === now.getMonth() && i === now.getDate()) {
+                        c.classList.add('today');
+                    }
+
+                    const ds = `${met.year}-${(met.month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+                    const ap = appointments.filter(a => a.dateStr === ds);
+
+                    if (ap.length > 0) {
+                        let h = '<div class="dots-row">';
+                        ap.slice(0, 3).forEach(a => {
+                            let cl = 'orange'; // Pending
+                            let s = (a.status || '').toLowerCase();
+                            if (s.includes('aprob')) cl = 'green';
+                            if (s.includes('cancel')) cl = 'red';
+                            h += `<div class="dot ${cl}"></div>`;
+                        });
+                        h += '</div>';
+                        c.innerHTML += h;
+                    }
+                    g.appendChild(c);
+                }
+                d.appendChild(g);
+                cv.appendChild(d);
+            });
         }
 
         function logout() {
