@@ -1,0 +1,8 @@
+{
+    "appId": "com.solarrosette.app",
+    "appName": "Agenda 2.1",
+    "webDir": "public",
+    "server": {
+        "androidScheme": "https"
+    }
+}

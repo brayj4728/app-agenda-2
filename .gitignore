@@ -35,3 +35,12 @@ yarn-error.log*
 .gemini/
 .agent/
 brain/
+
+# Android
+android/.gradle
+android/local.properties
+android/*/build
+android/build
+android/captures
+android/.externalNativeBuild
+android/app/release
