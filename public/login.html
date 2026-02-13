@@ -493,6 +493,51 @@
                 submitBtn.disabled = false;
             }
         }
+
+        // --- SWIPE LOGIC FOR DESKTOP (MOUSE) ---
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+
+        // Validar si es dispositivo móvil para no interferir con el touch nativo si existiera
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        if (!isMobile) {
+            const container = document.querySelector('.container');
+
+            container.addEventListener('mousedown', (e) => {
+                // Solo activar si estamos en una vista secundaria (paciente o profesional)
+                if (currentView === 'selection') return;
+
+                isDragging = true;
+                startX = e.clientX;
+                container.style.cursor = 'grabbing';
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                currentX = e.clientX;
+                // Opcional: Podríamos mover visualmente la vista aquí para feedback
+            });
+
+            container.addEventListener('mouseup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                container.style.cursor = 'default';
+
+                const diffX = e.clientX - startX;
+
+                // Si deslizó más de 100px a la derecha -> Volver
+                if (diffX > 100) {
+                    goBack();
+                }
+            });
+
+            container.addEventListener('mouseleave', () => {
+                isDragging = false;
+                container.style.cursor = 'default';
+            });
+        }
     </script>
 </body>
 
