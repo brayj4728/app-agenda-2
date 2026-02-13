@@ -732,6 +732,52 @@
                     card.style.transform = 'translateX(0)';
                 }
             });
+
+            // --- MOUSE LOGIC FOR DESKTOP ---
+            let isDragging = false;
+
+            card.addEventListener('mousedown', e => {
+                isDragging = true;
+                startX = e.clientX;
+                card.style.transition = 'none';
+                card.style.cursor = 'grabbing';
+            });
+
+            card.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                currentX = e.clientX;
+                const diffX = currentX - startX;
+                // Solo permitir arrastre a la izquierda
+                if (diffX < 0) {
+                    card.style.transform = `translateX(${diffX}px)`;
+                }
+            });
+
+            const endDrag = (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                card.style.cursor = 'grab';
+                card.style.transition = 'transform 0.3s ease';
+
+                const diffX = (e.clientX || currentX) - startX;
+
+                if (diffX < -100) {
+                    card.style.transform = 'translateX(-100%)';
+                    handleDelete(id);
+                } else {
+                    card.style.transform = 'translateX(0)';
+                }
+            };
+
+            card.addEventListener('mouseup', endDrag);
+            card.addEventListener('mouseleave', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    card.style.cursor = 'grab';
+                    card.style.transition = 'transform 0.3s ease';
+                    card.style.transform = 'translateX(0)';
+                }
+            });
         }
 
         async function handleDelete(id) {
