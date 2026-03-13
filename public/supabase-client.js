@@ -317,7 +317,7 @@ const SupabaseHelper = {
             const occupied = data.map(a => a.time);
 
             const allHours = [];
-            for (let h = 9; h <= 17; h++) {
+            for (let h = 10; h <= 20; h++) {
                 allHours.push(h.toString().padStart(2, '0') + ':00');
             }
 
